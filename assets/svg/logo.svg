@@ -1,0 +1,14 @@
+<svg version="1.1" id="图层_1" x="0px" y="0px" width="132.957px" height="180px" viewBox="0 0 132.957 180" enable-background="new 0 0 132.957 180" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xml="http://www.w3.org/XML/1998/namespace" style="transform: rotate(0deg) scale(1, 1); opacity: 1; position: absolute; backface-visibility: hidden; left: 50.4877px; top: 6.80574px; width: 246.938px; height: 334.202px; overflow: visible;"><defs class="defs"><linearGradient id="linearGradienta161b9a748f36e875e3e134ba6328ff2" class="linearGradient1" gradientTransform="translate(0.5,0.5) rotate(270) translate(-0.5,-0.5)" x1="50%" y1="0%" x2="50%" y2="100%"><stop id="stop1" offset="22.857142857142858%" class="linearGradientColor1" stop-color="#007ec4"></stop><stop id="stop2" offset="100%" class="linearGradientColor2" stop-color="#0df3f9"></stop></linearGradient><linearGradient id="linearGradientbe5c7fcd6404de7b774f16e128b22811" class="linearGradient2" gradientTransform="translate(0.5,0.5) rotate(0) translate(-0.5,-0.5)" x1="50%" y1="0%" x2="50%" y2="100%"><stop id="stop1" offset="0%" class="linearGradientColor1" stop-color="#0089c6"></stop><stop id="stop2" offset="100%" class="linearGradientColor2" stop-color="#0df3f9"></stop></linearGradient></defs>
+  <path fill="url(#linearGradienta161b9a748f36e875e3e134ba6328ff2)" d="M4.604,137.792l21.449,28.472c29.767,8.896,81.954-5.662,81.954-5.662
+	c15.318-14.05,21.688-26.302,21.688-26.302C72.292,161.508,4.604,137.792,4.604,137.792z" class="color c1"></path>
+  <path fill="url(#linearGradienta161b9a748f36e875e3e134ba6328ff2)" d="M127.835,87.705c0,0-85.541,18.982-123.169,2.146l-4.291,30.676c0,0,77.277,16.813,132.582-10.346
+	L127.835,87.705z" class="color c1"></path>
+  <path fill="url(#linearGradienta161b9a748f36e875e3e134ba6328ff2)" d="M107.41,53.471c-22.825-0.881-38.985-3.611-50.132-6.543c-16.345-4.303-8.138-2.449-8.138-2.449
+	L13.887,72.262c49.43,13.514,105.466,0.32,105.466,0.32L107.41,53.471z" class="color c1"></path>
+  <path fill="url(#linearGradientbe5c7fcd6404de7b774f16e128b22811)" d="M4.666,137.793c-0.02,0-0.042-0.002-0.062-0.002c4.458,11.344,11.932,21.162,21.449,28.471
+	c48.005-9.91,98.063-48.938,106.904-56.08c-0.393-7.938-2.186-15.508-5.122-22.477C102.02,106.262,51.291,137.793,4.666,137.793z
+	 M119.354,72.582L107.41,53.471C79.823,70.705,40.997,89.852,4.666,89.852c-0.092,0-0.183-0.002-0.275-0.004
+	C1.578,97.195,0,105.148,0,113.484c0,2.38,0.131,4.728,0.375,7.043C43.527,122.875,94.807,90.336,119.354,72.582z M49.14,177.691
+	C54.682,179.188,60.505,180,66.519,180c29.467,0,54.438-19.164,63.176-45.701C112.277,146.98,81.994,166.717,49.14,177.691z
+	 M66.519,0L13.887,72.262c0,0,54.265-13.652,80.759-39.215C90.122,27.729,66.519,0,66.519,0z" class="color c2"></path>
+</svg>
