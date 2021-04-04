@@ -3,6 +3,7 @@ import '../constants.dart';
 
 var darkTheme = ThemeData(
   scaffoldBackgroundColor: ConstColors.scaffoldBackgroundColor,
+  primaryColor: ConstColors.cardColor,
   cardColor: ConstColors.cardColor,
   focusColor: ConstColors.focusColor,
   textTheme: TextTheme(
@@ -13,7 +14,7 @@ var darkTheme = ThemeData(
     ),
     headline1 : TextStyle(
       fontSize: 35.0,
-      fontWeight: FontWeight.w400,
+      fontWeight: FontWeight.w300,
       color: ConstColors.focusColor,
     ),
   ),

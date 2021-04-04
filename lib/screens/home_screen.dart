@@ -9,15 +9,14 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    double horizontalPadding = 40.0;
     return Container(
       decoration: BoxDecoration(
         color: Theme.of(context).scaffoldBackgroundColor,
       ),
       child: Scaffold(
         body: Container(
-          padding: EdgeInsets.symmetric(
-              horizontal: horizontalPadding, vertical: 40.0),
+          padding: const EdgeInsets.symmetric(
+              horizontal: 40.0, vertical: 40.0),
           alignment: Alignment.center,
           child: Column(
             children: [
@@ -33,12 +32,12 @@ class HomeScreen extends StatelessWidget {
                   children: [
                     CardButton(
                       title: 'Клиенты',
-                      horizontalPadding: horizontalPadding,
+                      route: '/clients',
                     ),
                     SizedBox(width: 20.0),
                     CardButton(
                       title: 'Работа',
-                      horizontalPadding: horizontalPadding,
+                      route: '/work',
                     ),
                   ],
                 ),
@@ -49,12 +48,12 @@ class HomeScreen extends StatelessWidget {
                   children: [
                     CardButton(
                       title: 'Материалы',
-                      horizontalPadding: horizontalPadding,
+                      route: '/material',
                     ),
                     SizedBox(width: 20.0),
                     CardButton(
                       title: 'Календарь',
-                      horizontalPadding: horizontalPadding,
+                      route: '/calendar',
                     ),
                   ],
                 ),
@@ -62,8 +61,7 @@ class HomeScreen extends StatelessWidget {
               SizedBox(height: 20.0),
               CardButton(
                 title: 'Отчеты',
-                horizontalPadding: horizontalPadding,
-                expanded: true,
+                route: '/reports',
               ),
             ],
           ),
