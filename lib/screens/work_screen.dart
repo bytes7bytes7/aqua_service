@@ -10,6 +10,7 @@ class _WorkScreenState extends State<WorkScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        elevation: 4.0,
         backgroundColor: Theme.of(context).primaryColor,
         title: Text('Работа',style: Theme.of(context).textTheme.headline2,),
         centerTitle: true,

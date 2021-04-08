@@ -1,19 +1,17 @@
 import 'package:flutter/material.dart';
 
-class MaterialScreen extends StatefulWidget {
-  @override
-  _MaterialScreenState createState() => _MaterialScreenState();
-}
-
-class _MaterialScreenState extends State<MaterialScreen> {
+class Page404 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         elevation: 4.0,
         backgroundColor: Theme.of(context).primaryColor,
-        title: Text('Материалы',style: Theme.of(context).textTheme.headline2,),
         centerTitle: true,
+        title: Text(
+          'Ошибка!',
+          style: Theme.of(context).textTheme.headline2,
+        ),
         leading: IconButton(
           icon: Icon(
             Icons.arrow_back_ios_outlined,
@@ -22,6 +20,12 @@ class _MaterialScreenState extends State<MaterialScreen> {
           onPressed: () {
             Navigator.pop(context);
           },
+        ),
+      ),
+      body: Center(
+        child: Text(
+          'Страница не найдена :(',
+          style: Theme.of(context).textTheme.bodyText1,
         ),
       ),
     );

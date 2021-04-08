@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../screens/global/next_page_route.dart';
+import 'package:aqua_service/screens/screens.dart';
 
 class CardButton extends StatelessWidget {
   const CardButton({
@@ -18,15 +20,44 @@ class CardButton extends StatelessWidget {
         child: InkWell(
           borderRadius: BorderRadius.circular(15),
           onTap: () {
-            Navigator.pushNamed(context, route);
+            Widget page;
+            switch (route) {
+              case '/clients':
+                page = ClientsScreen();
+                break;
+              case '/work':
+                page = WorkScreen();
+                break;
+              case '/material':
+                page = MaterialScreen();
+                break;
+              case '/calendar':
+                page = CalendarScreen();
+                break;
+              case '/reports':
+                page = ReportsScreen();
+                break;
+              default:
+                page = Page404();
+            }
+            Navigator.push(
+              context,
+              NextPageRoute(nextPage: page),
+            );
           },
           child: Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(15),
               gradient: LinearGradient(
-                colors: [Theme
-                    .of(context)
-                    .cardColor, Colors.transparent],
+                colors: [
+                  Theme
+                      .of(context)
+                      .cardColor,
+                  Theme
+                      .of(context)
+                      .cardColor
+                      .withOpacity(0)
+                ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),

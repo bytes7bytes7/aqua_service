@@ -18,15 +18,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Aqua Service',
       theme: darkTheme,
-      initialRoute: '/',
-      routes: {
-        '/': (context) => HomeScreen(),
-        '/clients': (context) => ClientsScreen(),
-        '/work': (context) => WorkScreen(),
-        '/material': (context) => MaterialScreen(),
-        '/calendar': (context)=>CalendarScreen(),
-        '/reports': (context)=>ReportsScreen(),
-      },
+      home: HomeScreen(),
     );
   }
 }
