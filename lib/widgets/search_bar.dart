@@ -8,6 +8,16 @@ class SearchBar extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 25.0),
       decoration: BoxDecoration(
+        boxShadow: [
+           BoxShadow(
+             color: Colors.black12,
+          ),
+           BoxShadow(
+            color: Colors.black45,
+            spreadRadius: -12.0,
+            blurRadius: 12.0,
+          ),
+        ],
         borderRadius: BorderRadius.circular(68.0),
         gradient: LinearGradient(
           colors: [

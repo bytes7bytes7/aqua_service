@@ -1,6 +1,8 @@
+import 'package:aqua_service/screens/create_client.dart';
 import 'package:flutter/material.dart';
 import '../widgets/search_bar.dart';
 import '../widgets/sort_bar.dart';
+import 'global/next_page_route.dart';
 
 class ClientsScreen extends StatefulWidget {
   @override
@@ -48,7 +50,12 @@ class _AppBar extends StatelessWidget implements PreferredSizeWidget {
         IconButton(
           icon:
               Icon(Icons.add, color: Theme.of(context).focusColor, size: 32.0),
-          onPressed: () {},
+          onPressed: () {
+            Navigator.push(
+              context,
+              NextPageRoute(nextPage: CreateClientScreen()),
+            );
+          },
         ),
       ],
     );
@@ -71,7 +78,7 @@ class __BodyState extends State<_Body> {
       child: Padding(
         padding: const EdgeInsets.fromLTRB(20.0, 20.0, 20.0, 0),
         child: ListView.builder(
-          itemCount: 10,
+          itemCount: 11,
           itemBuilder: (context, i) {
             switch (i) {
               case 0:
@@ -80,6 +87,16 @@ class __BodyState extends State<_Body> {
               case 1:
                 return SortBar();
                 break;
+              case 10:
+                return Padding(
+                  padding: const EdgeInsets.only(top: 10.0,bottom: 20.0),
+                  child: Center(
+                    child: Text(
+                      'Контакты: 37',
+                      style: Theme.of(context).textTheme.subtitle1,
+                    ),
+                  ),
+                );
               default:
                 return Container(
                   margin: const EdgeInsets.symmetric(vertical: 10.0),
@@ -102,9 +119,24 @@ class __BodyState extends State<_Body> {
                           ),
                         ),
                         child: ListTile(
-                          leading: FlutterLogo(size: 56.0),
-                          title: Text('Two-line ListTile'),
-                          subtitle: Text('Here is a second line'),
+                          leading: CircleAvatar(
+                            backgroundColor: Theme.of(context).focusColor,
+                            child: Icon(
+                              Icons.person_outline_outlined,
+                              color: Theme.of(context).cardColor,
+                            ),
+                          ),
+                          title: Text(
+                            'Лионель Месси',
+                            style: Theme.of(context).textTheme.bodyText1,
+                          ),
+                          subtitle: Text(
+                            'Краснодар',
+                            style: Theme.of(context)
+                                .textTheme
+                                .subtitle1
+                                .copyWith(fontSize: 14.0),
+                          ),
                           trailing: Icon(Icons.more_vert),
                         ),
                       ),
