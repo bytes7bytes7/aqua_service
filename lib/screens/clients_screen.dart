@@ -1,8 +1,10 @@
-import 'package:aqua_service/screens/create_client.dart';
 import 'package:flutter/material.dart';
+import '../screens/client_info_screen.dart';
+import '../widgets/client_card.dart';
 import '../widgets/search_bar.dart';
 import '../widgets/sort_bar.dart';
 import 'global/next_page_route.dart';
+import 'package:aqua_service/test_data.dart';
 
 class ClientsScreen extends StatefulWidget {
   @override
@@ -53,7 +55,7 @@ class _AppBar extends StatelessWidget implements PreferredSizeWidget {
           onPressed: () {
             Navigator.push(
               context,
-              NextPageRoute(nextPage: CreateClientScreen()),
+              NextPageRoute(nextPage: ClientInfoScreen(title: 'Новый Клиент')),
             );
           },
         ),
@@ -78,7 +80,7 @@ class __BodyState extends State<_Body> {
       child: Padding(
         padding: const EdgeInsets.fromLTRB(20.0, 20.0, 20.0, 0),
         child: ListView.builder(
-          itemCount: 11,
+          itemCount: clients.length+2,
           itemBuilder: (context, i) {
             switch (i) {
               case 0:
@@ -87,62 +89,18 @@ class __BodyState extends State<_Body> {
               case 1:
                 return SortBar();
                 break;
-              case 10:
-                return Padding(
-                  padding: const EdgeInsets.only(top: 10.0,bottom: 20.0),
-                  child: Center(
-                    child: Text(
-                      'Контакты: 37',
-                      style: Theme.of(context).textTheme.subtitle1,
-                    ),
-                  ),
-                );
+              // case (clients.length-2):
+              //   return Padding(
+              //     padding: const EdgeInsets.only(top: 10.0,bottom: 20.0),
+              //     child: Center(
+              //       child: Text(
+              //         'Контакты: 37',
+              //         style: Theme.of(context).textTheme.subtitle1,
+              //       ),
+              //     ),
+              //   );
               default:
-                return Container(
-                  margin: const EdgeInsets.symmetric(vertical: 10.0),
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                  child: Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(8),
-                      onTap: () {},
-                      child: Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8),
-                          gradient: LinearGradient(
-                            colors: [
-                              Theme.of(context).cardColor,
-                              Theme.of(context).cardColor.withOpacity(0)
-                            ],
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                          ),
-                        ),
-                        child: ListTile(
-                          leading: CircleAvatar(
-                            backgroundColor: Theme.of(context).focusColor,
-                            child: Icon(
-                              Icons.person_outline_outlined,
-                              color: Theme.of(context).cardColor,
-                            ),
-                          ),
-                          title: Text(
-                            'Лионель Месси',
-                            style: Theme.of(context).textTheme.bodyText1,
-                          ),
-                          subtitle: Text(
-                            'Краснодар',
-                            style: Theme.of(context)
-                                .textTheme
-                                .subtitle1
-                                .copyWith(fontSize: 14.0),
-                          ),
-                          trailing: Icon(Icons.more_vert),
-                        ),
-                      ),
-                    ),
-                  ),
-                );
+                return ClientCard(client: clients[i-2],);
             }
           },
         ),

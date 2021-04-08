@@ -1,14 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:carousel_slider/carousel_slider.dart';
-
 import 'global/next_page_route.dart';
+import '../models/client_model.dart';
 
-class CreateClientScreen extends StatelessWidget {
+class ClientInfoScreen extends StatelessWidget {
+  ClientInfoScreen({
+    @required this.title,
+    this.client,
+  });
+
+  final String title;
+  final Client client;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: _AppBar(),
-      body: _Body(),
+      appBar: _AppBar(title: title),
+      body: _Body(client: client),
     );
   }
 }
@@ -19,7 +28,10 @@ class _AppBar extends StatelessWidget implements PreferredSizeWidget {
 
   const _AppBar({
     Key key,
+    @required this.title,
   }) : super(key: key);
+
+  final String title;
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +39,7 @@ class _AppBar extends StatelessWidget implements PreferredSizeWidget {
       elevation: 4.0,
       backgroundColor: Theme.of(context).primaryColor,
       title: Text(
-        'Новый Клиент',
+        title,
         style: Theme.of(context).textTheme.headline2,
       ),
       centerTitle: true,
@@ -40,11 +52,24 @@ class _AppBar extends StatelessWidget implements PreferredSizeWidget {
           Navigator.pop(context);
         },
       ),
+      actions: [
+        IconButton(
+          icon: Icon(
+            Icons.done,
+            color: Theme.of(context).focusColor,
+          ),
+          onPressed: () {},
+        ),
+      ],
     );
   }
 }
 
 class _Body extends StatefulWidget {
+  _Body({Key key, this.client}) : super(key: key);
+
+  final Client client;
+
   @override
   __BodyState createState() => __BodyState();
 }
@@ -80,7 +105,9 @@ class __BodyState extends State<_Body> {
                 ),
                 SizedBox(height: 20.0),
                 TextField(
-                  controller: TextEditingController(),
+                  controller: TextEditingController(
+                      text: (widget.client != null) ? widget.client.name : ''),
+                  style: Theme.of(context).textTheme.bodyText1,
                   decoration: InputDecoration(
                     labelText: 'Имя',
                     labelStyle: Theme.of(context).textTheme.headline3,
@@ -91,7 +118,10 @@ class __BodyState extends State<_Body> {
                   ),
                 ),
                 TextField(
-                  controller: TextEditingController(),
+                  controller: TextEditingController(
+                      text:
+                          (widget.client != null) ? widget.client.surname : ''),
+                  style: Theme.of(context).textTheme.bodyText1,
                   decoration: InputDecoration(
                     labelText: 'Фамилия',
                     labelStyle: Theme.of(context).textTheme.headline3,
@@ -102,7 +132,11 @@ class __BodyState extends State<_Body> {
                   ),
                 ),
                 TextField(
-                  controller: TextEditingController(),
+                  controller: TextEditingController(
+                      text: (widget.client != null)
+                          ? widget.client.middleName
+                          : ''),
+                  style: Theme.of(context).textTheme.bodyText1,
                   decoration: InputDecoration(
                     labelText: 'Отчество',
                     labelStyle: Theme.of(context).textTheme.headline3,
@@ -113,7 +147,9 @@ class __BodyState extends State<_Body> {
                   ),
                 ),
                 TextField(
-                  controller: TextEditingController(),
+                  controller: TextEditingController(
+                      text: (widget.client != null) ? widget.client.city : ''),
+                  style: Theme.of(context).textTheme.bodyText1,
                   decoration: InputDecoration(
                     labelText: 'Город',
                     labelStyle: Theme.of(context).textTheme.headline3,
@@ -124,7 +160,10 @@ class __BodyState extends State<_Body> {
                   ),
                 ),
                 TextField(
-                  controller: TextEditingController(),
+                  controller: TextEditingController(
+                      text:
+                          (widget.client != null) ? widget.client.address : ''),
+                  style: Theme.of(context).textTheme.bodyText1,
                   decoration: InputDecoration(
                     labelText: 'Адрес',
                     labelStyle: Theme.of(context).textTheme.headline3,
@@ -135,7 +174,10 @@ class __BodyState extends State<_Body> {
                   ),
                 ),
                 TextField(
-                  controller: TextEditingController(),
+                  controller: TextEditingController(
+                      text:
+                          (widget.client != null) ? widget.client.volume : ''),
+                  style: Theme.of(context).textTheme.bodyText1,
                   keyboardType: TextInputType.number,
                   decoration: InputDecoration(
                     labelText: 'Объем аквариума',
@@ -144,6 +186,58 @@ class __BodyState extends State<_Body> {
                       borderSide:
                           BorderSide(color: Theme.of(context).disabledColor),
                     ),
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(vertical: 10.0),
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    border: Border(
+                      bottom:
+                          BorderSide(color: Theme.of(context).disabledColor),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Text(
+                        'Посл. чистка: ${(widget.client != null) ? widget.client.name : ''}',
+                        style: Theme.of(context).textTheme.headline3,
+                      ),
+                      Spacer(),
+                      IconButton(
+                        icon: Icon(
+                          Icons.calendar_today_outlined,
+                          color: Theme.of(context).focusColor,
+                        ),
+                        onPressed: () {},
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(vertical: 10.0),
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    border: Border(
+                      bottom:
+                          BorderSide(color: Theme.of(context).disabledColor),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Text(
+                        'След. чистка: ${(widget.client != null) ? widget.client.name : ''}',
+                        style: Theme.of(context).textTheme.headline3,
+                      ),
+                      Spacer(),
+                      IconButton(
+                        icon: Icon(
+                          Icons.calendar_today_outlined,
+                          color: Theme.of(context).focusColor,
+                        ),
+                        onPressed: () {},
+                      ),
+                    ],
                   ),
                 ),
                 SizedBox(height: 50.0),
