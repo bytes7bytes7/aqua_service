@@ -33,5 +33,10 @@ var darkTheme = ThemeData(
       fontWeight: FontWeight.w300,
       color: ConstColors.disabledColor,
     ),
+    subtitle2: TextStyle(
+      fontSize: 16.0,
+      fontWeight: FontWeight.w300,
+      color: ConstColors.focusColor,
+    ),
   ),
 );

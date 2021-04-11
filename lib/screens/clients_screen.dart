@@ -3,7 +3,6 @@ import 'package:aqua_service/repository/clients_repository.dart';
 import 'package:aqua_service/widgets/client_card.dart';
 import 'package:aqua_service/widgets/rect_button.dart';
 import 'package:aqua_service/widgets/search_bar.dart';
-import 'package:aqua_service/widgets/sort_bar.dart';
 import '../model/client.dart';
 import 'package:flutter/material.dart';
 import '../screens/client_info_screen.dart';
@@ -105,7 +104,7 @@ class __BodyState extends State<_Body> {
       child: Column(
         children: [
           SearchBar(),
-          SortBar(),
+          //SortBar(),
           Expanded(
             child: StreamBuilder(
               stream: _clientBloc.client,
