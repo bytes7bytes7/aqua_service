@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:aqua_service/model/client_model.dart';
+import 'package:aqua_service/model/client.dart';
 import '../screens/client_info_screen.dart';
 import 'package:aqua_service/screens/global/next_page_route.dart';
 
@@ -36,7 +36,7 @@ class ClientCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 10.0),
-      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      padding: const EdgeInsets.symmetric(horizontal: 28.0),
       child: Material(
         color: Colors.transparent,
         child: InkWell(

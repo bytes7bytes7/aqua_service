@@ -11,6 +11,7 @@ class _SortBarState extends State<SortBar> {
     return GestureDetector(
       onTap: () {},
       child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 28.0,vertical: 0.0),
         padding: const EdgeInsets.symmetric(horizontal: 8.0,vertical: 15.0),
         child: Row(
           children: [

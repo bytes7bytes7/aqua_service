@@ -18,14 +18,21 @@ class ClientBloc {
   void loadClient() {
     _clientStreamController.sink.add(ClientState._clientLoading());
     _repository.getClient().then((client) {
-      _clientStreamController.sink.add(ClientState._clientData(client));
+      _clientStreamController.sink.add(ClientState._clientData([client]));
+    });
+  }
+
+  void loadAllClients(){
+    _clientStreamController.sink.add(ClientState._clientLoading());
+    _repository.getAllClients().then((clientsList) {
+      _clientStreamController.sink.add(ClientState._clientData(clientsList));
     });
   }
 }
 
 class ClientState {
   ClientState();
-  factory ClientState._clientData(Client client) = ClientDataState;
+  factory ClientState._clientData(List<Client> client) = ClientDataState;
   factory ClientState._clientLoading() = ClientLoadingState;
 }
 
@@ -34,6 +41,6 @@ class ClientInitState extends ClientState {}
 class ClientLoadingState extends ClientState{}
 
 class ClientDataState extends ClientState {
-  ClientDataState(this.client);
-  final Client client;
+  ClientDataState(this.clients);
+  final List<Client> clients;
 }

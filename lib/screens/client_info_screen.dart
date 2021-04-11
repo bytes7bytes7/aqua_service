@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'global/next_page_route.dart';
-import '../model/client_model.dart';
+import '../model/client.dart';
 
 class ClientInfoScreen extends StatelessWidget {
   ClientInfoScreen({

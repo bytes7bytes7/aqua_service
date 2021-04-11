@@ -1,16 +1,13 @@
-// import 'dart:async';
 import 'package:aqua_service/bloc/client_bloc.dart';
 import 'package:aqua_service/repository/clients_repository.dart';
-
-// import '../model/client_model.dart';
+import 'package:aqua_service/widgets/client_card.dart';
+import 'package:aqua_service/widgets/rect_button.dart';
+import 'package:aqua_service/widgets/search_bar.dart';
+import 'package:aqua_service/widgets/sort_bar.dart';
 import '../model/client.dart';
 import 'package:flutter/material.dart';
 import '../screens/client_info_screen.dart';
-// import '../widgets/client_card.dart';
-// import '../widgets/search_bar.dart';
-// import '../widgets/sort_bar.dart';
 import 'global/next_page_route.dart';
-// import 'package:aqua_service/test_data.dart';
 
 class ClientsScreen extends StatefulWidget {
   const ClientsScreen(this._repo);
@@ -100,49 +97,36 @@ class __BodyState extends State<_Body> {
 
   @override
   Widget build(BuildContext context) {
-    print('asdas');
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       onTap: () {
         FocusScope.of(context).requestFocus(FocusNode());
       },
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(20.0, 20.0, 20.0, 0),
-        child: StreamBuilder(
-          stream: _clientBloc.client,
-          initialData: ClientInitState(),
-          builder: (context, snapshot) {
-            if (snapshot.data is ClientInitState) {
-              _clientBloc.loadClient();
-              return SizedBox.shrink();
-            } else if (snapshot.data is ClientDataState) {
-              ClientDataState state = snapshot.data;
-              return _buildContent(state.client);
-            } else if (snapshot.data is ClientLoadingState) {
-              return _buildLoading();
-            } else {
-              return _buildError();
-            }
-          },
-        ),
+      child: Column(
+        children: [
+          SearchBar(),
+          SortBar(),
+          Expanded(
+            child: StreamBuilder(
+              stream: _clientBloc.client,
+              initialData: ClientInitState(),
+              builder: (context, snapshot) {
+                if (snapshot.data is ClientInitState) {
+                  _clientBloc.loadAllClients();
+                  return SizedBox.shrink();
+                } else if (snapshot.data is ClientLoadingState) {
+                  return _buildLoading();
+                } else if (snapshot.data is ClientDataState) {
+                  ClientDataState state = snapshot.data;
+                  return _buildContent(state.clients);
+                } else {
+                  return _buildError();
+                }
+              },
+            ),
+          ),
+        ],
       ),
-    );
-  }
-
-  // Widget _buildInit() {
-  //   return Center(
-  //     child: OutlinedButton(
-  //       child: const Text('Load'),
-  //       onPressed: () {
-  //
-  //       },
-  //     ),
-  //   );
-  // }
-
-  Widget _buildContent(Client client) {
-    return Center(
-      child: Text('${client.name} ${client.surname} ${client.city}'),
     );
   }
 
@@ -152,13 +136,29 @@ class __BodyState extends State<_Body> {
     );
   }
 
+  Widget _buildContent(List<Client> clients) {
+    return ListView.builder(
+      itemCount: clients.length,
+      itemBuilder: (context,i) {
+        return ClientCard(
+          client: clients[i],
+        );
+      },
+    );
+  }
+
   Widget _buildError() {
-    return Column(
-      children: [
-        Center(
-          child: Text('Error'),
-        ),
-      ],
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text('Ошибка',style: Theme.of(context).textTheme.headline1,),
+          SizedBox(height: 20),
+          RectButton(text: 'Обновить', onPressed: () {
+            _clientBloc.loadAllClients();
+          }),
+        ],
+      ),
     );
   }
 }
