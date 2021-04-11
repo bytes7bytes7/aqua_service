@@ -1,3 +1,5 @@
+
+import 'package:aqua_service/repository/repository.dart';
 import 'package:flutter/material.dart';
 import '../screens/global/next_page_route.dart';
 import 'package:aqua_service/screens/screens.dart';
@@ -7,10 +9,12 @@ class CardButton extends StatelessWidget {
     Key key,
     @required this.title,
     @required this.route,
+    @required this.repo,
   }) : super(key: key);
 
   final String title;
   final String route;
+  final Repository repo;
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +27,7 @@ class CardButton extends StatelessWidget {
             Widget page;
             switch (route) {
               case '/clients':
-                page = ClientsScreen();
+                page = ClientsScreen(repo);
                 break;
               case '/work':
                 page = WorkScreen();
@@ -50,13 +54,8 @@ class CardButton extends StatelessWidget {
               borderRadius: BorderRadius.circular(15),
               gradient: LinearGradient(
                 colors: [
-                  Theme
-                      .of(context)
-                      .cardColor,
-                  Theme
-                      .of(context)
-                      .cardColor
-                      .withOpacity(0)
+                  Theme.of(context).cardColor,
+                  Theme.of(context).cardColor.withOpacity(0)
                 ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
@@ -65,10 +64,7 @@ class CardButton extends StatelessWidget {
             child: Center(
               child: Text(
                 title,
-                style: Theme
-                    .of(context)
-                    .textTheme
-                    .headline2,
+                style: Theme.of(context).textTheme.headline2,
               ),
             ),
           ),

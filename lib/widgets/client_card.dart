@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:aqua_service/models/client_model.dart';
+import 'package:aqua_service/model/client_model.dart';
 import '../screens/client_info_screen.dart';
 import 'package:aqua_service/screens/global/next_page_route.dart';
 

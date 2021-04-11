@@ -1,6 +1,6 @@
-import 'models/client_model.dart';
+import 'model/client_model.dart';
 
-List<Client> clients =[
+List<Client> testClients =[
   Client.fromMap({
     'name':'',
     'surname':'Колумб',
