@@ -1,15 +1,19 @@
-import 'package:aqua_service/repository/clients_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:aqua_service/widgets/card_button.dart';
+
+import '../repository/repository.dart';
+import './global/next_page_route.dart';
+import 'screens.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({
     Key key,
     @required this.clientRepository,
+    @required this.orderRepository,
   }) : super(key: key);
 
-  final ClientRepository clientRepository;
+  final Repository clientRepository;
+  final Repository orderRepository;
 
   @override
   Widget build(BuildContext context) {
@@ -38,16 +42,17 @@ class HomeScreen extends StatelessWidget {
                 flex: 4,
                 child: Row(
                   children: [
-                    CardButton(
+                    _CardButton(
                       repo: clientRepository,
                       title: 'Клиенты',
                       route: '/clients',
                     ),
                     SizedBox(width: 20.0),
-                    // CardButton(
-                    //   title: 'Работа',
-                    //   route: '/work',
-                    // ),
+                    _CardButton(
+                      repo: orderRepository,
+                      title: 'Работа',
+                      route: '/work',
+                    ),
                   ],
                 ),
               ),
@@ -56,12 +61,12 @@ class HomeScreen extends StatelessWidget {
               //   flex: 4,
               //   child: Row(
               //     children: [
-              //       CardButton(
+              //       _CardButton(
               //         title: 'Материалы',
               //         route: '/material',
               //       ),
               //       SizedBox(width: 20.0),
-              //       CardButton(
+              //       _CardButton(
               //         title: 'Календарь',
               //         route: '/calendar',
               //       ),
@@ -73,7 +78,7 @@ class HomeScreen extends StatelessWidget {
               //   flex: 2,
               //   child: Row(
               //     children: [
-              //       CardButton(
+              //       _CardButton(
               //         title: 'Отчеты',
               //         route: '/reports',
               //       ),
@@ -81,6 +86,77 @@ class HomeScreen extends StatelessWidget {
               //   ),
               // ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+
+class _CardButton extends StatelessWidget {
+  const _CardButton({
+    Key key,
+    @required this.title,
+    @required this.route,
+    @required this.repo,
+  }) : super(key: key);
+
+  final String title;
+  final String route;
+  final Repository repo;
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(15),
+          onTap: () {
+            Widget page;
+            switch (route) {
+              case '/clients':
+                page = ClientsScreen(repo);
+                break;
+              case '/work':
+                page = OrdersScreen(repo);
+                break;
+              case '/material':
+                page = MaterialScreen();
+                break;
+              case '/calendar':
+                page = CalendarScreen();
+                break;
+              case '/reports':
+                page = ReportsScreen();
+                break;
+              default:
+                page = Page404();
+            }
+            Navigator.push(
+              context,
+              NextPageRoute(nextPage: page),
+            );
+          },
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(15),
+              gradient: LinearGradient(
+                colors: [
+                  Theme.of(context).cardColor,
+                  Theme.of(context).cardColor.withOpacity(0)
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+            ),
+            child: Center(
+              child: Text(
+                title,
+                style: Theme.of(context).textTheme.headline2,
+              ),
+            ),
           ),
         ),
       ),

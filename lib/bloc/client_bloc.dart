@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:aqua_service/model/client.dart';
-import 'package:aqua_service/repository/clients_repository.dart';
+import '../model/client.dart';
+import '../repository/clients_repository.dart';
 
 class ClientBloc {
   ClientBloc(this._repository);
@@ -15,17 +15,10 @@ class ClientBloc {
     _clientStreamController.close();
   }
 
-  void loadClient() {
-    _clientStreamController.sink.add(ClientState._clientLoading());
-    _repository.getClient().then((client) {
-      _clientStreamController.sink.add(ClientState._clientData([client]));
-    });
-  }
-
   void loadAllClients(){
     _clientStreamController.sink.add(ClientState._clientLoading());
-    _repository.getAllClients().then((clientsList) {
-      _clientStreamController.sink.add(ClientState._clientData(clientsList));
+    _repository.getAllClients().then((clientList) {
+      _clientStreamController.sink.add(ClientState._clientData(clientList));
     });
   }
 }

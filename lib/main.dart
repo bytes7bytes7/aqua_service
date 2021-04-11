@@ -1,8 +1,10 @@
-import 'package:aqua_service/repository/clients_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:aqua_service/screens/screens.dart';
-import 'package:aqua_service/themes/dark_theme.dart';
+
+import './repository/clients_repository.dart';
+import './repository/order_repository.dart';
+import './screens/screens.dart';
+import './themes/dark_theme.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -11,6 +13,7 @@ void main() {
 
 class MyApp extends StatelessWidget {
   final ClientRepository clientRepository = ClientRepository();
+  final OrderRepository orderRepository = OrderRepository();
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +24,10 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Aqua Service',
       theme: darkTheme,
-      home: HomeScreen(clientRepository: clientRepository),
+      home: HomeScreen(
+        clientRepository: clientRepository,
+        orderRepository: orderRepository,
+      ),
     );
   }
 }

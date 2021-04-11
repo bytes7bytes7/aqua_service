@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+
+import '../screens/widgets/app_header.dart';
 import 'global/next_page_route.dart';
 import '../model/client.dart';
 
@@ -16,51 +18,19 @@ class ClientInfoScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: _AppBar(title: title),
-      body: _Body(client: client),
-    );
-  }
-}
-
-class _AppBar extends StatelessWidget implements PreferredSizeWidget {
-  @override
-  Size get preferredSize => Size.fromHeight(60.0);
-
-  const _AppBar({
-    Key key,
-    @required this.title,
-  }) : super(key: key);
-
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    return AppBar(
-      elevation: 4.0,
-      backgroundColor: Theme.of(context).primaryColor,
-      title: Text(
-        title,
-        style: Theme.of(context).textTheme.headline2,
-      ),
-      centerTitle: true,
-      leading: IconButton(
-        icon: Icon(
-          Icons.arrow_back_ios_outlined,
-          color: Theme.of(context).focusColor,
-        ),
-        onPressed: () {
-          Navigator.pop(context);
-        },
-      ),
-      actions: [
-        IconButton(
-          icon: Icon(
-            Icons.done,
-            color: Theme.of(context).focusColor,
+      appBar: AppHeader(
+        title: title,
+        action: [
+          IconButton(
+            icon: Icon(
+              Icons.done,
+              color: Theme.of(context).focusColor,
+            ),
+            onPressed: () {},
           ),
-          onPressed: () {},
-        ),
-      ],
+        ],
+      ),
+      body: _Body(client: client),
     );
   }
 }
@@ -200,7 +170,7 @@ class __BodyState extends State<_Body> {
                   child: Row(
                     children: [
                       Text(
-                        'Посл. чистка: ${(widget.client != null) ? widget.client.name : ''}',
+                        'Посл. чистка: ${(widget.client != null) ? widget.client.previousDate : ''}',
                         style: Theme.of(context).textTheme.headline3,
                       ),
                       Spacer(),
@@ -226,7 +196,7 @@ class __BodyState extends State<_Body> {
                   child: Row(
                     children: [
                       Text(
-                        'След. чистка: ${(widget.client != null) ? widget.client.name : ''}',
+                        'След. чистка: ${(widget.client != null) ? widget.client.nextDate : ''}',
                         style: Theme.of(context).textTheme.headline3,
                       ),
                       Spacer(),

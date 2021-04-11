@@ -1,31 +1,30 @@
 import 'package:flutter/material.dart';
 
 import '../screens/widgets/app_header.dart';
-import '../bloc/client_bloc.dart';
-import '../repository/clients_repository.dart';
+import '../screens/order_info_screen.dart';
+import '../model/order.dart';
+import '../bloc/order_bloc.dart';
+import '../repository/order_repository.dart';
 import './widgets/rect_button.dart';
 import './widgets/search_bar.dart';
 import './widgets/loading_circle.dart';
-import '../model/client.dart';
-import '../screens/client_info_screen.dart';
 import 'global/next_page_route.dart';
-import '../screens/global/next_page_route.dart';
 
-class ClientsScreen extends StatefulWidget {
-  const ClientsScreen(this._repo);
+class OrdersScreen extends StatefulWidget {
+  const OrdersScreen(this._repo);
 
-  final ClientRepository _repo;
+  final OrderRepository _repo;
 
   @override
-  _ClientsScreenState createState() => _ClientsScreenState();
+  _OrdersScreenState createState() => _OrdersScreenState();
 }
 
-class _ClientsScreenState extends State<ClientsScreen> {
+class _OrdersScreenState extends State<OrdersScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppHeader(
-        title: 'Клиенты',
+        title: 'Работа',
         action: [
           IconButton(
             icon: Icon(Icons.add,
@@ -34,7 +33,7 @@ class _ClientsScreenState extends State<ClientsScreen> {
               Navigator.push(
                 context,
                 NextPageRoute(
-                  nextPage: ClientInfoScreen(title: 'Новый Клиент'),
+                  nextPage: OrderInfoScreen(title: 'Новый Заказ'),
                 ),
               );
             },
@@ -49,24 +48,24 @@ class _ClientsScreenState extends State<ClientsScreen> {
 class _Body extends StatefulWidget {
   const _Body(this._repo);
 
-  final ClientRepository _repo;
+  final OrderRepository _repo;
 
   @override
   __BodyState createState() => __BodyState();
 }
 
 class __BodyState extends State<_Body> {
-  ClientBloc _clientBloc;
+  OrderBloc _orderBloc;
 
   @override
   void initState() {
-    _clientBloc = ClientBloc(widget._repo);
+    _orderBloc = OrderBloc(widget._repo);
     super.initState();
   }
 
   @override
   void dispose() {
-    _clientBloc.dispose();
+    _orderBloc.dispose();
     super.dispose();
   }
 
@@ -83,17 +82,17 @@ class __BodyState extends State<_Body> {
           //SortBar(),
           Expanded(
             child: StreamBuilder(
-              stream: _clientBloc.client,
-              initialData: ClientInitState(),
+              stream: _orderBloc.order,
+              initialData: OrderInitState(),
               builder: (context, snapshot) {
-                if (snapshot.data is ClientInitState) {
-                  _clientBloc.loadAllClients();
+                if (snapshot.data is OrderInitState) {
+                  _orderBloc.getAllOrders();
                   return SizedBox.shrink();
-                } else if (snapshot.data is ClientLoadingState) {
+                } else if (snapshot.data is OrderLoadingState) {
                   return _buildLoading();
-                } else if (snapshot.data is ClientDataState) {
-                  ClientDataState state = snapshot.data;
-                  return _buildContent(state.clients);
+                } else if (snapshot.data is OrderDataState) {
+                  OrderDataState state = snapshot.data;
+                  return _buildContent(state.orders);
                 } else {
                   return _buildError();
                 }
@@ -111,12 +110,12 @@ class __BodyState extends State<_Body> {
     );
   }
 
-  Widget _buildContent(List<Client> clients) {
+  Widget _buildContent(List<Order> orders) {
     return ListView.builder(
-      itemCount: clients.length,
+      itemCount: orders.length,
       itemBuilder: (context, i) {
-        return _ClientCard(
-          client: clients[i],
+        return _OrderCard(
+          order: orders[i],
         );
       },
     );
@@ -133,20 +132,24 @@ class __BodyState extends State<_Body> {
           ),
           SizedBox(height: 20),
           RectButton(
-              text: 'Обновить',
-              onPressed: () {
-                _clientBloc.loadAllClients();
-              }),
+            text: 'Обновить',
+            onPressed: () {
+              _orderBloc.getAllOrders();
+            },
+          ),
         ],
       ),
     );
   }
 }
 
-class _ClientCard extends StatelessWidget {
-  const _ClientCard({Key key, this.client}) : super(key: key);
+class _OrderCard extends StatelessWidget {
+  const _OrderCard({
+    Key key,
+    @required this.order,
+  }) : super(key: key);
 
-  final Client client;
+  final Order order;
 
   @override
   Widget build(BuildContext context) {
@@ -160,9 +163,9 @@ class _ClientCard extends StatelessWidget {
             Navigator.push(
               context,
               NextPageRoute(
-                nextPage: ClientInfoScreen(
-                  title: 'Клиент',
-                  client: client,
+                nextPage: OrderInfoScreen(
+                  title: 'Заказ',
+                  order: order,
                 ),
               ),
             );
@@ -173,29 +176,28 @@ class _ClientCard extends StatelessWidget {
             width: double.infinity,
             child: Row(
               children: [
-                CircleAvatar(
-                  radius: 24.0,
-                  child: Icon(
-                    Icons.person,
-                    color: Theme.of(context).cardColor,
-                  ),
-                  backgroundColor: Theme.of(context).focusColor,
-                ),
-                SizedBox(width: 14.0),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '${(client.name != '') ? (client.name + ' ') : ''}' +
-                          '${client.surname ?? ''}'
+                      '${(order.client.name != '') ? (order.client.name + ' ') : ''}' +
+                          '${order.client.surname ?? ''}'
                               .replaceAll(RegExp(r"\s+"), ""),
                       style: Theme.of(context).textTheme.bodyText1,
                     ),
                     Text(
-                      client.city,
+                      order.date,
                       style: Theme.of(context).textTheme.subtitle2,
                     ),
                   ],
+                ),
+                Spacer(),
+                IconButton(
+                  icon: Icon(
+                    order.done ? Icons.done_all : Icons.timelapse_outlined,
+                    color: Theme.of(context).focusColor,
+                  ),
+                  onPressed: () {},
                 ),
               ],
             ),
