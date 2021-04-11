@@ -66,17 +66,11 @@ class _Body extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(vertical: 10.0),
                   width: double.infinity,
-                  decoration: BoxDecoration(
-                    border: Border(
-                      bottom:
-                          BorderSide(color: Theme.of(context).disabledColor),
-                    ),
-                  ),
                   child: Row(
                     children: [
                       Text(
-                        'Дата: ${order.date}',
-                        style: Theme.of(context).textTheme.headline3,
+                        'Дата: ${(order!=null) ? order.date : ''}',
+                        style: Theme.of(context).textTheme.bodyText1,
                       ),
                       Spacer(),
                       IconButton(
@@ -89,31 +83,34 @@ class _Body extends StatelessWidget {
                     ],
                   ),
                 ),
-                SizedBox(height: 40.0),
+                SizedBox(height: 20.0),
                 GestureDetector(
                   onTap: () {},
                   child: Container(
                     width: double.infinity,
-                    height: 0.4*MediaQuery.of(context).size.height,
+                    height: 0.4 * MediaQuery.of(context).size.height,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(5.0),
-                      border: Border.all(width: 2.0,color: Theme.of(context).focusColor),
+                      border: Border.all(
+                          width: 2.0, color: Theme.of(context).focusColor),
                     ),
                     child: Padding(
                       padding: const EdgeInsets.all(10.0),
-                      child: (order.comment!= '') ? Text(
-                        order.comment,
-                        style: Theme.of(context).textTheme.bodyText1,
-                      ): Text(
-                        'Ваш комментарий...',
-                        style: Theme.of(context).textTheme.headline3,
-                      ),
+                      child: (order!=null &&order.comment != '')
+                          ? Text(
+                              order.comment,
+                              style: Theme.of(context).textTheme.bodyText1,
+                            )
+                          : Text(
+                              'Ваш комментарий...',
+                              style: Theme.of(context).textTheme.headline3,
+                            ),
                     ),
                   ),
                 ),
                 SizedBox(height: 20.0),
                 RectButton(
-                  text: 'Выполнено',
+                  text:(order!=null && order.done)? 'Заново':'Выполнено',
                   onPressed: () {},
                 ),
               ],
@@ -141,15 +138,16 @@ class _ClientCard extends StatelessWidget {
         child: InkWell(
           borderRadius: BorderRadius.circular(8),
           onTap: () {
-            Navigator.push(
-              context,
-              NextPageRoute(
-                nextPage: ClientInfoScreen(
-                  title: 'Клиент',
-                  client: order.client,
+            if (order != null)
+              Navigator.push(
+                context,
+                NextPageRoute(
+                  nextPage: ClientInfoScreen(
+                    title: 'Клиент',
+                    client: order.client,
+                  ),
                 ),
-              ),
-            );
+              );
           },
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 0.0, vertical: 5.0),
@@ -165,12 +163,17 @@ class _ClientCard extends StatelessWidget {
                   backgroundColor: Theme.of(context).focusColor,
                 ),
                 SizedBox(width: 14.0),
-                Text(
-                  '${(order.client.name != '') ? (order.client.name + ' ') : ''}' +
-                      '${order.client.surname ?? ''}'
-                          .replaceAll(RegExp(r"\s+"), ""),
-                  style: Theme.of(context).textTheme.bodyText1,
-                ),
+                (order != null)
+                    ? Text(
+                        '${(order.client.name != '') ? (order.client.name + ' ') : ''}' +
+                            '${order.client.surname ?? ''}'
+                                .replaceAll(RegExp(r"\s+"), ""),
+                        style: Theme.of(context).textTheme.bodyText1,
+                      )
+                    : Text(
+                        'Не выбран!',
+                        style: Theme.of(context).textTheme.bodyText1.copyWith(color: Theme.of(context).disabledColor),
+                      ),
                 Spacer(),
                 IconButton(
                   icon: Icon(

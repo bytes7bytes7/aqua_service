@@ -86,7 +86,7 @@ class __BodyState extends State<_Body> {
               initialData: OrderInitState(),
               builder: (context, snapshot) {
                 if (snapshot.data is OrderInitState) {
-                  _orderBloc.getAllOrders();
+                  _orderBloc.loadAllOrders();
                   return SizedBox.shrink();
                 } else if (snapshot.data is OrderLoadingState) {
                   return _buildLoading();
@@ -134,7 +134,7 @@ class __BodyState extends State<_Body> {
           RectButton(
             text: 'Обновить',
             onPressed: () {
-              _orderBloc.getAllOrders();
+              _orderBloc.loadAllOrders();
             },
           ),
         ],
@@ -176,6 +176,15 @@ class _OrderCard extends StatelessWidget {
             width: double.infinity,
             child: Row(
               children: [
+                CircleAvatar(
+                  radius: 24.0,
+                  child: Icon(
+                    Icons.person,
+                    color: Theme.of(context).cardColor,
+                  ),
+                  backgroundColor: Theme.of(context).focusColor,
+                ),
+                SizedBox(width: 14.0),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [

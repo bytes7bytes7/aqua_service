@@ -1,5 +1,5 @@
-import 'package:aqua_service/repository/repository.dart';
-import 'package:aqua_service/test_data.dart';
+import 'repository.dart';
+import '../test_data.dart';
 import '../model/client.dart';
 
 class ClientRepository extends Repository {

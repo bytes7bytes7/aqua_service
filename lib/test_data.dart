@@ -1,3 +1,4 @@
+import 'model/fabric.dart';
 import 'model/order.dart';
 import 'model/client.dart';
 
@@ -165,4 +166,19 @@ List<Order> testOrders = [
     date: '12.02.21',
     done: true,
   ),
+];
+
+List<Fabric> testFabrics = [
+  Fabric(title: 'Дерево'),
+  Fabric(title: 'Металл'),
+  Fabric(title: 'Стекло'),
+  Fabric(title: 'Пластмасса'),
+  Fabric(title: 'Дерево'),
+  Fabric(title: 'Металл'),
+  Fabric(title: 'Стекло'),
+  Fabric(title: 'Пластмасса'),
+  Fabric(title: 'Дерево'),
+  Fabric(title: 'Металл'),
+  Fabric(title: 'Стекло'),
+  Fabric(title: 'Пластмасса'),
 ];

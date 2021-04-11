@@ -10,10 +10,12 @@ class HomeScreen extends StatelessWidget {
     Key key,
     @required this.clientRepository,
     @required this.orderRepository,
+    @required this.fabricRepository,
   }) : super(key: key);
 
   final Repository clientRepository;
   final Repository orderRepository;
+  final Repository fabricRepository;
 
   @override
   Widget build(BuildContext context) {
@@ -56,23 +58,24 @@ class HomeScreen extends StatelessWidget {
                   ],
                 ),
               ),
-              // SizedBox(height: 20.0),
-              // Expanded(
-              //   flex: 4,
-              //   child: Row(
-              //     children: [
-              //       _CardButton(
-              //         title: 'Материалы',
-              //         route: '/material',
-              //       ),
-              //       SizedBox(width: 20.0),
-              //       _CardButton(
-              //         title: 'Календарь',
-              //         route: '/calendar',
-              //       ),
-              //     ],
-              //   ),
-              // ),
+              SizedBox(height: 20.0),
+              Expanded(
+                flex: 4,
+                child: Row(
+                  children: [
+                    _CardButton(
+                      repo: fabricRepository,
+                      title: 'Материалы',
+                      route: '/material',
+                    ),
+                    // SizedBox(width: 20.0),
+                    // _CardButton(
+                    //   title: 'Календарь',
+                    //   route: '/calendar',
+                    // ),
+                  ],
+                ),
+              ),
               // SizedBox(height: 20.0),
               // Expanded(
               //   flex: 2,
@@ -92,7 +95,6 @@ class HomeScreen extends StatelessWidget {
     );
   }
 }
-
 
 class _CardButton extends StatelessWidget {
   const _CardButton({
@@ -123,7 +125,7 @@ class _CardButton extends StatelessWidget {
                 page = OrdersScreen(repo);
                 break;
               case '/material':
-                page = MaterialScreen();
+                page = FabricsScreen(repo);
                 break;
               case '/calendar':
                 page = CalendarScreen();

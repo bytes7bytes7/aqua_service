@@ -15,9 +15,10 @@ class OrderBloc{
     _orderStreamController.close();
   }
 
-  void getAllOrders(){
+  void loadAllOrders(){
     _orderStreamController.sink.add(OrderState._orderLoading());
     _repository.getAllOrders().then((orderList) {
+      if(!_orderStreamController.isClosed)
       _orderStreamController.sink.add(OrderState._orderData(orderList));
     });
   }

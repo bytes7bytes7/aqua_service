@@ -1,5 +1,5 @@
 import '../test_data.dart';
-import '../repository/repository.dart';
+import 'repository.dart';
 import '../model/order.dart';
 
 class OrderRepository extends Repository {

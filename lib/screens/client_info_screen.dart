@@ -158,20 +158,17 @@ class __BodyState extends State<_Body> {
                     ),
                   ),
                 ),
+                SizedBox(height: 30.0),
                 Container(
+
                   padding: const EdgeInsets.symmetric(vertical: 10.0),
                   width: double.infinity,
-                  decoration: BoxDecoration(
-                    border: Border(
-                      bottom:
-                          BorderSide(color: Theme.of(context).disabledColor),
-                    ),
-                  ),
+
                   child: Row(
                     children: [
                       Text(
                         'Посл. чистка: ${(widget.client != null) ? widget.client.previousDate : ''}',
-                        style: Theme.of(context).textTheme.headline3,
+                        style: Theme.of(context).textTheme.bodyText1,
                       ),
                       Spacer(),
                       IconButton(
@@ -187,17 +184,12 @@ class __BodyState extends State<_Body> {
                 Container(
                   padding: const EdgeInsets.symmetric(vertical: 10.0),
                   width: double.infinity,
-                  decoration: BoxDecoration(
-                    border: Border(
-                      bottom:
-                          BorderSide(color: Theme.of(context).disabledColor),
-                    ),
-                  ),
+
                   child: Row(
                     children: [
                       Text(
                         'След. чистка: ${(widget.client != null) ? widget.client.nextDate : ''}',
-                        style: Theme.of(context).textTheme.headline3,
+                        style: Theme.of(context).textTheme.bodyText1,
                       ),
                       Spacer(),
                       IconButton(
@@ -210,7 +202,7 @@ class __BodyState extends State<_Body> {
                     ],
                   ),
                 ),
-                SizedBox(height: 50.0),
+                SizedBox(height: 10.0),
               ],
             ),
           ),
@@ -277,7 +269,7 @@ class __BodyState extends State<_Body> {
               );
             }).toList(),
           ),
-          SizedBox(height: 50.0),
+          SizedBox(height: 30.0),
         ],
       ),
     );
