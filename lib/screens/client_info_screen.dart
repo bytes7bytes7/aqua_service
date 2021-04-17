@@ -145,6 +145,20 @@ class __BodyState extends State<_Body> {
                 ),
                 TextField(
                   controller: TextEditingController(
+                      text: (widget.client != null) ? widget.client.phone : ''),
+                  style: Theme.of(context).textTheme.bodyText1,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    labelText: 'Телефон',
+                    labelStyle: Theme.of(context).textTheme.headline3,
+                    enabledBorder: UnderlineInputBorder(
+                      borderSide:
+                          BorderSide(color: Theme.of(context).disabledColor),
+                    ),
+                  ),
+                ),
+                TextField(
+                  controller: TextEditingController(
                       text:
                           (widget.client != null) ? widget.client.volume : ''),
                   style: Theme.of(context).textTheme.bodyText1,
@@ -160,14 +174,12 @@ class __BodyState extends State<_Body> {
                 ),
                 SizedBox(height: 30.0),
                 Container(
-
                   padding: const EdgeInsets.symmetric(vertical: 10.0),
                   width: double.infinity,
-
                   child: Row(
                     children: [
                       Text(
-                        'Посл. чистка: ${(widget.client != null) ? widget.client.previousDate : ''}',
+                        'Посл. чистка : ${(widget.client != null) ? widget.client.previousDate : '-- -- --'}',
                         style: Theme.of(context).textTheme.bodyText1,
                       ),
                       Spacer(),
@@ -184,11 +196,10 @@ class __BodyState extends State<_Body> {
                 Container(
                   padding: const EdgeInsets.symmetric(vertical: 10.0),
                   width: double.infinity,
-
                   child: Row(
                     children: [
                       Text(
-                        'След. чистка: ${(widget.client != null) ? widget.client.nextDate : ''}',
+                        'След. чистка : ${(widget.client != null) ? widget.client.nextDate : '-- -- --'}',
                         style: Theme.of(context).textTheme.bodyText1,
                       ),
                       Spacer(),
@@ -208,7 +219,7 @@ class __BodyState extends State<_Body> {
           ),
           CarouselSlider(
             options: CarouselOptions(
-              height: 300.0,
+              height: 200.0,
               enableInfiniteScroll: false,
               pageSnapping: true,
               viewportFraction: 0.9,
@@ -220,45 +231,100 @@ class __BodyState extends State<_Body> {
                     child: Hero(
                       tag: element,
                       child: Container(
+                        width: double.infinity,
                         margin: const EdgeInsets.symmetric(horizontal: 5.0),
-                        child: Image.asset(
-                          element,
+                        child: Stack(
+                          children: [
+                            Positioned.fill(
+                              child: Image.asset(
+                                element,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                            Positioned(
+                              top: 5,
+                              right: 5,
+                              child: CircleAvatar(
+                                backgroundColor: Theme.of(context).cardColor.withOpacity(0.6),
+                                child: IconButton(
+                                  padding: const EdgeInsets.all(0),
+                                  icon: Icon(
+                                    Icons.delete,
+                                    size: 18,
+                                  ),
+                                  color: Theme.of(context).focusColor,
+                                  onPressed: () {
+                                    _showDeleteDialog(images.indexOf(element), images);
+                                  },
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
                     onTap: () {
+                      final Size size = MediaQuery.of(context).size;
                       Navigator.push(
                         context,
                         NextPageRoute(
                           nextPage: Scaffold(
-                            body: Builder(
-                              builder: (context) {
-                                final double height =
-                                    MediaQuery.of(context).size.height;
-                                return CarouselSlider(
-                                  options: CarouselOptions(
-                                    initialPage: images.indexOf(element),
-                                    height: height,
-                                    viewportFraction: 1.0,
-                                    enlargeCenterPage: false,
-                                    enableInfiniteScroll: false,
-                                    // autoPlay: false,
-                                  ),
-                                  items: images
-                                      .map(
-                                        (item) => Container(
-                                          child: Center(
-                                            child: Image.asset(
-                                              item,
-                                              fit: BoxFit.cover,
-                                              height: height,
+                            body: Stack(
+                              children: [
+                                Builder(
+                                  builder: (context) {
+                                    return CarouselSlider(
+                                      options: CarouselOptions(
+                                        initialPage: images.indexOf(element),
+                                        height: size.height,
+                                        viewportFraction: 1.0,
+                                        enlargeCenterPage: false,
+                                        enableInfiniteScroll: false,
+                                        // autoPlay: false,
+                                      ),
+                                      items: images
+                                          .map(
+                                            (item) => Center(
+                                              child: Image.asset(
+                                                item,
+                                                fit: BoxFit.contain,
+                                                height: size.height,
+                                              ),
                                             ),
+                                          )
+                                          .toList(),
+                                    );
+                                  },
+                                ),
+                                Positioned(
+                                  top: 0,
+                                  child: SafeArea(
+                                    child: Container(
+                                      alignment: Alignment.center,
+                                      height: 60,
+                                      width: size.width,
+                                      decoration: BoxDecoration(
+                                        color: Colors.black12.withOpacity(0.5),
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          IconButton(
+                                            icon: Icon(
+                                              Icons.arrow_back_ios_outlined,
+                                              color:
+                                                  Theme.of(context).focusColor,
+                                            ),
+                                            onPressed: () {
+                                              Navigator.pop(context);
+                                            },
                                           ),
-                                        ),
-                                      )
-                                      .toList(),
-                                );
-                              },
+                                          Spacer(),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ),
@@ -272,6 +338,55 @@ class __BodyState extends State<_Body> {
           SizedBox(height: 30.0),
         ],
       ),
+    );
+  }
+
+  Future<void> _showDeleteDialog(int index, List<String> images) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          title: Text(
+            'Удаление',
+            style: Theme.of(context).textTheme.headline2,
+          ),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text(
+                  'Удалить снимок?',
+                  style: Theme.of(context).textTheme.bodyText1,
+                ),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text(
+                'Нет',
+                style: Theme.of(context).textTheme.bodyText1.copyWith(color:  Theme.of(context).cardColor),
+              ),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text(
+                'Да',
+                style: Theme.of(context).textTheme.bodyText1.copyWith(color:  Theme.of(context).cardColor),
+              ),
+              onPressed: () {
+                setState(() {
+                  images.removeAt(index);
+                });
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }

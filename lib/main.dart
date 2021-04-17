@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import './repository/fabric_repository.dart';
-import './repository/clients_repository.dart';
-import './repository/order_repository.dart';
 import './screens/screens.dart';
 import './themes/dark_theme.dart';
 
@@ -13,10 +10,6 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-  final ClientRepository clientRepository = ClientRepository();
-  final OrderRepository orderRepository = OrderRepository();
-  final FabricRepository fabricRepository = FabricRepository();
-
   @override
   Widget build(BuildContext context) {
     SystemChrome.setPreferredOrientations([
@@ -26,11 +19,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Aqua Service',
       theme: darkTheme,
-      home: HomeScreen(
-        clientRepository: clientRepository,
-        orderRepository: orderRepository,
-        fabricRepository: fabricRepository,
-      ),
+      home: HomeScreen(),
     );
   }
 }

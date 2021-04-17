@@ -1,3 +1,4 @@
+import 'package:aqua_service/repository/repository.dart';
 import 'package:flutter/material.dart';
 
 import '../screens/widgets/app_header.dart';
@@ -11,10 +12,6 @@ import './widgets/loading_circle.dart';
 import 'global/next_page_route.dart';
 
 class OrdersScreen extends StatefulWidget {
-  const OrdersScreen(this._repo);
-
-  final OrderRepository _repo;
-
   @override
   _OrdersScreenState createState() => _OrdersScreenState();
 }
@@ -40,15 +37,14 @@ class _OrdersScreenState extends State<OrdersScreen> {
           ),
         ],
       ),
-      body: _Body(widget._repo),
+      body: _Body(),
     );
   }
 }
 
 class _Body extends StatefulWidget {
-  const _Body(this._repo);
 
-  final OrderRepository _repo;
+  final OrderRepository _repo=Repository.orderRepository;
 
   @override
   __BodyState createState() => __BodyState();
@@ -153,6 +149,11 @@ class _OrderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    String profit=(order.price-order.expenses).toString().replaceAll(RegExp(r"([.]*0)(?!.*\d)"), "");
+    if(order.price> order.expenses)
+      profit = '+'+profit;
+    else if (order.price < order.expenses)
+      profit = '-'+profit;
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 28.0),
       child: Material(
@@ -193,20 +194,19 @@ class _OrderCard extends StatelessWidget {
                           '${order.client.surname ?? ''}'
                               .replaceAll(RegExp(r"\s+"), ""),
                       style: Theme.of(context).textTheme.bodyText1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                     Text(
                       order.date,
                       style: Theme.of(context).textTheme.subtitle2,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),
                 Spacer(),
-                IconButton(
-                  icon: Icon(
-                    order.done ? Icons.done_all : Icons.timelapse_outlined,
-                    color: Theme.of(context).focusColor,
-                  ),
-                  onPressed: () {},
+                Text(
+                    profit,
+                  style: Theme.of(context).textTheme.bodyText1,
                 ),
               ],
             ),

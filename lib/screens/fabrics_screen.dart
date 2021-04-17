@@ -1,6 +1,7 @@
 import 'package:aqua_service/bloc/fabric_bloc.dart';
 import 'package:aqua_service/model/fabric.dart';
 import 'package:aqua_service/repository/fabric_repository.dart';
+import 'package:aqua_service/repository/repository.dart';
 import 'package:flutter/material.dart';
 
 import '../screens/widgets/app_header.dart';
@@ -9,9 +10,12 @@ import 'widgets/rect_button.dart';
 import 'widgets/search_bar.dart';
 
 class FabricsScreen extends StatefulWidget {
-  const FabricsScreen(this._repo);
+  const FabricsScreen({
+    Key key,
+    this.forChoice = false,
+  }) : super(key: key);
 
-  final FabricRepository _repo;
+  final bool forChoice;
 
   @override
   _FabricsScreenState createState() => _FabricsScreenState();
@@ -22,16 +26,19 @@ class _FabricsScreenState extends State<FabricsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppHeader(title: 'Материалы'),
-      body: _Body(widget._repo),
+      body: _Body(forChoice: widget.forChoice),
     );
   }
 }
 
-
 class _Body extends StatefulWidget {
-  const _Body(this._repo);
+  _Body({
+    Key key,
+    @required this.forChoice,
+  }) : super(key: key);
 
-  final FabricRepository _repo;
+  final bool forChoice;
+  final FabricRepository _repo = Repository.fabricRepository;
 
   @override
   __BodyState createState() => __BodyState();
@@ -97,10 +104,10 @@ class __BodyState extends State<_Body> {
     return ListView.builder(
       itemCount: fabrics.length,
       itemBuilder: (context, i) {
-        return SizedBox.shrink();
-        // return _FabricCard(
-        //   fabric: fabrics[i],
-        // );
+        return _FabricCard(
+          fabric: fabrics[i],
+          forChoice: widget.forChoice,
+        );
       },
     );
   }
@@ -122,6 +129,57 @@ class __BodyState extends State<_Body> {
             },
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _FabricCard extends StatelessWidget {
+  const _FabricCard({
+    Key key,
+    @required this.fabric,
+    @required this.forChoice,
+  }) : super(key: key);
+
+  final Fabric fabric;
+  final bool forChoice;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 28.0),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(8),
+          onTap: (!forChoice) ? () {
+            // Navigator.push(
+            //   context,
+            //   NextPageRoute(
+            //     nextPage: FabricInfoScreen(
+            //       title: 'Заказ',
+            //       fabric: fabric,
+            //     ),
+            //   ),
+            // );
+          } : () {},
+          child: Container(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
+            width: double.infinity,
+            child: Row(
+              children: [
+                SizedBox(width: 14.0),
+                Text(
+                  '${fabric.title}',
+                  style: Theme.of(context).textTheme.bodyText1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                Spacer(),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

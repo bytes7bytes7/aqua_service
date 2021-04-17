@@ -18,6 +18,7 @@ class ClientBloc {
   void loadAllClients(){
     _clientStreamController.sink.add(ClientState._clientLoading());
     _repository.getAllClients().then((clientList) {
+      clientList.sort((a,b) => a.city.compareTo(b.city));
       if(!_clientStreamController.isClosed)
       _clientStreamController.sink.add(ClientState._clientData(clientList));
     });

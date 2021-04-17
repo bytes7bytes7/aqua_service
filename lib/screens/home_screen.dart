@@ -1,21 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 
-import '../repository/repository.dart';
 import './global/next_page_route.dart';
 import 'screens.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({
     Key key,
-    @required this.clientRepository,
-    @required this.orderRepository,
-    @required this.fabricRepository,
   }) : super(key: key);
-
-  final Repository clientRepository;
-  final Repository orderRepository;
-  final Repository fabricRepository;
 
   @override
   Widget build(BuildContext context) {
@@ -45,13 +37,11 @@ class HomeScreen extends StatelessWidget {
                 child: Row(
                   children: [
                     _CardButton(
-                      repo: clientRepository,
                       title: 'Клиенты',
                       route: '/clients',
                     ),
                     SizedBox(width: 20.0),
                     _CardButton(
-                      repo: orderRepository,
                       title: 'Работа',
                       route: '/work',
                     ),
@@ -64,7 +54,6 @@ class HomeScreen extends StatelessWidget {
                 child: Row(
                   children: [
                     _CardButton(
-                      repo: fabricRepository,
                       title: 'Материалы',
                       route: '/material',
                     ),
@@ -101,12 +90,10 @@ class _CardButton extends StatelessWidget {
     Key key,
     @required this.title,
     @required this.route,
-    @required this.repo,
   }) : super(key: key);
 
   final String title;
   final String route;
-  final Repository repo;
 
   @override
   Widget build(BuildContext context) {
@@ -119,13 +106,13 @@ class _CardButton extends StatelessWidget {
             Widget page;
             switch (route) {
               case '/clients':
-                page = ClientsScreen(repo);
+                page = ClientsScreen();
                 break;
               case '/work':
-                page = OrdersScreen(repo);
+                page = OrdersScreen();
                 break;
               case '/material':
-                page = FabricsScreen(repo);
+                page = FabricsScreen();
                 break;
               case '/calendar':
                 page = CalendarScreen();

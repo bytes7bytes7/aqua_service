@@ -1,3 +1,4 @@
+import 'package:aqua_service/repository/repository.dart';
 import 'package:flutter/material.dart';
 
 import '../screens/widgets/app_header.dart';
@@ -12,9 +13,12 @@ import 'global/next_page_route.dart';
 import '../screens/global/next_page_route.dart';
 
 class ClientsScreen extends StatefulWidget {
-  const ClientsScreen(this._repo);
+  const ClientsScreen({
+    Key key,
+    this.forChoice = false,
+  }) : super(key: key);
 
-  final ClientRepository _repo;
+  final bool forChoice;
 
   @override
   _ClientsScreenState createState() => _ClientsScreenState();
@@ -29,7 +33,9 @@ class _ClientsScreenState extends State<ClientsScreen> {
         action: [
           IconButton(
             icon: Icon(Icons.add,
-                color: Theme.of(context).focusColor, size: 32.0),
+                color: Theme
+                    .of(context)
+                    .focusColor, size: 32.0),
             onPressed: () {
               Navigator.push(
                 context,
@@ -41,15 +47,19 @@ class _ClientsScreenState extends State<ClientsScreen> {
           ),
         ],
       ),
-      body: _Body(widget._repo),
+      body: _Body(forChoice: widget.forChoice),
     );
   }
 }
 
 class _Body extends StatefulWidget {
-  const _Body(this._repo);
+  _Body({
+    Key key,
+    @required this.forChoice,
+  }) : super(key: key);
 
-  final ClientRepository _repo;
+  final bool forChoice;
+  final ClientRepository _repo = Repository.clientRepository;
 
   @override
   __BodyState createState() => __BodyState();
@@ -117,6 +127,7 @@ class __BodyState extends State<_Body> {
       itemBuilder: (context, i) {
         return _ClientCard(
           client: clients[i],
+          forChoice: widget.forChoice,
         );
       },
     );
@@ -129,7 +140,10 @@ class __BodyState extends State<_Body> {
         children: [
           Text(
             'Ошибка',
-            style: Theme.of(context).textTheme.headline1,
+            style: Theme
+                .of(context)
+                .textTheme
+                .headline1,
           ),
           SizedBox(height: 20),
           RectButton(
@@ -144,9 +158,14 @@ class __BodyState extends State<_Body> {
 }
 
 class _ClientCard extends StatelessWidget {
-  const _ClientCard({Key key, this.client}) : super(key: key);
+  const _ClientCard({
+    Key key,
+    @required this.client,
+    @required this.forChoice,
+  }) : super(key: key);
 
   final Client client;
+  final bool forChoice;
 
   @override
   Widget build(BuildContext context) {
@@ -156,7 +175,7 @@ class _ClientCard extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(8),
-          onTap: () {
+          onTap: (!forChoice) ? () {
             Navigator.push(
               context,
               NextPageRoute(
@@ -166,10 +185,10 @@ class _ClientCard extends StatelessWidget {
                 ),
               ),
             );
-          },
+          } : () {},
           child: Container(
             padding:
-                const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
+            const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
             width: double.infinity,
             child: Row(
               children: [
@@ -177,9 +196,13 @@ class _ClientCard extends StatelessWidget {
                   radius: 24.0,
                   child: Icon(
                     Icons.person,
-                    color: Theme.of(context).cardColor,
+                    color: Theme
+                        .of(context)
+                        .cardColor,
                   ),
-                  backgroundColor: Theme.of(context).focusColor,
+                  backgroundColor: Theme
+                      .of(context)
+                      .focusColor,
                 ),
                 SizedBox(width: 14.0),
                 Column(
@@ -189,11 +212,19 @@ class _ClientCard extends StatelessWidget {
                       '${(client.name != '') ? (client.name + ' ') : ''}' +
                           '${client.surname ?? ''}'
                               .replaceAll(RegExp(r"\s+"), ""),
-                      style: Theme.of(context).textTheme.bodyText1,
+                      style: Theme
+                          .of(context)
+                          .textTheme
+                          .bodyText1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                     Text(
                       client.city,
-                      style: Theme.of(context).textTheme.subtitle2,
+                      style: Theme
+                          .of(context)
+                          .textTheme
+                          .subtitle2,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),

@@ -118,52 +118,54 @@ List<Client> testClients = [
 List<Order> testOrders = [
   Order(
     client: testClients[0],
-    date: '12.02.21',
-    done: true,
+    date: '21.02.12',
+    done: false,
+    price: 1000,
+    expenses: 250,
     comment: 'dsadasdsadasda dsadasdsadasda dsadasdsadasda dsadasdsadasda dsadasdsadasda dsadasdsadasda dsadasdsadasda dsadasdsadasdadsadasdsadasdadsadasdsadasdadsadasdsadasdadsadasdsadasdadsadasdsadasda  dsadasdsadasda dsadasdsadasdadsadasdsadasda dsadasdsadasdav',
   ),
   Order(
     client: testClients[1],
-    date: '05.07.21',
+    date: '21.07.05',
     comment: 'dsadasdsadasda dsadasdsadasda dsadasdsadasda dsadasdsadasda dsadasdsadasda dsadasdsadasda dsadasdsadasda dsadasdsadasdadsadasdsadasdadsadasdsadasdadsadasdsadasdadsadasdsadasdadsadasdsadasda  dsadasdsadasda dsadasdsadasdadsadasdsadasda dsadasdsadasdav',
   ),
   Order(
     client: testClients[2],
-    date: '12.02.21',
+    date: '12.02.05',
     done: true,
     comment: 'dsadasdsadasda dsadasdsadasda dsadasdsadasda dsadasdsadasda dsadasdsadasda dsadasdsadasda dsadasdsadasda dsadasdsadasdadsadasdsadasdadsadasdsadasdadsadasdsadasdadsadasdsadasdadsadasdsadasda  dsadasdsadasda dsadasdsadasdadsadasdsadasda dsadasdsadasdav',
   ),
   Order(
     client: testClients[3],
-    date: '17.09.21',
+    date: '21.09.17',
   ),
   Order(
     client: testClients[0],
-    date: '12.02.21',
+    date: '21.02.12',
     done: true,
     comment: 'dsadasdsadasda dsadasdsadasda dsadasdsadasda dsadasdsadasda dsadasdsadasda dsadasdsadasda dsadasdsadasda dsadasdsadasdadsadasdsadasdadsadasdsadasdadsadasdsadasdadsadasdsadasdadsadasdsadasda  dsadasdsadasda dsadasdsadasdadsadasdsadasda dsadasdsadasdav',
   ),Order(
     client: testClients[0],
-    date: '12.02.21',
+    date: '21.02.12',
     done: true,
   ),
   Order(
     client: testClients[1],
-    date: '05.07.21',
+    date: '21.07.05',
   ),
   Order(
     client: testClients[2],
-    date: '12.02.21',
+    date: '21.02.12',
     done: true,
     comment: 'dsadasdsadasda dsadasdsadasda dsadasdsadasda dsadasdsadasda dsadasdsadasda dsadasdsadasda dsadasdsadasda dsadasdsadasdadsadasdsadasdadsadasdsadasdadsadasdsadasdadsadasdsadasdadsadasdsadasda  dsadasdsadasda dsadasdsadasdadsadasdsadasda dsadasdsadasdav',
   ),
   Order(
     client: testClients[3],
-    date: '17.09.21',
+    date: '21.09.17',
   ),
   Order(
     client: testClients[0],
-    date: '12.02.21',
+    date: '21.02.12',
     done: true,
   ),
 ];

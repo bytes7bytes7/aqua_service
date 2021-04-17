@@ -7,6 +7,7 @@ class Client {
     this.middleName,
     @required this.city,
     this.address,
+    this.phone,
     this.volume,
     this.previousDate,
     this.nextDate,
@@ -18,6 +19,7 @@ class Client {
   String middleName;
   String city;
   String address;
+  String phone;
   String volume;
   String previousDate;
   String nextDate;

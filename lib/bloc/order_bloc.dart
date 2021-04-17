@@ -18,6 +18,7 @@ class OrderBloc{
   void loadAllOrders(){
     _orderStreamController.sink.add(OrderState._orderLoading());
     _repository.getAllOrders().then((orderList) {
+      orderList.sort((a,b) => a.date.compareTo(b.date));
       if(!_orderStreamController.isClosed)
       _orderStreamController.sink.add(OrderState._orderData(orderList));
     });

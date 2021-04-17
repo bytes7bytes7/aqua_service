@@ -1,6 +1,8 @@
-import 'package:aqua_service/screens/widgets/rect_button.dart';
+import 'package:aqua_service/screens/clients_screen.dart';
+import 'package:aqua_service/screens/fabrics_screen.dart';
 import 'package:flutter/material.dart';
 
+import '../screens/widgets/rect_button.dart';
 import '../screens/widgets/app_header.dart';
 import '../model/order.dart';
 import 'client_info_screen.dart';
@@ -32,7 +34,9 @@ class _OrderInfoScreenState extends State<OrderInfoScreen> {
               Icons.done,
               color: Theme.of(context).focusColor,
             ),
-            onPressed: () {},
+            onPressed: () {
+
+            },
           ),
         ],
       ),
@@ -51,6 +55,12 @@ class _Body extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    String fabrics = '';
+    if (order != null && order.fabrics != null && order.fabrics.length > 0) {
+      fabrics = order.fabrics[0].title;
+      for (int i = 1; i < order.fabrics.length; i++)
+        fabrics += ', ' + order.fabrics[i].title;
+    }
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       onTap: () {
@@ -63,13 +73,70 @@ class _Body extends StatelessWidget {
             child: Column(
               children: [
                 _ClientCard(order: order),
+                TextField(
+                  controller: TextEditingController(
+                      text: (order != null && order.price != null)
+                          ? order.price.toString()
+                          : ''),
+                  style: Theme.of(context).textTheme.bodyText1,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    labelText: 'Стоимость',
+                    labelStyle: Theme.of(context).textTheme.headline3,
+                    enabledBorder: UnderlineInputBorder(
+                      borderSide:
+                          BorderSide(color: Theme.of(context).disabledColor),
+                    ),
+                  ),
+                ),
+                TextField(
+                  controller: TextEditingController(
+                      text: (order != null && order.expenses != null)
+                          ? order.expenses.toString()
+                          : ''),
+                  style: Theme.of(context).textTheme.bodyText1,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    labelText: 'Затраты',
+                    labelStyle: Theme.of(context).textTheme.headline3,
+                    enabledBorder: UnderlineInputBorder(
+                      borderSide:
+                          BorderSide(color: Theme.of(context).disabledColor),
+                    ),
+                  ),
+                ),
+                SizedBox(height: 20.0),
                 Container(
-                  padding: const EdgeInsets.symmetric(vertical: 10.0),
                   width: double.infinity,
                   child: Row(
                     children: [
                       Text(
-                        'Дата: ${(order!=null) ? order.date : ''}',
+                        'Материалы : ' + fabrics,
+                        style: Theme.of(context).textTheme.bodyText1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Spacer(),
+                      IconButton(
+                        icon: Icon(
+                          Icons.content_paste_outlined,
+                          color: Theme.of(context).focusColor,
+                        ),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            NextPageRoute(nextPage: FabricsScreen(forChoice: true)),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  width: double.infinity,
+                  child: Row(
+                    children: [
+                      Text(
+                        'Дата : ${(order != null) ? order.date : ''}',
                         style: Theme.of(context).textTheme.bodyText1,
                       ),
                       Spacer(),
@@ -79,6 +146,26 @@ class _Body extends StatelessWidget {
                           color: Theme.of(context).focusColor,
                         ),
                         onPressed: () {},
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(height: 20.0),
+                Container(
+                  width: double.infinity,
+                  child: Row(
+                    children: [
+                      Text(
+                        'Прибыль : ',
+                        style: Theme.of(context).textTheme.bodyText1,
+                      ),
+                      Text(
+                        ((order != null &&
+                                order.price != null &&
+                                order.expenses != null)
+                            ? (order.price - order.expenses).toString()
+                            : ''),
+                        style: Theme.of(context).textTheme.bodyText1,
                       ),
                     ],
                   ),
@@ -96,10 +183,11 @@ class _Body extends StatelessWidget {
                     ),
                     child: Padding(
                       padding: const EdgeInsets.all(10.0),
-                      child: (order!=null &&order.comment != '')
+                      child: (order != null && order.comment != '')
                           ? Text(
                               order.comment,
                               style: Theme.of(context).textTheme.bodyText1,
+                              overflow: TextOverflow.ellipsis,
                             )
                           : Text(
                               'Ваш комментарий...',
@@ -110,9 +198,10 @@ class _Body extends StatelessWidget {
                 ),
                 SizedBox(height: 20.0),
                 RectButton(
-                  text:(order!=null && order.done)? 'Заново':'Выполнено',
+                  text: (order != null && order.done) ? 'Заново' : 'Завершить',
                   onPressed: () {},
                 ),
+                SizedBox(height: 20.0),
               ],
             ),
           ),
@@ -169,10 +258,14 @@ class _ClientCard extends StatelessWidget {
                             '${order.client.surname ?? ''}'
                                 .replaceAll(RegExp(r"\s+"), ""),
                         style: Theme.of(context).textTheme.bodyText1,
+                        overflow: TextOverflow.ellipsis,
                       )
                     : Text(
-                        'Не выбран!',
-                        style: Theme.of(context).textTheme.bodyText1.copyWith(color: Theme.of(context).disabledColor),
+                        'Не выбран',
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodyText1
+                            .copyWith(color: Theme.of(context).disabledColor),
                       ),
                 Spacer(),
                 IconButton(
@@ -180,7 +273,12 @@ class _ClientCard extends StatelessWidget {
                     Icons.edit,
                     color: Theme.of(context).focusColor,
                   ),
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      NextPageRoute(nextPage: ClientsScreen(forChoice: true)),
+                    );
+                  },
                 ),
               ],
             ),

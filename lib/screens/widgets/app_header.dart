@@ -15,24 +15,30 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AppBar(
-      elevation: 4.0,
-      backgroundColor: Theme.of(context).primaryColor,
-      title: Text(
-        title,
-        style: Theme.of(context).textTheme.headline2,
-      ),
-      centerTitle: true,
-      leading: IconButton(
-        icon: Icon(
-          Icons.arrow_back_ios_outlined,
-          color: Theme.of(context).focusColor,
+    return GestureDetector(
+      behavior: HitTestBehavior.translucent,
+      onTap: () {
+        FocusScope.of(context).requestFocus(FocusNode());
+      },
+      child: AppBar(
+        elevation: 4.0,
+        backgroundColor: Theme.of(context).primaryColor,
+        title: Text(
+          title,
+          style: Theme.of(context).textTheme.headline2,
         ),
-        onPressed: () {
-          Navigator.pop(context);
-        },
+        centerTitle: true,
+        leading: IconButton(
+          icon: Icon(
+            Icons.arrow_back_ios_outlined,
+            color: Theme.of(context).focusColor,
+          ),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+        actions: action,
       ),
-      actions: action,
     );
   }
 }
