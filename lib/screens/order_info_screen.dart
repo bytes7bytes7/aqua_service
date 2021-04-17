@@ -1,7 +1,7 @@
-import 'package:aqua_service/screens/clients_screen.dart';
-import 'package:aqua_service/screens/fabrics_screen.dart';
 import 'package:flutter/material.dart';
 
+import 'clients_screen.dart';
+import 'fabrics_screen.dart';
 import '../screens/widgets/rect_button.dart';
 import '../screens/widgets/app_header.dart';
 import '../model/order.dart';
@@ -34,9 +34,7 @@ class _OrderInfoScreenState extends State<OrderInfoScreen> {
               Icons.done,
               color: Theme.of(context).focusColor,
             ),
-            onPressed: () {
-
-            },
+            onPressed: () {},
           ),
         ],
       ),
@@ -46,12 +44,13 @@ class _OrderInfoScreenState extends State<OrderInfoScreen> {
 }
 
 class _Body extends StatelessWidget {
-  const _Body({
+  _Body({
     Key key,
     @required this.order,
   }) : super(key: key);
 
   final Order order;
+  TextEditingController controller = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -124,7 +123,8 @@ class _Body extends StatelessWidget {
                         onPressed: () {
                           Navigator.push(
                             context,
-                            NextPageRoute(nextPage: FabricsScreen(forChoice: true)),
+                            NextPageRoute(
+                                nextPage: FabricsScreen(forChoice: true)),
                           );
                         },
                       ),
@@ -171,28 +171,34 @@ class _Body extends StatelessWidget {
                   ),
                 ),
                 SizedBox(height: 20.0),
-                GestureDetector(
-                  onTap: () {},
-                  child: Container(
-                    width: double.infinity,
-                    height: 0.4 * MediaQuery.of(context).size.height,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(5.0),
-                      border: Border.all(
-                          width: 2.0, color: Theme.of(context).focusColor),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(10.0),
-                      child: (order != null && order.comment != '')
-                          ? Text(
-                              order.comment,
-                              style: Theme.of(context).textTheme.bodyText1,
-                              overflow: TextOverflow.ellipsis,
-                            )
-                          : Text(
-                              'Ваш комментарий...',
-                              style: Theme.of(context).textTheme.headline3,
+                Container(
+                  width: double.infinity,
+                  height: 0.4 * MediaQuery.of(context).size.height,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(5.0),
+                    border: Border.all(
+                        width: 2.0, color: Theme.of(context).focusColor),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: SingleChildScrollView(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          TextField(
+                            controller: controller,
+                            decoration: InputDecoration(
+                              hintText: "Ваш комментарий",
+                              hintStyle: Theme.of(context).textTheme.headline3,
+                              border: InputBorder.none,
                             ),
+                            style: Theme.of(context).textTheme.bodyText1,
+                            scrollPadding: EdgeInsets.all(20.0),
+                            keyboardType: TextInputType.multiline,
+                            maxLines: 30,
+                          )
+                        ],
+                      ),
                     ),
                   ),
                 ),

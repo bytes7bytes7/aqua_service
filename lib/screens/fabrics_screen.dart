@@ -5,6 +5,8 @@ import 'package:aqua_service/repository/repository.dart';
 import 'package:flutter/material.dart';
 
 import '../screens/widgets/app_header.dart';
+import 'fabric_info_screen.dart';
+import 'global/next_page_route.dart';
 import 'widgets/loading_circle.dart';
 import 'widgets/rect_button.dart';
 import 'widgets/search_bar.dart';
@@ -25,7 +27,23 @@ class _FabricsScreenState extends State<FabricsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppHeader(title: 'Материалы'),
+      appBar: AppHeader(
+        title: 'Материалы',
+        action: [
+          IconButton(
+            icon: Icon(Icons.add,
+                color: Theme.of(context).focusColor, size: 32.0),
+            onPressed: () {
+              Navigator.push(
+                context,
+                NextPageRoute(
+                  nextPage: FabricInfoScreen(title: 'Новый Материал'),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
       body: _Body(forChoice: widget.forChoice),
     );
   }
@@ -153,15 +171,15 @@ class _FabricCard extends StatelessWidget {
         child: InkWell(
           borderRadius: BorderRadius.circular(8),
           onTap: (!forChoice) ? () {
-            // Navigator.push(
-            //   context,
-            //   NextPageRoute(
-            //     nextPage: FabricInfoScreen(
-            //       title: 'Заказ',
-            //       fabric: fabric,
-            //     ),
-            //   ),
-            // );
+            Navigator.push(
+              context,
+              NextPageRoute(
+                nextPage: FabricInfoScreen(
+                  title: 'Материал',
+                  fabric: fabric,
+                ),
+              ),
+            );
           } : () {},
           child: Container(
             padding:

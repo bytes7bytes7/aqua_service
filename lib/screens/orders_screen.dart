@@ -152,8 +152,6 @@ class _OrderCard extends StatelessWidget {
     String profit=(order.price-order.expenses).toString().replaceAll(RegExp(r"([.]*0)(?!.*\d)"), "");
     if(order.price> order.expenses)
       profit = '+'+profit;
-    else if (order.price < order.expenses)
-      profit = '-'+profit;
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 28.0),
       child: Material(

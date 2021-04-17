@@ -3,9 +3,11 @@ import 'package:meta/meta.dart';
 class Fabric {
   Fabric({
     @required this.title,
-    this.photo,
+    this.retailPrice,
+    this.purchasePrice,
   });
 
   final String title;
-  final String photo;
+  final double retailPrice;
+  final double purchasePrice;
 }
