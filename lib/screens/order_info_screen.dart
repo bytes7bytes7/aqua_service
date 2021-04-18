@@ -50,7 +50,7 @@ class _Body extends StatelessWidget {
   }) : super(key: key);
 
   final Order order;
-  TextEditingController controller = TextEditingController();
+  final TextEditingController controller = TextEditingController();
 
   @override
   Widget build(BuildContext context) {

@@ -57,26 +57,26 @@ class HomeScreen extends StatelessWidget {
                       title: 'Материалы',
                       route: '/material',
                     ),
-                    // SizedBox(width: 20.0),
-                    // _CardButton(
-                    //   title: 'Календарь',
-                    //   route: '/calendar',
-                    // ),
+                    SizedBox(width: 20.0),
+                    _CardButton(
+                      title: 'Календарь',
+                      route: '/calendar',
+                    ),
                   ],
                 ),
               ),
-              // SizedBox(height: 20.0),
-              // Expanded(
-              //   flex: 2,
-              //   child: Row(
-              //     children: [
-              //       _CardButton(
-              //         title: 'Отчеты',
-              //         route: '/reports',
-              //       ),
-              //     ],
-              //   ),
-              // ),
+              SizedBox(height: 20.0),
+              Expanded(
+                flex: 2,
+                child: Row(
+                  children: [
+                    _CardButton(
+                      title: 'Отчеты',
+                      route: '/reports',
+                    ),
+                  ],
+                ),
+              ),
             ],
           ),
         ),

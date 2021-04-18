@@ -1,6 +1,7 @@
 import 'model/fabric.dart';
 import 'model/order.dart';
 import 'model/client.dart';
+import 'model/report.dart';
 
 List<Client> testClients = [
   Client(
@@ -222,4 +223,27 @@ List<Fabric> testFabrics = [
   Fabric(title: 'Бетон'),
   Fabric(title: 'Камень'),
   Fabric(title: 'Гипсокартон'),
+];
+
+List<Report> testReports = [
+  Report(
+    timePeriod: 'Февраль',
+    profit: 13542,
+    date: '20210225',
+  ),
+  Report(
+    timePeriod: 'Март',
+    profit: 15512.1,
+    date: '20210325',
+  ),
+  Report(
+    timePeriod: 'Январь',
+    profit: 17620.5,
+    date: '20210125',
+  ),
+  Report(
+    timePeriod: '2020 год',
+    profit: 82135,
+    date: '20210101',
+  ),
 ];

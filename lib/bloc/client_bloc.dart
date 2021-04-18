@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import '../model/client.dart';
-import '../repository/clients_repository.dart';
+import '../repository/client_repository.dart';
 
 class ClientBloc {
   ClientBloc(this._repository);

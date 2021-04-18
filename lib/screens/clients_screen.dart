@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../screens/widgets/app_header.dart';
 import '../bloc/client_bloc.dart';
-import '../repository/clients_repository.dart';
+import '../repository/client_repository.dart';
 import './widgets/rect_button.dart';
 import './widgets/search_bar.dart';
 import './widgets/loading_circle.dart';

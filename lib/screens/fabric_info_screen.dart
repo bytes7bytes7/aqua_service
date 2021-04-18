@@ -45,7 +45,6 @@ class _Body extends StatelessWidget {
   }) : super(key: key);
 
   final Fabric fabric;
-  TextEditingController controller = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
