@@ -42,7 +42,6 @@ class ClientDatabase {
 
   Future<Database> _initDB() async {
     // The path_provider plugin gets the right directory for Android or iOS.
-
     Directory documentsDirectory = await getApplicationDocumentsDirectory();
     String path = join(documentsDirectory.path, _databaseName);
     return await openDatabase(path,

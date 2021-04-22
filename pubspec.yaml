@@ -33,6 +33,7 @@ dependencies:
   table_calendar: ^3.0.0
   sqflite: ^2.0.0+3
   path_provider: ^2.0.1
+  image_picker: ^0.7.4
 
 dev_dependencies:
   flutter_test:

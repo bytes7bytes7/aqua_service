@@ -1,9 +1,12 @@
-import 'package:aqua_service/bloc/client_bloc.dart';
-import 'package:aqua_service/database/client_database.dart';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 
+import '../bloc/client_bloc.dart';
+import '../database/client_database.dart';
 import '../screens/widgets/app_header.dart';
 import 'global/next_page_route.dart';
 import '../model/client.dart';
@@ -226,8 +229,18 @@ class _Body extends StatefulWidget {
 }
 
 class __BodyState extends State<_Body> {
+  String appDocPath;
+
+  Future<void> getApplicationDirectoryPath() async {
+    Directory appDocDir = await getApplicationDocumentsDirectory();
+    appDocPath = appDocDir.path;
+    print('got');
+  }
+
   @override
   void initState() {
+    if(appDocPath==null)
+      getApplicationDirectoryPath();
     super.initState();
   }
 
@@ -252,12 +265,11 @@ class __BodyState extends State<_Body> {
                       size: 30,
                       color: Theme.of(context).scaffoldBackgroundColor,
                     ),
-                    onPressed: () {
-                      
-                    },
+                    onPressed: () {},
                     style: ElevatedButton.styleFrom(
                       shape: CircleBorder(),
                       primary: Theme.of(context).focusColor.withOpacity(0.9),
+                      onPrimary: Theme.of(context).scaffoldBackgroundColor,
                     ),
                   ),
                 ),
@@ -403,7 +415,7 @@ class __BodyState extends State<_Body> {
               viewportFraction: 0.9,
             ),
             items: (widget.client.images == null)
-                ? [_AddImage()]
+                ? [buildAddImage()]
                 : widget.client.images.map((element) {
                     return Builder(
                       builder: (BuildContext context) {
@@ -584,11 +596,26 @@ class __BodyState extends State<_Body> {
       },
     );
   }
-}
 
-class _AddImage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
+  Widget buildAddImage() {
+    File _image;
+
+    Future _getImage() async {
+      final picker = ImagePicker();
+      final pickedFile = await picker.getImage(source: ImageSource.gallery);
+      if (pickedFile == null) return;
+      _image = File(pickedFile.path);
+      final fileName = 'background_image';
+      final File localImage = await _image.copy('$appDocPath/$fileName');
+      setState(() {});
+    }
+
+    Image image;
+    var hasLocalImage = File('$appDocPath/background_image').existsSync();
+    if (hasLocalImage) {
+      var bytes = File('$appDocPath/background_image').readAsBytesSync();
+      image = Image.memory(bytes);
+    }
     return Container(
       height: 200,
       width: double.infinity,
@@ -596,16 +623,21 @@ class _AddImage extends StatelessWidget {
         borderRadius: BorderRadius.circular(3.0),
         border: Border.all(color: Theme.of(context).focusColor),
       ),
-      child: Center(
-        child: IconButton(
-          icon: Icon(
-            Icons.image_search_outlined,
-            color: Theme.of(context).cardColor,
-            size: 30.0,
-          ),
-          onPressed: () {},
-        ),
-      ),
+      child: (File('$appDocPath/background_image').existsSync())
+          ? Center(child: image)
+          : Center(
+              child: IconButton(
+                icon: Icon(
+                  Icons.image_search_outlined,
+                  color: Theme.of(context).cardColor,
+                  size: 30.0,
+                ),
+                onPressed: () {
+                  _getImage();
+                  print(appDocPath);
+                },
+              ),
+            ),
     );
   }
 }
