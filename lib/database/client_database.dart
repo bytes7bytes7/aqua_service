@@ -7,13 +7,14 @@ import '../model/client.dart';
 
 class ClientDatabase {
   ClientDatabase._privateConstructor();
+
   static final ClientDatabase db = ClientDatabase._privateConstructor();
   static final _databaseName = "clients.db";
   static final _databaseVersion =
-  1; // Increment this version when you need to change the schema.
+      1; // Increment this version when you need to change the schema.
 
   static const String _clientTableName = 'clients';
-  static const String _imageTableName ='images';
+  static const String _imageTableName = 'images';
 
   static const String _id = 'id';
   static const String _name = 'name';
@@ -25,12 +26,14 @@ class ClientDatabase {
   static const String _volume = 'volume';
   static const String _previousDate = 'previousDate';
   static const String _nextDate = 'nextDate';
-  static const String _clientImages = 'images'; // DO NOT USE AS COLUMN FOR CLIENTS TABLE
+  static const String _clientImages =
+      'images'; // DO NOT USE AS COLUMN FOR CLIENTS TABLE
 
   static const String _imageUrl = 'imageUrl';
   static const String _clientId = 'clientId';
 
   static Database _clientDatabase;
+
   Future<Database> get clientDatabase async {
     if (_clientDatabase != null) return _clientDatabase;
     _clientDatabase = await _initDB();
@@ -39,7 +42,7 @@ class ClientDatabase {
 
   Future<Database> _initDB() async {
     // The path_provider plugin gets the right directory for Android or iOS.
-    print('init $_databaseName');
+
     Directory documentsDirectory = await getApplicationDocumentsDirectory();
     String path = join(documentsDirectory.path, _databaseName);
     return await openDatabase(path,
@@ -47,7 +50,6 @@ class ClientDatabase {
   }
 
   Future _onCreate(Database db, int version) async {
-    print('_onCreate');
     await db.execute('''
       CREATE TABLE IF NOT EXISTS $_clientTableName (
         $_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -72,29 +74,37 @@ class ClientDatabase {
     ''');
   }
 
-  Future dropBD()async{
+  Future dropBD() async {
     final db = await clientDatabase;
     await db.execute('DROP TABLE IF EXISTS $_clientTableName;');
     await db.execute('DROP TABLE IF EXISTS $_imageTableName;');
     _onCreate(db, _databaseVersion);
   }
 
-  Future<int> getId(Database db, String tableName)async{
+  Future<int> getId(Database db, String tableName) async {
     var table = await db.rawQuery("SELECT MAX($_id)+1 AS $_id FROM $tableName");
     return table.first["$_id"] ?? 1;
   }
 
   Future addClient(Client client) async {
-    print('add');
     final db = await clientDatabase;
     client.id = await getId(db, _clientTableName);
     await db.rawInsert(
         "INSERT INTO $_clientTableName ($_name, $_surname, $_middleName, $_city, $_address, $_phone, $_volume, $_previousDate, $_nextDate) VALUES (?,?,?,?,?,?,?,?,?)",
-        [client.name, client.surname, client.middleName, client.city, client.address, client.phone, client.volume, client.previousDate, client.nextDate]);
+        [
+          client.name,
+          client.surname,
+          client.middleName,
+          client.city,
+          client.address,
+          client.phone,
+          client.volume,
+          client.previousDate,
+          client.nextDate
+        ]);
   }
 
   Future addImage(int clientId, String url) async {
-    print('url: $url, clientId: $clientId');
     final db = await clientDatabase;
     await db.execute(
         'INSERT INTO $_imageTableName ($_imageUrl, $_clientId) VALUES (?,?)',
@@ -102,7 +112,6 @@ class ClientDatabase {
   }
 
   Future updateClient(Client client) async {
-    print('update');
     final db = await clientDatabase;
     var map = client.toMap();
     map.remove(_clientImages);
@@ -113,7 +122,7 @@ class ClientDatabase {
   Future<Client> getClient(int id) async {
     final db = await clientDatabase;
     var res =
-    await db.query("$_clientTableName", where: "$_id = ?", whereArgs: [id]);
+        await db.query("$_clientTableName", where: "$_id = ?", whereArgs: [id]);
     return res.isNotEmpty ? Client.fromMap(res.first) : null;
   }
 
@@ -123,14 +132,16 @@ class ClientDatabase {
     return res.isNotEmpty ? res.map((c) => Client.fromMap(c)).toList() : [];
   }
 
-  Future<List<String>> getAllImages(int clientId)async{
+  Future<List<String>> getAllImages(int clientId) async {
     final db = await clientDatabase;
-    var res = await db.query("$_imageTableName",where: "$_clientId = ?",whereArgs: [clientId]);
-    return res.isNotEmpty ? res.map((e) => e[_imageUrl].toString()).toList(): [];
+    var res = await db.query("$_imageTableName",
+        where: "$_clientId = ?", whereArgs: [clientId]);
+    return res.isNotEmpty
+        ? res.map((e) => e[_imageUrl].toString()).toList()
+        : [];
   }
 
   Future deleteClient(int id) async {
-    print('delete');
     final db = await clientDatabase;
     db.delete("$_clientTableName", where: "$_id = ?", whereArgs: [id]);
   }

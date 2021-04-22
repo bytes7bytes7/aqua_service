@@ -115,7 +115,7 @@ class __BodyState extends State<_Body> {
                   else
                     return Center(
                       child: Text(
-                        'Пусто :(',
+                        'Пусто',
                         style: Theme.of(context).textTheme.headline2,
                       ),
                     );
