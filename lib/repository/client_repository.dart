@@ -1,10 +1,8 @@
-import 'repository.dart';
-import '../test_data.dart';
+import '../database/client_database.dart';
 import '../model/client.dart';
 
-class ClientRepository extends Repository {
-  Future<List<Client>> getAllClients()async{
-    await Future.delayed(const Duration(seconds: 1));
-    return testClients;
+class ClientRepository {
+  Future<List<Client>> getAllClients() async {
+    return await ClientDatabase.db.getAllClients();
   }
 }

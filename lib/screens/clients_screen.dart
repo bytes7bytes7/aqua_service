@@ -13,59 +13,19 @@ import 'global/next_page_route.dart';
 import '../screens/global/next_page_route.dart';
 
 class ClientsScreen extends StatefulWidget {
-  const ClientsScreen({
+  ClientsScreen({
     Key key,
     this.forChoice = false,
-  }) : super(key: key);
-
-  final bool forChoice;
-
-  @override
-  _ClientsScreenState createState() => _ClientsScreenState();
-}
-
-class _ClientsScreenState extends State<ClientsScreen> {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppHeader(
-        title: 'Клиенты',
-        action: [
-          IconButton(
-            icon: Icon(Icons.add,
-                color: Theme
-                    .of(context)
-                    .focusColor, size: 32.0),
-            onPressed: () {
-              Navigator.push(
-                context,
-                NextPageRoute(
-                  nextPage: ClientInfoScreen(title: 'Новый Клиент'),
-                ),
-              );
-            },
-          ),
-        ],
-      ),
-      body: _Body(forChoice: widget.forChoice),
-    );
-  }
-}
-
-class _Body extends StatefulWidget {
-  _Body({
-    Key key,
-    @required this.forChoice,
   }) : super(key: key);
 
   final bool forChoice;
   final ClientRepository _repo = Repository.clientRepository;
 
   @override
-  __BodyState createState() => __BodyState();
+  _ClientsScreenState createState() => _ClientsScreenState();
 }
 
-class __BodyState extends State<_Body> {
+class _ClientsScreenState extends State<ClientsScreen> {
   ClientBloc _clientBloc;
 
   @override
@@ -82,6 +42,53 @@ class __BodyState extends State<_Body> {
 
   @override
   Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppHeader(
+        title: 'Клиенты',
+        action: [
+          IconButton(
+            icon: Icon(Icons.add,
+                color: Theme.of(context).focusColor, size: 32.0),
+            onPressed: () {
+              Navigator.push(
+                context,
+                NextPageRoute(
+                  nextPage: ClientInfoScreen(
+                    title: 'Новый Клиент',
+                    client: Client(),
+                    bloc: _clientBloc,
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+      body: _Body(
+        forChoice: widget.forChoice,
+        bloc: _clientBloc,
+      ),
+    );
+  }
+}
+
+class _Body extends StatefulWidget {
+  _Body({
+    Key key,
+    @required this.forChoice,
+    @required this.bloc,
+  }) : super(key: key);
+
+  final bool forChoice;
+  final ClientBloc bloc;
+
+  @override
+  __BodyState createState() => __BodyState();
+}
+
+class __BodyState extends State<_Body> {
+  @override
+  Widget build(BuildContext context) {
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       onTap: () {
@@ -93,17 +100,25 @@ class __BodyState extends State<_Body> {
           //SortBar(),
           Expanded(
             child: StreamBuilder(
-              stream: _clientBloc.client,
+              stream: widget.bloc.client,
               initialData: ClientInitState(),
               builder: (context, snapshot) {
                 if (snapshot.data is ClientInitState) {
-                  _clientBloc.loadAllClients();
+                  widget.bloc.loadAllClients();
                   return SizedBox.shrink();
                 } else if (snapshot.data is ClientLoadingState) {
                   return _buildLoading();
                 } else if (snapshot.data is ClientDataState) {
                   ClientDataState state = snapshot.data;
-                  return _buildContent(state.clients);
+                  if (state.clients.length > 0)
+                    return _buildContent(state.clients);
+                  else
+                    return Center(
+                      child: Text(
+                        'Пусто :(',
+                        style: Theme.of(context).textTheme.headline2,
+                      ),
+                    );
                 } else {
                   return _buildError();
                 }
@@ -128,6 +143,7 @@ class __BodyState extends State<_Body> {
         return _ClientCard(
           client: clients[i],
           forChoice: widget.forChoice,
+          bloc: widget.bloc,
         );
       },
     );
@@ -140,16 +156,13 @@ class __BodyState extends State<_Body> {
         children: [
           Text(
             'Ошибка',
-            style: Theme
-                .of(context)
-                .textTheme
-                .headline1,
+            style: Theme.of(context).textTheme.headline1,
           ),
           SizedBox(height: 20),
           RectButton(
               text: 'Обновить',
               onPressed: () {
-                _clientBloc.loadAllClients();
+                widget.bloc.loadAllClients();
               }),
         ],
       ),
@@ -162,10 +175,12 @@ class _ClientCard extends StatelessWidget {
     Key key,
     @required this.client,
     @required this.forChoice,
+    @required this.bloc,
   }) : super(key: key);
 
   final Client client;
   final bool forChoice;
+  final ClientBloc bloc;
 
   @override
   Widget build(BuildContext context) {
@@ -175,20 +190,23 @@ class _ClientCard extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(8),
-          onTap: (!forChoice) ? () {
-            Navigator.push(
-              context,
-              NextPageRoute(
-                nextPage: ClientInfoScreen(
-                  title: 'Клиент',
-                  client: client,
-                ),
-              ),
-            );
-          } : () {},
+          onTap: (!forChoice)
+              ? () {
+                  Navigator.push(
+                    context,
+                    NextPageRoute(
+                      nextPage: ClientInfoScreen(
+                        title: 'Клиент',
+                        client: client,
+                        bloc: bloc,
+                      ),
+                    ),
+                  );
+                }
+              : () {},
           child: Container(
             padding:
-            const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
+                const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
             width: double.infinity,
             child: Row(
               children: [
@@ -196,13 +214,9 @@ class _ClientCard extends StatelessWidget {
                   radius: 24.0,
                   child: Icon(
                     Icons.person,
-                    color: Theme
-                        .of(context)
-                        .cardColor,
+                    color: Theme.of(context).cardColor,
                   ),
-                  backgroundColor: Theme
-                      .of(context)
-                      .focusColor,
+                  backgroundColor: Theme.of(context).focusColor,
                 ),
                 SizedBox(width: 14.0),
                 Column(
@@ -212,18 +226,12 @@ class _ClientCard extends StatelessWidget {
                       '${(client.name != '') ? (client.name + ' ') : ''}' +
                           '${client.surname ?? ''}'
                               .replaceAll(RegExp(r"\s+"), ""),
-                      style: Theme
-                          .of(context)
-                          .textTheme
-                          .bodyText1,
+                      style: Theme.of(context).textTheme.bodyText1,
                       overflow: TextOverflow.ellipsis,
                     ),
                     Text(
                       client.city,
-                      style: Theme
-                          .of(context)
-                          .textTheme
-                          .subtitle2,
+                      style: Theme.of(context).textTheme.subtitle2,
                       overflow: TextOverflow.ellipsis,
                     ),
                   ],

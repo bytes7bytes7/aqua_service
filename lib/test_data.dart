@@ -5,6 +5,7 @@ import 'model/report.dart';
 
 List<Client> testClients = [
   Client(
+    id: 1,
     name: '',
     surname: 'Колумб',
     middleName: '',
@@ -16,6 +17,7 @@ List<Client> testClients = [
     //'images':'',
   ),
   Client(
+    id: 2,
     name: 'Исаак',
     surname: 'Ньютон',
     middleName: '',
@@ -27,6 +29,7 @@ List<Client> testClients = [
     //images:'',
   ),
   Client(
+    id: 3,
     name: 'Луи',
     surname: 'Пастер',
     middleName: '',
@@ -38,6 +41,7 @@ List<Client> testClients = [
     //images:'',
   ),
   Client(
+    id: 4,
     name: 'Джеймс',
     surname: 'Максвелл',
     middleName: 'Клерк',
@@ -49,6 +53,7 @@ List<Client> testClients = [
     //images:'',
   ),
   Client(
+    id: 5,
     name: 'Джон',
     surname: 'Дальтон',
     middleName: '',
@@ -60,6 +65,7 @@ List<Client> testClients = [
     //images:'',
   ),
   Client(
+    id: 6,
     name: '',
     surname: 'Колумб',
     middleName: '',
@@ -71,6 +77,7 @@ List<Client> testClients = [
     //'images':'',
   ),
   Client(
+    id: 7,
     name: 'Исаак',
     surname: 'Ньютон',
     middleName: '',
@@ -82,6 +89,7 @@ List<Client> testClients = [
     //images:'',
   ),
   Client(
+    id: 8,
     name: 'Луи',
     surname: 'Пастер',
     middleName: '',
@@ -93,6 +101,7 @@ List<Client> testClients = [
     //images:'',
   ),
   Client(
+    id: 9,
     name: 'Джеймс',
     surname: 'Максвелл',
     middleName: 'Клерк',
@@ -104,6 +113,7 @@ List<Client> testClients = [
     //images:'',
   ),
   Client(
+    id: 10,
     name: 'Джон',
     surname: 'Дальтон',
     middleName: '',
