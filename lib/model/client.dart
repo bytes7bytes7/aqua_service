@@ -1,6 +1,7 @@
 class Client {
   Client({
     this.id,
+    this.avatar,
     this.name,
     this.surname,
     this.middleName,
@@ -14,6 +15,7 @@ class Client {
   });
 
   int id;
+  String avatar;
   String name;
   String surname;
   String middleName;
@@ -27,6 +29,7 @@ class Client {
 
   Client.fromMap(Map<String, dynamic> map) {
     id = map['id'];
+    avatar = map['avatar'];
     name = map['name'];
     surname = map['surname'];
     middleName = map['middleName'];
@@ -40,8 +43,9 @@ class Client {
   }
 
   Map<String, dynamic> toMap() {
-    Map<String, dynamic> map = {
+    return {
       'id': id,
+      'avatar':avatar,
       'name': name,
       'surname': surname,
       'middleName': middleName,
@@ -53,6 +57,5 @@ class Client {
       'nextDate': nextDate,
       'images': images,
     };
-    return map;
   }
 }

@@ -1,9 +1,8 @@
-import '../test_data.dart';
+import '../database/database_helper.dart';
 import '../model/fabric.dart';
 
 class FabricRepository{
   Future<List<Fabric>> getAllFabrics()async{
-    await Future.delayed(const Duration(seconds: 1));
-    return testFabrics;
+    return await DatabaseHelper.db.getAllFabrics();
   }
 }

@@ -1,9 +1,10 @@
-import 'package:aqua_service/repository/repository.dart';
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 
+import '../repository/repository.dart';
 import '../screens/widgets/app_header.dart';
 import '../bloc/client_bloc.dart';
-import '../repository/client_repository.dart';
 import './widgets/rect_button.dart';
 import './widgets/search_bar.dart';
 import './widgets/loading_circle.dart';
@@ -19,7 +20,7 @@ class ClientsScreen extends StatefulWidget {
   }) : super(key: key);
 
   final bool forChoice;
-  final ClientRepository _repo = Repository.clientRepository;
+  final _repo = Repository.clientRepository;
 
   @override
   _ClientsScreenState createState() => _ClientsScreenState();
@@ -170,7 +171,7 @@ class __BodyState extends State<_Body> {
   }
 }
 
-class _ClientCard extends StatelessWidget {
+class _ClientCard extends StatefulWidget {
   const _ClientCard({
     Key key,
     @required this.client,
@@ -183,22 +184,50 @@ class _ClientCard extends StatelessWidget {
   final ClientBloc bloc;
 
   @override
+  __ClientCardState createState() => __ClientCardState();
+}
+
+class __ClientCardState extends State<_ClientCard> {
+  String appDocPath;
+  var bytes;
+
+  Future<void> getApplicationDirectoryPath() async {
+    Directory appDocDir = await getApplicationDocumentsDirectory();
+    appDocPath = appDocDir.path;
+  }
+
+  @override
+  void initState() {
+    if(widget.client.avatar!=null){
+      if (appDocPath == null) getApplicationDirectoryPath();
+      if (widget.client.avatar != null) {
+        var hasLocalImage = File(widget.client.avatar).existsSync();
+        if (hasLocalImage) {
+          bytes = File(widget.client.avatar).readAsBytesSync();
+        }
+      }
+    }
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    print(widget.client.avatar);
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 28.0),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(8),
-          onTap: (!forChoice)
+          onTap: (!widget.forChoice)
               ? () {
                   Navigator.push(
                     context,
                     NextPageRoute(
                       nextPage: ClientInfoScreen(
                         title: 'Клиент',
-                        client: client,
-                        bloc: bloc,
+                        client: widget.client,
+                        bloc: widget.bloc,
                       ),
                     ),
                   );
@@ -212,25 +241,35 @@ class _ClientCard extends StatelessWidget {
               children: [
                 CircleAvatar(
                   radius: 24.0,
-                  child: Icon(
-                    Icons.person,
-                    color: Theme.of(context).cardColor,
-                  ),
                   backgroundColor: Theme.of(context).focusColor,
+                  child: (widget.client.avatar != null)
+                      ? Container(
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            image: DecorationImage(
+                              image: MemoryImage(bytes),
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        )
+                      : Icon(
+                          Icons.person,
+                          color: Theme.of(context).cardColor,
+                        ),
                 ),
                 SizedBox(width: 14.0),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '${(client.name != '') ? (client.name + ' ') : ''}' +
-                          '${client.surname ?? ''}'
+                      '${(widget.client.name != '') ? (widget.client.name + ' ') : ''}' +
+                          '${widget.client.surname ?? ''}'
                               .replaceAll(RegExp(r"\s+"), ""),
                       style: Theme.of(context).textTheme.bodyText1,
                       overflow: TextOverflow.ellipsis,
                     ),
                     Text(
-                      client.city,
+                      widget.client.city,
                       style: Theme.of(context).textTheme.subtitle2,
                       overflow: TextOverflow.ellipsis,
                     ),

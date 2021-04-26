@@ -18,7 +18,7 @@ class FabricBloc{
   void loadAllFabrics(){
     _fabricStreamController.sink.add(FabricState._fabricLoading());
     _repository.getAllFabrics().then((fabricList) {
-      fabricList.sort((a,b) => a.title.compareTo(b.title));
+      fabricList.sort((a,b) => a.title.toLowerCase().compareTo(b.title.toLowerCase()));
       if(!_fabricStreamController.isClosed)
       _fabricStreamController.sink.add(FabricState._fabricData(fabricList));
     });

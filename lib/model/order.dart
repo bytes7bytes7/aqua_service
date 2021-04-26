@@ -6,6 +6,7 @@ import 'client.dart';
 
 class Order {
   Order({
+    this.id,
     @required this.client,
     this.price=0,
     this.fabrics,
@@ -15,14 +16,15 @@ class Order {
     this.comment = '',
   });
 
-  final Client client;
-  final double price;
-  final List<Fabric> fabrics;
-  final double expenses;
+  int id;
+  Client client;
+  double price;
+  List<Fabric> fabrics;
+  double expenses;
   // YY-MM-DD
-  final String date;
-  final bool done;
-  final String comment;
+  String date;
+  bool done;
+  String comment;
 
   String dateToString({String year,String month, String day}){
     while(year.length < 4)

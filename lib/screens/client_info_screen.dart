@@ -6,7 +6,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../bloc/client_bloc.dart';
-import '../database/client_database.dart';
 import '../screens/widgets/app_header.dart';
 import 'global/next_page_route.dart';
 import '../model/client.dart';
@@ -46,16 +45,20 @@ class _ClientInfoScreenState extends State<ClientInfoScreen> {
     addressController = TextEditingController();
     phoneController = TextEditingController();
     volumeController = TextEditingController();
-    nameController.text = (widget.client != null) ? widget.client.name : '';
+    nameController.text =
+        (widget.client.name != null) ? widget.client.name : '';
     surnameController.text =
-        (widget.client != null) ? widget.client.surname : '';
+        (widget.client.surname != null) ? widget.client.surname : '';
     middleNameController.text =
-        (widget.client != null) ? widget.client.middleName : '';
-    cityController.text = (widget.client != null) ? widget.client.city : '';
+        (widget.client.middleName != null) ? widget.client.middleName : '';
+    cityController.text =
+        (widget.client.city != null) ? widget.client.city : '';
     addressController.text =
-        (widget.client != null) ? widget.client.address : '';
-    phoneController.text = (widget.client != null) ? widget.client.phone : '';
-    volumeController.text = (widget.client != null) ? widget.client.volume : '';
+        (widget.client.address != null) ? widget.client.address : '';
+    phoneController.text =
+        (widget.client.phone != null) ? widget.client.phone : '';
+    volumeController.text =
+        (widget.client.volume != null) ? widget.client.volume : '';
     super.initState();
   }
 
@@ -80,7 +83,7 @@ class _ClientInfoScreenState extends State<ClientInfoScreen> {
               Icons.done,
               color: Theme.of(context).focusColor,
             ),
-            onPressed: () async {
+            onPressed: () {
               FocusScope.of(context).requestFocus(FocusNode());
               validateName = nameController.text.length > 0;
               validateCity = cityController.text.length > 0;
@@ -94,9 +97,8 @@ class _ClientInfoScreenState extends State<ClientInfoScreen> {
                   ..phone = phoneController.text
                   ..volume = volumeController.text;
                 (widget.title != 'Новый Клиент')
-                    ? await ClientDatabase.db.updateClient(widget.client)
-                    : await ClientDatabase.db.addClient(widget.client);
-                widget.bloc.loadAllClients();
+                    ? widget.bloc.updateClient(widget.client)
+                    : widget.bloc.addClient(widget.client);
                 setState(() {
                   _title = 'Клиент';
                 });
@@ -129,6 +131,7 @@ class _ClientInfoScreenState extends State<ClientInfoScreen> {
         ],
       ),
       body: _Body(
+        bloc: widget.bloc,
         client: widget.client,
         validateName: validateName,
         validateCity: validateCity,
@@ -186,8 +189,7 @@ class _ClientInfoScreenState extends State<ClientInfoScreen> {
                     .copyWith(color: Theme.of(context).cardColor),
               ),
               onPressed: () {
-                ClientDatabase.db.deleteClient(client.id);
-                widget.bloc.loadAllClients();
+                widget.bloc.deleteClient(client.id);
                 Navigator.of(context).pop();
                 Navigator.of(context).pop();
               },
@@ -202,6 +204,7 @@ class _ClientInfoScreenState extends State<ClientInfoScreen> {
 class _Body extends StatefulWidget {
   _Body(
       {Key key,
+      @required this.bloc,
       @required this.client,
       @required this.validateName,
       @required this.validateCity,
@@ -214,6 +217,7 @@ class _Body extends StatefulWidget {
       @required this.volumeController})
       : super(key: key);
 
+  ClientBloc bloc;
   final Client client;
   final bool validateName, validateCity;
   final TextEditingController nameController;
@@ -230,17 +234,22 @@ class _Body extends StatefulWidget {
 
 class __BodyState extends State<_Body> {
   String appDocPath;
+  Iterable<int> bytes;
 
   Future<void> getApplicationDirectoryPath() async {
     Directory appDocDir = await getApplicationDocumentsDirectory();
     appDocPath = appDocDir.path;
-    print('got');
   }
 
   @override
   void initState() {
-    if(appDocPath==null)
-      getApplicationDirectoryPath();
+    if (appDocPath == null) getApplicationDirectoryPath();
+    if (widget.client.avatar != null) {
+      var hasLocalImage = File(widget.client.avatar).existsSync();
+      if (hasLocalImage) {
+        bytes = File(widget.client.avatar).readAsBytesSync();
+      }
+    }
     super.initState();
   }
 
@@ -259,17 +268,39 @@ class __BodyState extends State<_Body> {
               children: [
                 ConstrainedBox(
                   constraints: BoxConstraints.tightFor(width: 100, height: 100),
-                  child: ElevatedButton(
-                    child: Icon(
-                      Icons.image_search_outlined,
-                      size: 30,
-                      color: Theme.of(context).scaffoldBackgroundColor,
-                    ),
-                    onPressed: () {},
-                    style: ElevatedButton.styleFrom(
-                      shape: CircleBorder(),
-                      primary: Theme.of(context).focusColor.withOpacity(0.9),
-                      onPrimary: Theme.of(context).scaffoldBackgroundColor,
+                  child: ClipOval(
+                    child: Material(
+                      child: InkWell(
+                        onTap: () async {
+                          String path = await _getImage();
+                          print(path);
+                          if (path != null) {
+                            var hasLocalImage = File(path).existsSync();
+                            if (hasLocalImage) {
+                              bytes = File(path).readAsBytesSync();
+                              widget.client.avatar = path;
+                              widget.bloc.updateClient(widget.client);
+                            }
+                          }
+                          setState(() {});
+                        },
+                        child: (widget.client.avatar != null)
+                            ? Container(
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  image: DecorationImage(
+                                    image: MemoryImage(bytes),
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                              )
+                            : Icon(
+                                Icons.image_search_outlined,
+                                size: 30,
+                                color:
+                                    Theme.of(context).scaffoldBackgroundColor,
+                              ),
+                      ),
                     ),
                   ),
                 ),
@@ -429,8 +460,8 @@ class __BodyState extends State<_Body> {
                               child: Stack(
                                 children: [
                                   Positioned.fill(
-                                    child: Image.asset(
-                                      element,
+                                    child: Image.memory(
+                                      File(element).readAsBytesSync(),
                                       fit: BoxFit.cover,
                                     ),
                                   ),
@@ -484,8 +515,8 @@ class __BodyState extends State<_Body> {
                                             items: widget.client.images
                                                 .map(
                                                   (item) => Center(
-                                                    child: Image.asset(
-                                                      item,
+                                                    child: Image.memory(
+                                                      File(item).readAsBytesSync(),
                                                       fit: BoxFit.contain,
                                                       height: size.height,
                                                     ),
@@ -597,25 +628,22 @@ class __BodyState extends State<_Body> {
     );
   }
 
-  Widget buildAddImage() {
+  Future<String> _getImage() async {
     File _image;
+    final picker = ImagePicker();
+    final pickedFile = await picker.getImage(source: ImageSource.gallery);
+    if (pickedFile == null) return null;
+    _image = File(pickedFile.path);
+    print(pickedFile.path);
+    String filename =
+        pickedFile.path.substring(pickedFile.path.lastIndexOf('/') + 1);
+    final File localImage = await _image.copy('$appDocPath/$filename');
+    String newPath = '$appDocPath/$filename';
+    setState(() {});
+    return newPath;
+  }
 
-    Future _getImage() async {
-      final picker = ImagePicker();
-      final pickedFile = await picker.getImage(source: ImageSource.gallery);
-      if (pickedFile == null) return;
-      _image = File(pickedFile.path);
-      final fileName = 'background_image';
-      final File localImage = await _image.copy('$appDocPath/$fileName');
-      setState(() {});
-    }
-
-    Image image;
-    var hasLocalImage = File('$appDocPath/background_image').existsSync();
-    if (hasLocalImage) {
-      var bytes = File('$appDocPath/background_image').readAsBytesSync();
-      image = Image.memory(bytes);
-    }
+  Widget buildAddImage() {
     return Container(
       height: 200,
       width: double.infinity,
@@ -623,8 +651,11 @@ class __BodyState extends State<_Body> {
         borderRadius: BorderRadius.circular(3.0),
         border: Border.all(color: Theme.of(context).focusColor),
       ),
-      child: (File('$appDocPath/background_image').existsSync())
-          ? Center(child: image)
+      child: (widget.client.images !=null && widget.client.images.length > 0 && File(widget.client.images[0]).existsSync())
+          ? Image.memory(
+            File(widget.client.images[0]).readAsBytesSync(),
+            fit: BoxFit.cover,
+          )
           : Center(
               child: IconButton(
                 icon: Icon(
@@ -632,9 +663,17 @@ class __BodyState extends State<_Body> {
                   color: Theme.of(context).cardColor,
                   size: 30.0,
                 ),
-                onPressed: () {
-                  _getImage();
-                  print(appDocPath);
+                onPressed: () async {
+                  String p = await _getImage();
+                  var hasLocalImage = File(p).existsSync();
+                  if (hasLocalImage) {
+                    if(widget.client.images!= null)
+                      widget.client.images.add(p);
+                    else
+                      widget.client.images = List.of([p]);
+                    setState(() {});
+                    widget.bloc.updateClient(widget.client);
+                  }
                 },
               ),
             ),

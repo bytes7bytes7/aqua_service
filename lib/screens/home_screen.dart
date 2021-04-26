@@ -1,3 +1,4 @@
+import 'package:aqua_service/database/database_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 
@@ -26,6 +27,9 @@ class HomeScreen extends StatelessWidget {
                 flex: 3,
                 child: SvgPicture.asset('assets/svg/logo.svg'),
               ),
+              TextButton(onPressed: (){
+                DatabaseHelper.db.dropBD();
+              }, child: Text("DROP")),
               SizedBox(height: 20.0),
               Text(
                 'Aqua Service',
