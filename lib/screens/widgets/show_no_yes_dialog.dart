@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-Future<void> showWarningDialog({BuildContext context, String title, String subtitle}) async {
+Future<void> showNoYesDialog({BuildContext context, String title, String subtitle, Function noAnswer, Function yesAnswer}) async {
   return showDialog<void>(
     context: context,
     barrierDismissible: true, // true - user can dismiss dialog
@@ -30,9 +30,7 @@ Future<void> showWarningDialog({BuildContext context, String title, String subti
                   .bodyText1
                   .copyWith(color: Theme.of(context).cardColor),
             ),
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
+            onPressed: noAnswer,
           ),
           TextButton(
             child: Text(
@@ -42,10 +40,7 @@ Future<void> showWarningDialog({BuildContext context, String title, String subti
                   .bodyText1
                   .copyWith(color: Theme.of(context).cardColor),
             ),
-            onPressed: () {
-              Navigator.of(context).pop();
-              Navigator.of(context).pop();
-            },
+            onPressed: yesAnswer,
           ),
         ],
       );

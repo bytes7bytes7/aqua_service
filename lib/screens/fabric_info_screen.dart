@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'widgets/show_warning_dialog.dart';
-import '../database/database_helper.dart';
+import 'widgets/show_no_yes_dialog.dart';
 import '../bloc/fabric_bloc.dart';
 import '../screens/widgets/app_header.dart';
 import '../model/fabric.dart';
@@ -76,10 +75,17 @@ class _FabricInfoScreenState extends State<FabricInfoScreen> {
                     widget.fabric.retailPrice.toString() ||
                 purchasePriceController.text !=
                     widget.fabric.purchasePrice.toString()) {
-              showWarningDialog(
+              showNoYesDialog(
                 context: context,
                 title: 'Изменения будут утеряны',
                 subtitle: 'Покинуть карту материала?',
+                noAnswer: () {
+                  Navigator.pop(context);
+                },
+                yesAnswer: () {
+                  Navigator.pop(context);
+                  Navigator.pop(context);
+                },
               );
             } else {
               Navigator.pop(context);
@@ -89,19 +95,33 @@ class _FabricInfoScreenState extends State<FabricInfoScreen> {
         action: [
           if (widget.fabric.id != null)
             IconButton(
-                icon: Icon(
-                  Icons.delete,
-                  color: Theme.of(context).focusColor,
-                ),
-                onPressed: () {
-                  _showDeleteDialog(context, widget.fabric);
-                }),
+              icon: Icon(
+                Icons.delete,
+                color: Theme.of(context).focusColor,
+              ),
+              onPressed: () {
+                showNoYesDialog(
+                  context: context,
+                  title: 'Удаление',
+                  subtitle: 'Удалить материал?',
+                  noAnswer: () {
+                    Navigator.of(context).pop();
+                  },
+                  yesAnswer: () {
+                    widget.bloc.deleteFabric(widget.fabric.id);
+                    widget.bloc.loadAllFabrics();
+                    Navigator.of(context).pop();
+                    Navigator.of(context).pop();
+                  },
+                );
+              },
+            ),
           IconButton(
             icon: Icon(
               Icons.done,
               color: Theme.of(context).focusColor,
             ),
-            onPressed: () async {
+            onPressed: () {
               FocusScope.of(context).requestFocus(FocusNode());
               validateFormat = true;
               validateTitle = titleController.text.length > 0;
@@ -133,9 +153,9 @@ class _FabricInfoScreenState extends State<FabricInfoScreen> {
                   ..title = titleController.text
                   ..retailPrice = double.parse(retailPriceController.text)
                   ..purchasePrice = double.parse(purchasePriceController.text);
-                (widget.title != 'Новый Материал')
-                    ? await DatabaseHelper.db.updateFabric(widget.fabric)
-                    : await DatabaseHelper.db.addFabric(widget.fabric);
+                (widget.fabric.id == null)
+                    ? widget.bloc.addFabric(widget.fabric)
+                    : widget.bloc.updateFabric(widget.fabric);
                 widget.bloc.loadAllFabrics();
                 setState(() {
                   _title = 'Материал';
@@ -186,61 +206,6 @@ class _FabricInfoScreenState extends State<FabricInfoScreen> {
         retailPriceController: retailPriceController,
         purchasePriceController: purchasePriceController,
       ),
-    );
-  }
-
-  Future<void> _showDeleteDialog(BuildContext context, Fabric fabric) async {
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: false, // user must tap button!
-      builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          title: Text(
-            'Удаление',
-            style: Theme.of(context).textTheme.headline2,
-          ),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[
-                Text(
-                  'Удалить материал?',
-                  style: Theme.of(context).textTheme.bodyText1,
-                ),
-              ],
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: Text(
-                'Нет',
-                style: Theme.of(context)
-                    .textTheme
-                    .bodyText1
-                    .copyWith(color: Theme.of(context).cardColor),
-              ),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: Text(
-                'Да',
-                style: Theme.of(context)
-                    .textTheme
-                    .bodyText1
-                    .copyWith(color: Theme.of(context).cardColor),
-              ),
-              onPressed: () {
-                DatabaseHelper.db.deleteFabric(fabric.id);
-                widget.bloc.loadAllFabrics();
-                Navigator.of(context).pop();
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
     );
   }
 }

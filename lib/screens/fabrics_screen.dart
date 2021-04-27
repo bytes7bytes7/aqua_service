@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../bloc/fabric_bloc.dart';
 import '../model/fabric.dart';
-import '../repository/fabric_repository.dart';
 import '../repository/repository.dart';
 import '../screens/widgets/app_header.dart';
 import 'fabric_info_screen.dart';
@@ -18,7 +17,7 @@ class FabricsScreen extends StatefulWidget {
   }) : super(key: key);
 
   final bool forChoice;
-  final FabricRepository _repo = Repository.fabricRepository;
+  final _repo = Repository.fabricRepository;
 
   @override
   _FabricsScreenState createState() => _FabricsScreenState();
@@ -72,7 +71,7 @@ class _FabricsScreenState extends State<FabricsScreen> {
 }
 
 class _Body extends StatefulWidget {
-  _Body({
+  const _Body({
     Key key,
     @required this.forChoice,
     @required this.bloc,

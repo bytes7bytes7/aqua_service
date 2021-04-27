@@ -23,6 +23,27 @@ class FabricBloc{
       _fabricStreamController.sink.add(FabricState._fabricData(fabricList));
     });
   }
+
+  void deleteFabric(int id) {
+    _fabricStreamController.sink.add(FabricState._fabricLoading());
+    _repository.deleteFabric(id).then((value) {
+      loadAllFabrics();
+    });
+  }
+
+  void updateFabric(Fabric fabric){
+    _fabricStreamController.sink.add(FabricState._fabricLoading());
+    _repository.updateFabric(fabric).then((value) {
+      loadAllFabrics();
+    });
+  }
+
+  void addFabric(Fabric fabric){
+    _fabricStreamController.sink.add(FabricState._fabricLoading());
+    _repository.addFabric(fabric).then((value) {
+      loadAllFabrics();
+    });
+  }
 }
 
 class FabricState {

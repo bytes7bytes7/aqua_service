@@ -6,11 +6,11 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 
-import 'widgets/show_warning_dialog.dart';
 import '../bloc/client_bloc.dart';
 import '../screens/widgets/app_header.dart';
 import 'global/next_page_route.dart';
 import '../model/client.dart';
+import 'widgets/show_no_yes_dialog.dart';
 
 class ClientInfoScreen extends StatefulWidget {
   ClientInfoScreen({
@@ -41,6 +41,7 @@ class _ClientInfoScreenState extends State<ClientInfoScreen> {
 
   @override
   void initState() {
+    _title = widget.title;
     nameController = TextEditingController();
     surnameController = TextEditingController();
     middleNameController = TextEditingController();
@@ -73,7 +74,6 @@ class _ClientInfoScreenState extends State<ClientInfoScreen> {
     widget.client.volume = widget.client.volume ?? '';
     widget.client.images = widget.client.images ?? [];
 
-    _title = widget.title;
     avatarPath = [widget.client.avatar];
     imagesPath = List<String>.from(widget.client.images) ?? [];
 
@@ -108,10 +108,17 @@ class _ClientInfoScreenState extends State<ClientInfoScreen> {
                 volumeController.text != widget.client.volume ||
                 avatarPath[0] != widget.client.avatar ||
                 !ListEquality().equals(imagesPath, widget.client.images)) {
-              showWarningDialog(
+              showNoYesDialog(
                 context: context,
                 title: 'Изменения будут утеряны',
                 subtitle: 'Покинуть карту клиента?',
+                noAnswer: () {
+                  Navigator.pop(context);
+                },
+                yesAnswer: () {
+                  Navigator.pop(context);
+                  Navigator.pop(context);
+                },
               );
             } else {
               Navigator.pop(context);
@@ -121,13 +128,26 @@ class _ClientInfoScreenState extends State<ClientInfoScreen> {
         action: [
           if (widget.client.id != null)
             IconButton(
-                icon: Icon(
-                  Icons.delete,
-                  color: Theme.of(context).focusColor,
-                ),
-                onPressed: () {
-                  _showDeleteDialog(context, widget.client);
-                }),
+              icon: Icon(
+                Icons.delete,
+                color: Theme.of(context).focusColor,
+              ),
+              onPressed: () {
+                showNoYesDialog(
+                  context: context,
+                  title: 'Удаление',
+                  subtitle: 'Удалить клиента?',
+                  noAnswer: () {
+                    Navigator.of(context).pop();
+                  },
+                  yesAnswer: () {
+                    widget.bloc.deleteClient(widget.client.id);
+                    Navigator.of(context).pop();
+                    Navigator.of(context).pop();
+                  },
+                );
+              },
+            ),
           IconButton(
             icon: Icon(
               Icons.done,
@@ -148,7 +168,7 @@ class _ClientInfoScreenState extends State<ClientInfoScreen> {
                   ..phone = phoneController.text
                   ..volume = volumeController.text
                   ..images = imagesPath;
-                if (_title == 'Новый Клиент') {
+                if (widget.client.id == null) {
                   widget.bloc.addClient(widget.client);
                   setState(() {
                     _title = 'Клиент';
@@ -199,60 +219,6 @@ class _ClientInfoScreenState extends State<ClientInfoScreen> {
         phoneController: phoneController,
         volumeController: volumeController,
       ),
-    );
-  }
-
-  Future<void> _showDeleteDialog(BuildContext context, Client client) async {
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: false, // user must tap button!
-      builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          title: Text(
-            'Удаление',
-            style: Theme.of(context).textTheme.headline2,
-          ),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[
-                Text(
-                  'Удалить клиента?',
-                  style: Theme.of(context).textTheme.bodyText1,
-                ),
-              ],
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: Text(
-                'Нет',
-                style: Theme.of(context)
-                    .textTheme
-                    .bodyText1
-                    .copyWith(color: Theme.of(context).cardColor),
-              ),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: Text(
-                'Да',
-                style: Theme.of(context)
-                    .textTheme
-                    .bodyText1
-                    .copyWith(color: Theme.of(context).cardColor),
-              ),
-              onPressed: () {
-                widget.bloc.deleteClient(client.id);
-                Navigator.of(context).pop();
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
     );
   }
 }
@@ -546,7 +512,21 @@ class __BodyState extends State<_Body> {
                                       ),
                                       color: Theme.of(context).focusColor,
                                       onPressed: () {
-                                        _showDeleteDialog(index);
+                                        showNoYesDialog(
+                                          context: context,
+                                          title: 'Удаление',
+                                          subtitle: 'Удалить снимок?',
+                                          noAnswer: () {
+                                            Navigator.of(context).pop();
+                                          },
+                                          yesAnswer: () {
+                                            widget.imagesPath.removeAt(index);
+                                            widget.bloc
+                                                .updateClient(widget.client);
+                                            setState(() {});
+                                            Navigator.of(context).pop();
+                                          },
+                                        );
                                       },
                                     ),
                                   ),
@@ -634,62 +614,6 @@ class __BodyState extends State<_Body> {
           SizedBox(height: 30.0),
         ],
       ),
-    );
-  }
-
-  Future<void> _showDeleteDialog(int index) async {
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: false, // user must tap button!
-      builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          title: Text(
-            'Удаление',
-            style: Theme.of(context).textTheme.headline2,
-          ),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[
-                Text(
-                  'Удалить снимок?',
-                  style: Theme.of(context).textTheme.bodyText1,
-                ),
-              ],
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: Text(
-                'Нет',
-                style: Theme.of(context)
-                    .textTheme
-                    .bodyText1
-                    .copyWith(color: Theme.of(context).cardColor),
-              ),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: Text(
-                'Да',
-                style: Theme.of(context)
-                    .textTheme
-                    .bodyText1
-                    .copyWith(color: Theme.of(context).cardColor),
-              ),
-              onPressed: () {
-                setState(() {
-                  widget.imagesPath.removeAt(index);
-                  widget.bloc.updateClient(widget.client);
-                });
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
     );
   }
 

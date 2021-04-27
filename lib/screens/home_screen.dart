@@ -114,18 +114,18 @@ class _CardButton extends StatelessWidget {
               case '/clients':
                 page = ClientsScreen();
                 break;
-              case '/work':
-                page = OrdersScreen();
-                break;
+              // case '/work':
+              //   page = OrdersScreen();
+              //   break;
               case '/material':
                 page = FabricsScreen();
                 break;
-              case '/calendar':
-                page = CalendarScreen();
-                break;
-              case '/reports':
-                page = ReportsScreen();
-                break;
+              // case '/calendar':
+              //   page = CalendarScreen();
+              //   break;
+              // case '/reports':
+              //   page = ReportsScreen();
+              //   break;
               default:
                 page = Page404();
             }

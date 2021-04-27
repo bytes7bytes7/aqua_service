@@ -74,7 +74,7 @@ class _ClientsScreenState extends State<ClientsScreen> {
 }
 
 class _Body extends StatefulWidget {
-  _Body({
+  const _Body({
     Key key,
     @required this.forChoice,
     @required this.bloc,

@@ -1,9 +1,21 @@
-import '../test_data.dart';
+import '../database/database_helper.dart';
 import '../model/order.dart';
 
 class OrderRepository {
   Future<List<Order>> getAllOrders() async {
     await Future.delayed(const Duration(seconds: 2));
-    return testOrders;
+    return DatabaseHelper.db.getAllOrders();
+  }
+
+  Future deleteOrder(int id) async{
+    await DatabaseHelper.db.deleteOrder(id);
+  }
+
+  Future updateOrder(Order order)async{
+    await DatabaseHelper.db.updateOrder(order);
+  }
+
+  Future addOrder(Order order)async{
+    await DatabaseHelper.db.addOrder(order);
   }
 }
