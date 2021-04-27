@@ -161,10 +161,11 @@ class __BodyState extends State<_Body> {
           ),
           SizedBox(height: 20),
           RectButton(
-              text: 'Обновить',
-              onPressed: () {
-                widget.bloc.loadAllClients();
-              }),
+            text: 'Обновить',
+            onPressed: () {
+              widget.bloc.loadAllClients();
+            },
+          ),
         ],
       ),
     );
@@ -198,7 +199,7 @@ class __ClientCardState extends State<_ClientCard> {
 
   @override
   void initState() {
-    if(widget.client.avatar!=null){
+    if (widget.client.avatar != null) {
       if (appDocPath == null) getApplicationDirectoryPath();
       if (widget.client.avatar != null) {
         var hasLocalImage = File(widget.client.avatar).existsSync();
@@ -212,7 +213,7 @@ class __ClientCardState extends State<_ClientCard> {
 
   @override
   Widget build(BuildContext context) {
-    print(widget.client.avatar);
+    print('ClientsScreen avatar: ${widget.client.avatar}');
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 28.0),
       child: Material(
@@ -242,7 +243,7 @@ class __ClientCardState extends State<_ClientCard> {
                 CircleAvatar(
                   radius: 24.0,
                   backgroundColor: Theme.of(context).focusColor,
-                  child: (widget.client.avatar != null)
+                  child: (bytes != null)
                       ? Container(
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,

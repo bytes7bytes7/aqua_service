@@ -16,7 +16,6 @@ class DatabaseHelper {
 
   // Names of tables
   static const String _clientTableName = 'clients';
-  static const String _imageTableName = 'images';
 
   // static const String _orderTableName = 'orders';
   static const String _fabricTableName = 'fabrics';
@@ -33,12 +32,7 @@ class DatabaseHelper {
   static const String _volume = 'volume';
   static const String _previousDate = 'previousDate';
   static const String _nextDate = 'nextDate';
-  static const String _clientImages =
-      'images'; // DO NOT USE AS COLUMN FOR CLIENTS TABLE
-
-  // Special columns for images
-  static const String _imageUrl = 'imageUrl';
-  static const String _clientId = 'clientId';
+  static const String _images = 'images';
 
   // Special columns for fabrics
   static const String _title = 'title';
@@ -74,15 +68,8 @@ class DatabaseHelper {
         $_phone TEXT,
         $_volume TEXT,
         $_previousDate TEXT,
-        $_nextDate TEXT
-      )
-    ''');
-    await db.execute('''
-      CREATE TABLE IF NOT EXISTS  $_imageTableName (
-        $_id INTEGER PRIMARY KEY AUTOINCREMENT,
-        $_imageUrl TEXT,
-        $_clientId INTEGER,
-        FOREIGN KEY($_clientId) REFERENCES $_clientTableName($_id)
+        $_nextDate TEXT,
+        $_images TEXT
       )
     ''');
     // await db.execute('''
@@ -104,7 +91,6 @@ class DatabaseHelper {
   Future dropBD() async {
     final db = await database;
     await db.execute('DROP TABLE IF EXISTS $_clientTableName;');
-    await db.execute('DROP TABLE IF EXISTS $_imageTableName;');
     // await db.execute('DROP TABLE IF EXISTS $_orderTableName;');
     await db.execute('DROP TABLE IF EXISTS $_fabricTableName;');
     _onCreate(db, _databaseVersion);
@@ -120,7 +106,7 @@ class DatabaseHelper {
     final db = await database;
     client.id = await getMaxId(db, _clientTableName);
     await db.rawInsert(
-      "INSERT INTO $_clientTableName ($_avatar, $_name, $_surname, $_middleName, $_city, $_address, $_phone, $_volume, $_previousDate, $_nextDate) VALUES (?,?,?,?,?,?,?,?,?,?)",
+      "INSERT INTO $_clientTableName ($_avatar, $_name, $_surname, $_middleName, $_city, $_address, $_phone, $_volume, $_previousDate, $_nextDate, $_images) VALUES (?,?,?,?,?,?,?,?,?,?,?)",
       [
         client.avatar,
         client.name,
@@ -132,6 +118,7 @@ class DatabaseHelper {
         client.volume,
         client.previousDate,
         client.nextDate,
+        client.images?.join(';'),
       ],
     );
   }
@@ -139,37 +126,31 @@ class DatabaseHelper {
   Future updateClient(Client client) async {
     final db = await database;
     var map = client.toMap();
-    var images = await getAllImages(client.id);
-    if(map[_clientImages]!=null) {
-      for (int i = 0; i < map[_clientImages].length; i++) {
-        if (images.contains(map[_clientImages][i]))
-          map[_clientImages].removeAt(i);
-      }
-      for(int i =0;i<map[_clientImages].length;i++)
-        await db.rawInsert(
-          "INSERT INTO $_imageTableName ($_imageUrl, $_clientId) VALUES (?,?)",
-          [
-            map[_clientImages][i],
-            client.id,
-          ],
-        );
-    }
-    map.remove(_clientImages);
     await db.update("$_clientTableName", map,
         where: "$_id = ?", whereArgs: [client.id]);
   }
 
   Future<Client> getClient(int id) async {
     final db = await database;
-    var res =
+    List<Map<String,dynamic>> res =
         await db.query("$_clientTableName", where: "$_id = ?", whereArgs: [id]);
+    res.first[_images] = List.from(res.first[_images]?.split(';'));
     return res.isNotEmpty ? Client.fromMap(res.first) : null;
   }
 
   Future<List<Client>> getAllClients() async {
     final db = await database;
-    var res = await db.query("$_clientTableName");
-    return res.isNotEmpty ? res.map((c) => Client.fromMap(c)).toList() : [];
+    List<Map<String,dynamic>> data =  await db.query("$_clientTableName");
+    List<Map<String,dynamic>> result=[];
+    if (data.isNotEmpty) {
+      for(int i =0;i<data.length;i++){
+        Map<String,dynamic> m = Map<String,dynamic>.from(data[i]);
+        m[_images] = (m[_images]!=null )? m[_images].split(';') : List<String>.from([]);
+        result.add(m);
+      }
+      return result.map((e) => Client.fromMap(e)).toList();
+    } else
+      return [];
   }
 
   Future deleteClient(int id) async {
@@ -181,29 +162,6 @@ class DatabaseHelper {
     final db = await database;
     db.rawDelete("DELETE * FROM $_clientTableName");
   }
-
-  // Image methods
-  Future addImage(int clientId, String url) async {
-    final db = await database;
-    await db.execute(
-        'INSERT INTO $_imageTableName ($_imageUrl, $_clientId) VALUES (?,?)',
-        [url, clientId]);
-  }
-
-  // Future updateImage(){}
-
-  Future<List<String>> getAllImages(int clientId) async {
-    final db = await database;
-    var res = await db.query("$_imageTableName",
-        where: "$_clientId = ?", whereArgs: [clientId]);
-    return res.isNotEmpty
-        ? res.map((e) => e[_imageUrl].toString()).toList()
-        : [];
-  }
-
-  // Future deleteImage(){}
-
-  // Future deleteAllImages(){}
 
   // Fabric methods
   Future addFabric(Fabric fabric) async {
