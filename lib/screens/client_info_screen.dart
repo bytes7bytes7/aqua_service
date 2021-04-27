@@ -34,12 +34,22 @@ class _ClientInfoScreenState extends State<ClientInfoScreen> {
   TextEditingController phoneController;
   TextEditingController volumeController;
   List<String> avatarPath;
+  List<String> imagesPath;
   String _title;
 
   @override
   void initState() {
+    widget.client.name = widget.client.name ?? '';
+    widget.client.surname = widget.client.surname ?? '';
+    widget.client.middleName = widget.client.middleName ?? '';
+    widget.client.city = widget.client.city ?? '';
+    widget.client.address = widget.client.address ?? '';
+    widget.client.phone = widget.client.phone ?? '';
+    widget.client.volume = widget.client.volume ?? '';
+    widget.client.images = widget.client.images ?? [];
     _title = widget.title;
     avatarPath = [widget.client.avatar];
+    imagesPath = List.from(widget.client.images) ?? [];
     nameController = TextEditingController();
     surnameController = TextEditingController();
     middleNameController = TextEditingController();
@@ -47,20 +57,13 @@ class _ClientInfoScreenState extends State<ClientInfoScreen> {
     addressController = TextEditingController();
     phoneController = TextEditingController();
     volumeController = TextEditingController();
-    nameController.text =
-        (widget.client.name != null) ? widget.client.name : '';
-    surnameController.text =
-        (widget.client.surname != null) ? widget.client.surname : '';
-    middleNameController.text =
-        (widget.client.middleName != null) ? widget.client.middleName : '';
-    cityController.text =
-        (widget.client.city != null) ? widget.client.city : '';
-    addressController.text =
-        (widget.client.address != null) ? widget.client.address : '';
-    phoneController.text =
-        (widget.client.phone != null) ? widget.client.phone : '';
-    volumeController.text =
-        (widget.client.volume != null) ? widget.client.volume : '';
+    nameController.text = widget.client.name;
+    surnameController.text = widget.client.surname;
+    middleNameController.text = widget.client.middleName;
+    cityController.text = widget.client.city;
+    addressController.text = widget.client.address;
+    phoneController.text = widget.client.phone;
+    volumeController.text = widget.client.volume;
     super.initState();
   }
 
@@ -70,6 +73,27 @@ class _ClientInfoScreenState extends State<ClientInfoScreen> {
     return Scaffold(
       appBar: AppHeader(
         title: _title,
+        leading: IconButton(
+          icon: Icon(
+            Icons.arrow_back_ios_outlined,
+            color: Theme.of(context).focusColor,
+          ),
+          onPressed: () {
+            if (nameController.text != widget.client.name ||
+                surnameController.text != widget.client.surname ||
+                middleNameController.text != widget.client.middleName ||
+                cityController.text != widget.client.city ||
+                addressController.text != widget.client.address ||
+                phoneController.text != widget.client.phone ||
+                volumeController.text != widget.client.volume ||
+                avatarPath[0] != widget.client.avatar ||
+                imagesPath != widget.client.images) {
+              _showWarningDialog(context);
+            } else {
+              Navigator.pop(context);
+            }
+          },
+        ),
         action: [
           if (widget.client.id != null)
             IconButton(
@@ -99,7 +123,8 @@ class _ClientInfoScreenState extends State<ClientInfoScreen> {
                   ..city = cityController.text
                   ..address = addressController.text
                   ..phone = phoneController.text
-                  ..volume = volumeController.text;
+                  ..volume = volumeController.text
+                  ..images = imagesPath;
                 if (_title == 'Новый Клиент') {
                   widget.bloc.addClient(widget.client);
                   setState(() {
@@ -138,6 +163,7 @@ class _ClientInfoScreenState extends State<ClientInfoScreen> {
       ),
       body: _Body(
         avatarPath: avatarPath,
+        imagesPath: imagesPath,
         bloc: widget.bloc,
         client: widget.client,
         validateName: validateName,
@@ -150,6 +176,59 @@ class _ClientInfoScreenState extends State<ClientInfoScreen> {
         phoneController: phoneController,
         volumeController: volumeController,
       ),
+    );
+  }
+
+  Future<void> _showWarningDialog(BuildContext context) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: true, // true - user can dismiss dialog
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          title: Text(
+            'Изменения будут утеряны!',
+            style: Theme.of(context).textTheme.headline2,
+          ),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text(
+                  'Покинуть карту клиента?',
+                  style: Theme.of(context).textTheme.bodyText1,
+                ),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text(
+                'Нет',
+                style: Theme.of(context)
+                    .textTheme
+                    .bodyText1
+                    .copyWith(color: Theme.of(context).cardColor),
+              ),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text(
+                'Да',
+                style: Theme.of(context)
+                    .textTheme
+                    .bodyText1
+                    .copyWith(color: Theme.of(context).cardColor),
+              ),
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -212,6 +291,7 @@ class _Body extends StatefulWidget {
   _Body(
       {Key key,
       @required this.avatarPath,
+      @required this.imagesPath,
       @required this.bloc,
       @required this.client,
       @required this.validateName,
@@ -226,6 +306,7 @@ class _Body extends StatefulWidget {
       : super(key: key);
 
   final List<String> avatarPath;
+  final List<String> imagesPath;
   final ClientBloc bloc;
   final Client client;
   final bool validateName, validateCity;
@@ -293,7 +374,7 @@ class __BodyState extends State<_Body> {
                             setState(() {});
                           }
                         },
-                        child: (widget.avatarPath != null)
+                        child: (widget.avatarPath[0] != null)
                             ? Container(
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
@@ -455,16 +536,16 @@ class __BodyState extends State<_Body> {
               viewportFraction: 0.9,
             ),
             items: List.generate(
-              (widget.client.images?.length ?? 0) + 1,
+              widget.imagesPath.length + 1,
               (index) {
-                if (index == widget.client.images.length) {
+                if (index == widget.imagesPath.length) {
                   return buildAddImage();
                 } else {
                   return Builder(
                     builder: (BuildContext context) {
                       return GestureDetector(
                         child: Hero(
-                          tag: widget.client.images[index],
+                          tag: widget.imagesPath[index],
                           child: Container(
                             width: double.infinity,
                             margin: const EdgeInsets.symmetric(horizontal: 5.0),
@@ -477,7 +558,7 @@ class __BodyState extends State<_Body> {
                               children: [
                                 Positioned.fill(
                                   child: Image.memory(
-                                    File(widget.client.images[index])
+                                    File(widget.imagesPath[index])
                                         .readAsBytesSync(),
                                     fit: BoxFit.cover,
                                   ),
@@ -525,7 +606,7 @@ class __BodyState extends State<_Body> {
                                             enableInfiniteScroll: false,
                                             // autoPlay: false,
                                           ),
-                                          items: widget.client.images
+                                          items: widget.imagesPath
                                               .map(
                                                 (item) => Center(
                                                   child: Image.memory(
@@ -632,7 +713,7 @@ class __BodyState extends State<_Body> {
               ),
               onPressed: () {
                 setState(() {
-                  widget.client.images.removeAt(index);
+                  widget.imagesPath.removeAt(index);
                   widget.bloc.updateClient(widget.client);
                 });
                 Navigator.of(context).pop();
@@ -677,10 +758,7 @@ class __BodyState extends State<_Body> {
             String p = await _getImage() ?? '';
             var hasLocalImage = File(p).existsSync();
             if (hasLocalImage) {
-              if (widget.client.images != null)
-                widget.client.images.add(p);
-              else
-                widget.client.images = List<String>.from([p]);
+              widget.imagesPath.add(p);
               setState(() {});
               //widget.bloc.updateClient(widget.client);
             }

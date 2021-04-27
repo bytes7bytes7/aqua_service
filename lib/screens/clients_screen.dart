@@ -146,10 +146,6 @@ class __BodyState extends State<_Body> {
           client: clients[i],
           forChoice: widget.forChoice,
           bloc: widget.bloc,
-          avatar: clients[i].avatar,
-          name: clients[i].name,
-          surname: clients[i].surname,
-          city: clients[i].city,
         );
       },
     );
@@ -183,19 +179,11 @@ class _ClientCard extends StatefulWidget {
     @required this.client,
     @required this.forChoice,
     @required this.bloc,
-    @required this.avatar,
-    @required this.name,
-    @required this.surname,
-    @required this.city,
   }) : super(key: key);
 
   final Client client;
   final bool forChoice;
   final ClientBloc bloc;
-  final String avatar;
-  final String name;
-  final String surname;
-  final String city;
 
   @override
   __ClientCardState createState() => __ClientCardState();
@@ -211,13 +199,13 @@ class __ClientCardState extends State<_ClientCard> {
   }
 
   void init() {
-    if (widget.avatar != null) {
+    if (widget.client.avatar != null) {
       if (appDocPath == null) getApplicationDirectoryPath();
-      if (widget.avatar != null) {
-        var hasLocalImage = File(widget.avatar).existsSync();
+      if (widget.client.avatar != null) {
+        var hasLocalImage = File(widget.client.avatar).existsSync();
         if (hasLocalImage) {
-          print('client card: ${widget.avatar}');
-          bytes = File(widget.avatar).readAsBytesSync();
+          print('client card: ${widget.client.avatar}');
+          bytes = File(widget.client.avatar).readAsBytesSync();
         }
       }
     }

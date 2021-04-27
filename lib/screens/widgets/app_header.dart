@@ -8,10 +8,12 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
     Key key,
     @required this.title,
     this.action,
+    this.leading,
   }) : super(key: key);
 
   final String title;
   final List<Widget> action;
+  final Widget leading;
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +30,7 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
           style: Theme.of(context).textTheme.headline2,
         ),
         centerTitle: true,
-        leading: IconButton(
+        leading: leading ?? IconButton(
           icon: Icon(
             Icons.arrow_back_ios_outlined,
             color: Theme.of(context).focusColor,
