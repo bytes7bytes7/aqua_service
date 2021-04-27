@@ -138,7 +138,6 @@ class __BodyState extends State<_Body> {
   }
 
   Widget _buildContent(List<Client> clients) {
-    print('build content: ${clients[0].avatar}');
     return ListView.builder(
       itemCount: clients.length,
       itemBuilder: (context, i) {
@@ -204,7 +203,6 @@ class __ClientCardState extends State<_ClientCard> {
       if (widget.client.avatar != null) {
         var hasLocalImage = File(widget.client.avatar).existsSync();
         if (hasLocalImage) {
-          print('client card: ${widget.client.avatar}');
           bytes = File(widget.client.avatar).readAsBytesSync();
         }
       }

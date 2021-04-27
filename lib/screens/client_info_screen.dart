@@ -1,10 +1,12 @@
 import 'dart:io';
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 
+import 'widgets/show_warning_dialog.dart';
 import '../bloc/client_bloc.dart';
 import '../screens/widgets/app_header.dart';
 import 'global/next_page_route.dart';
@@ -39,6 +41,29 @@ class _ClientInfoScreenState extends State<ClientInfoScreen> {
 
   @override
   void initState() {
+    nameController = TextEditingController();
+    surnameController = TextEditingController();
+    middleNameController = TextEditingController();
+    cityController = TextEditingController();
+    addressController = TextEditingController();
+    phoneController = TextEditingController();
+    volumeController = TextEditingController();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    nameController.dispose();
+    surnameController.dispose();
+    middleNameController.dispose();
+    cityController.dispose();
+    addressController.dispose();
+    phoneController.dispose();
+    volumeController.dispose();
+    super.dispose();
+  }
+
+  void init() {
     widget.client.name = widget.client.name ?? '';
     widget.client.surname = widget.client.surname ?? '';
     widget.client.middleName = widget.client.middleName ?? '';
@@ -47,16 +72,11 @@ class _ClientInfoScreenState extends State<ClientInfoScreen> {
     widget.client.phone = widget.client.phone ?? '';
     widget.client.volume = widget.client.volume ?? '';
     widget.client.images = widget.client.images ?? [];
+
     _title = widget.title;
     avatarPath = [widget.client.avatar];
-    imagesPath = List.from(widget.client.images) ?? [];
-    nameController = TextEditingController();
-    surnameController = TextEditingController();
-    middleNameController = TextEditingController();
-    cityController = TextEditingController();
-    addressController = TextEditingController();
-    phoneController = TextEditingController();
-    volumeController = TextEditingController();
+    imagesPath = List<String>.from(widget.client.images) ?? [];
+
     nameController.text = widget.client.name;
     surnameController.text = widget.client.surname;
     middleNameController.text = widget.client.middleName;
@@ -64,11 +84,11 @@ class _ClientInfoScreenState extends State<ClientInfoScreen> {
     addressController.text = widget.client.address;
     phoneController.text = widget.client.phone;
     volumeController.text = widget.client.volume;
-    super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
+    init();
     bool validateName = false, validateCity = false;
     return Scaffold(
       appBar: AppHeader(
@@ -87,8 +107,12 @@ class _ClientInfoScreenState extends State<ClientInfoScreen> {
                 phoneController.text != widget.client.phone ||
                 volumeController.text != widget.client.volume ||
                 avatarPath[0] != widget.client.avatar ||
-                imagesPath != widget.client.images) {
-              _showWarningDialog(context);
+                !ListEquality().equals(imagesPath, widget.client.images)) {
+              showWarningDialog(
+                context: context,
+                title: 'Изменения будут утеряны',
+                subtitle: 'Покинуть карту клиента?',
+              );
             } else {
               Navigator.pop(context);
             }
@@ -114,7 +138,6 @@ class _ClientInfoScreenState extends State<ClientInfoScreen> {
               validateName = nameController.text.length > 0;
               validateCity = cityController.text.length > 0;
               if (validateName && validateCity) {
-                print('Save: ${widget.client.avatar} -> $avatarPath');
                 widget.client
                   ..avatar = avatarPath[0]
                   ..name = nameController.text
@@ -176,59 +199,6 @@ class _ClientInfoScreenState extends State<ClientInfoScreen> {
         phoneController: phoneController,
         volumeController: volumeController,
       ),
-    );
-  }
-
-  Future<void> _showWarningDialog(BuildContext context) async {
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: true, // true - user can dismiss dialog
-      builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          title: Text(
-            'Изменения будут утеряны!',
-            style: Theme.of(context).textTheme.headline2,
-          ),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[
-                Text(
-                  'Покинуть карту клиента?',
-                  style: Theme.of(context).textTheme.bodyText1,
-                ),
-              ],
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: Text(
-                'Нет',
-                style: Theme.of(context)
-                    .textTheme
-                    .bodyText1
-                    .copyWith(color: Theme.of(context).cardColor),
-              ),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: Text(
-                'Да',
-                style: Theme.of(context)
-                    .textTheme
-                    .bodyText1
-                    .copyWith(color: Theme.of(context).cardColor),
-              ),
-              onPressed: () {
-                Navigator.of(context).pop();
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
     );
   }
 
@@ -337,7 +307,6 @@ class __BodyState extends State<_Body> {
     if (widget.avatarPath[0] != null) {
       var hasLocalImage = File(widget.avatarPath[0]).existsSync();
       if (hasLocalImage) {
-        print('init state: ${widget.client.avatar}');
         bytes = File(widget.avatarPath[0]).readAsBytesSync();
       }
     }
@@ -368,7 +337,6 @@ class __BodyState extends State<_Body> {
                             var hasLocalImage = File(path).existsSync();
                             if (hasLocalImage) {
                               bytes = File(path).readAsBytesSync();
-                              print('Avatar path: $path');
                               widget.avatarPath[0] = path;
                             }
                             setState(() {});

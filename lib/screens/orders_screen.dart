@@ -30,7 +30,10 @@ class _OrdersScreenState extends State<OrdersScreen> {
               Navigator.push(
                 context,
                 NextPageRoute(
-                  nextPage: OrderInfoScreen(title: 'Новый Заказ'),
+                  nextPage: OrderInfoScreen(
+                    title: 'Новый Заказ',
+
+                  ),
                 ),
               );
             },
@@ -43,8 +46,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
 }
 
 class _Body extends StatefulWidget {
-
-  final OrderRepository _repo=Repository.orderRepository;
+  final OrderRepository _repo = Repository.orderRepository;
 
   @override
   __BodyState createState() => __BodyState();
@@ -149,9 +151,10 @@ class _OrderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    String profit=(order.price-order.expenses).toString().replaceAll(RegExp(r"([.]*0)(?!.*\d)"), "");
-    if(order.price> order.expenses)
-      profit = '+'+profit;
+    String profit = (order.price - order.expenses)
+        .toString()
+        .replaceAll(RegExp(r"([.]*0)(?!.*\d)"), "");
+    if (order.price > order.expenses) profit = '+' + profit;
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 28.0),
       child: Material(
@@ -203,7 +206,7 @@ class _OrderCard extends StatelessWidget {
                 ),
                 Spacer(),
                 Text(
-                    profit,
+                  profit,
                   style: Theme.of(context).textTheme.bodyText1,
                 ),
               ],

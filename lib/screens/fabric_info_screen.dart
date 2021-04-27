@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'widgets/show_warning_dialog.dart';
 import '../database/database_helper.dart';
 import '../bloc/fabric_bloc.dart';
 import '../screens/widgets/app_header.dart';
@@ -33,22 +34,58 @@ class _FabricInfoScreenState extends State<FabricInfoScreen> {
     titleController = TextEditingController();
     retailPriceController = TextEditingController();
     purchasePriceController = TextEditingController();
-    titleController.text = (widget.fabric != null) ? widget.fabric.title : '';
-    retailPriceController.text =
-        (widget.fabric.retailPrice != null) ? widget.fabric.retailPrice.toString() : '';
-    purchasePriceController.text =
-        (widget.fabric.purchasePrice != null) ? widget.fabric.purchasePrice.toString() : '';
     super.initState();
   }
 
   @override
+  void dispose() {
+    titleController.dispose();
+    retailPriceController.dispose();
+    purchasePriceController.dispose();
+    super.dispose();
+  }
+
+  void init() {
+    widget.fabric.title = widget.fabric.title ?? '';
+    widget.fabric.retailPrice = widget.fabric.retailPrice ?? 0.0;
+    widget.fabric.purchasePrice = widget.fabric.purchasePrice ?? 0.0;
+
+    titleController.text = widget.fabric.title;
+    retailPriceController.text = widget.fabric.retailPrice.toString();
+    purchasePriceController.text = widget.fabric.purchasePrice.toString();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    init();
     bool validateTitle = false,
         validateRetailPrice = false,
-        validatePurchasePrice = false;
+        validatePurchasePrice = false,
+        validateFormat = false;
     return Scaffold(
       appBar: AppHeader(
         title: _title,
+        leading: IconButton(
+          icon: Icon(
+            Icons.arrow_back_ios_outlined,
+            color: Theme.of(context).focusColor,
+          ),
+          onPressed: () {
+            if (titleController.text != widget.fabric.title ||
+                retailPriceController.text !=
+                    widget.fabric.retailPrice.toString() ||
+                purchasePriceController.text !=
+                    widget.fabric.purchasePrice.toString()) {
+              showWarningDialog(
+                context: context,
+                title: 'Изменения будут утеряны',
+                subtitle: 'Покинуть карту материала?',
+              );
+            } else {
+              Navigator.pop(context);
+            }
+          },
+        ),
         action: [
           if (widget.fabric.id != null)
             IconButton(
@@ -66,12 +103,32 @@ class _FabricInfoScreenState extends State<FabricInfoScreen> {
             ),
             onPressed: () async {
               FocusScope.of(context).requestFocus(FocusNode());
+              validateFormat = true;
               validateTitle = titleController.text.length > 0;
               validateRetailPrice = retailPriceController.text.length > 0;
               validatePurchasePrice = purchasePriceController.text.length > 0;
+              String first = retailPriceController.text,
+                  second = purchasePriceController.text;
+              for (int i = 0; i < first.length; i++) {
+                if (!'.0123456789'.contains(first[i])) {
+                  validateFormat = false;
+                  break;
+                }
+              }
+              for (int i = 0; i < second.length; i++) {
+                if (!'.0123456789'.contains(second[i])) {
+                  validateFormat = false;
+                  break;
+                }
+              }
+              if (first.indexOf('.') != first.lastIndexOf('.') ||
+                  second.indexOf('.') != second.lastIndexOf('.')) {
+                validateFormat = false;
+              }
               if (validateTitle &&
                   validateRetailPrice &&
-                  validatePurchasePrice) {
+                  validatePurchasePrice &&
+                  validateFormat) {
                 widget.fabric
                   ..title = titleController.text
                   ..retailPrice = double.parse(retailPriceController.text)
@@ -93,9 +150,14 @@ class _FabricInfoScreenState extends State<FabricInfoScreen> {
                       Text(
                         (validateTitle &&
                                 validateRetailPrice &&
-                                validatePurchasePrice)
+                                validatePurchasePrice &&
+                                validateFormat)
                             ? 'Сохранено!'
-                            : 'Заполните поля со звездочкой',
+                            : (validateTitle &&
+                                    validateRetailPrice &&
+                                    validatePurchasePrice)
+                                ? 'Неверный формат числа'
+                                : 'Заполните поля со звездочкой',
                         style: Theme.of(context).textTheme.bodyText1,
                       ),
                       Spacer(),
@@ -240,7 +302,8 @@ class __BodyState extends State<_Body> {
                   decoration: InputDecoration(
                     labelText: 'Розничная цена *',
                     labelStyle: Theme.of(context).textTheme.headline3,
-                    errorText: widget.validateRetailPrice ? 'Заполните поле' : null,
+                    errorText:
+                        widget.validateRetailPrice ? 'Заполните поле' : null,
                     errorStyle: Theme.of(context).textTheme.headline4,
                     enabledBorder: UnderlineInputBorder(
                       borderSide:
@@ -255,7 +318,8 @@ class __BodyState extends State<_Body> {
                   decoration: InputDecoration(
                     labelText: 'Закупочная цена *',
                     labelStyle: Theme.of(context).textTheme.headline3,
-                    errorText: widget.validatePurchasePrice ? 'Заполните поле' : null,
+                    errorText:
+                        widget.validatePurchasePrice ? 'Заполните поле' : null,
                     errorStyle: Theme.of(context).textTheme.headline4,
                     enabledBorder: UnderlineInputBorder(
                       borderSide:
@@ -277,7 +341,8 @@ class __BodyState extends State<_Body> {
                                 widget.fabric.retailPrice != null &&
                                 widget.fabric.purchasePrice != null)
                             ? (widget.fabric.retailPrice -
-                                    widget.fabric.purchasePrice).toStringAsFixed(2)
+                                    widget.fabric.purchasePrice)
+                                .toStringAsFixed(2)
                                 .toString()
                             : ''),
                         style: Theme.of(context).textTheme.bodyText1,
