@@ -138,6 +138,7 @@ class __BodyState extends State<_Body> {
   }
 
   Widget _buildContent(List<Client> clients) {
+    print('build content: ${clients[0].avatar}');
     return ListView.builder(
       itemCount: clients.length,
       itemBuilder: (context, i) {
@@ -145,6 +146,10 @@ class __BodyState extends State<_Body> {
           client: clients[i],
           forChoice: widget.forChoice,
           bloc: widget.bloc,
+          avatar: clients[i].avatar,
+          name: clients[i].name,
+          surname: clients[i].surname,
+          city: clients[i].city,
         );
       },
     );
@@ -178,11 +183,19 @@ class _ClientCard extends StatefulWidget {
     @required this.client,
     @required this.forChoice,
     @required this.bloc,
+    @required this.avatar,
+    @required this.name,
+    @required this.surname,
+    @required this.city,
   }) : super(key: key);
 
   final Client client;
   final bool forChoice;
   final ClientBloc bloc;
+  final String avatar;
+  final String name;
+  final String surname;
+  final String city;
 
   @override
   __ClientCardState createState() => __ClientCardState();
@@ -190,30 +203,29 @@ class _ClientCard extends StatefulWidget {
 
 class __ClientCardState extends State<_ClientCard> {
   String appDocPath;
-  var bytes;
+  Iterable<int> bytes;
 
   Future<void> getApplicationDirectoryPath() async {
     Directory appDocDir = await getApplicationDocumentsDirectory();
     appDocPath = appDocDir.path;
   }
 
-  @override
-  void initState() {
-    if (widget.client.avatar != null) {
+  void init() {
+    if (widget.avatar != null) {
       if (appDocPath == null) getApplicationDirectoryPath();
-      if (widget.client.avatar != null) {
-        var hasLocalImage = File(widget.client.avatar).existsSync();
+      if (widget.avatar != null) {
+        var hasLocalImage = File(widget.avatar).existsSync();
         if (hasLocalImage) {
-          bytes = File(widget.client.avatar).readAsBytesSync();
+          print('client card: ${widget.avatar}');
+          bytes = File(widget.avatar).readAsBytesSync();
         }
       }
     }
-    super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    print('ClientsScreen avatar: ${widget.client.avatar}');
+    init();
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 28.0),
       child: Material(

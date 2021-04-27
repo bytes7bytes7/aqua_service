@@ -126,6 +126,7 @@ class DatabaseHelper {
   Future updateClient(Client client) async {
     final db = await database;
     var map = client.toMap();
+    map[_images] = map[_images]?.join(';');
     await db.update("$_clientTableName", map,
         where: "$_id = ?", whereArgs: [client.id]);
   }
@@ -145,7 +146,8 @@ class DatabaseHelper {
     if (data.isNotEmpty) {
       for(int i =0;i<data.length;i++){
         Map<String,dynamic> m = Map<String,dynamic>.from(data[i]);
-        m[_images] = (m[_images]!=null )? m[_images].split(';') : List<String>.from([]);
+        List<String> a =[];
+        m[_images] = (m[_images].length > 0 )? m[_images].split(';') :a;
         result.add(m);
       }
       return result.map((e) => Client.fromMap(e)).toList();

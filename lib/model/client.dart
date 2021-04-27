@@ -11,8 +11,8 @@ class Client {
     this.volume,
     this.previousDate,
     this.nextDate,
-    this.images,
-  });
+    List<String> images,
+  }) : images = images ?? [];
 
   int id;
   String avatar;

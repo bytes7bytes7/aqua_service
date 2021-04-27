@@ -33,11 +33,13 @@ class _ClientInfoScreenState extends State<ClientInfoScreen> {
   TextEditingController addressController;
   TextEditingController phoneController;
   TextEditingController volumeController;
+  List<String> avatarPath;
   String _title;
 
   @override
   void initState() {
     _title = widget.title;
+    avatarPath = [widget.client.avatar];
     nameController = TextEditingController();
     surnameController = TextEditingController();
     middleNameController = TextEditingController();
@@ -84,12 +86,13 @@ class _ClientInfoScreenState extends State<ClientInfoScreen> {
               color: Theme.of(context).focusColor,
             ),
             onPressed: () {
-              print('init images: ${widget.client.images}');
               FocusScope.of(context).requestFocus(FocusNode());
               validateName = nameController.text.length > 0;
               validateCity = cityController.text.length > 0;
               if (validateName && validateCity) {
+                print('Save: ${widget.client.avatar} -> $avatarPath');
                 widget.client
+                  ..avatar = avatarPath[0]
                   ..name = nameController.text
                   ..surname = surnameController.text
                   ..middleName = middleNameController.text
@@ -103,8 +106,6 @@ class _ClientInfoScreenState extends State<ClientInfoScreen> {
                     _title = 'Клиент';
                   });
                 } else {
-                  print('ClientInfoScreen avatar: ${widget.client.avatar}');
-                  print('ClientInfoScreen images: ${widget.client.images}');
                   widget.bloc.updateClient(widget.client);
                 }
               }
@@ -136,6 +137,7 @@ class _ClientInfoScreenState extends State<ClientInfoScreen> {
         ],
       ),
       body: _Body(
+        avatarPath: avatarPath,
         bloc: widget.bloc,
         client: widget.client,
         validateName: validateName,
@@ -209,6 +211,7 @@ class _ClientInfoScreenState extends State<ClientInfoScreen> {
 class _Body extends StatefulWidget {
   _Body(
       {Key key,
+      @required this.avatarPath,
       @required this.bloc,
       @required this.client,
       @required this.validateName,
@@ -222,6 +225,7 @@ class _Body extends StatefulWidget {
       @required this.volumeController})
       : super(key: key);
 
+  final List<String> avatarPath;
   final ClientBloc bloc;
   final Client client;
   final bool validateName, validateCity;
@@ -249,10 +253,11 @@ class __BodyState extends State<_Body> {
   @override
   void initState() {
     if (appDocPath == null) getApplicationDirectoryPath();
-    if (widget.client.avatar != null) {
-      var hasLocalImage = File(widget.client.avatar).existsSync();
+    if (widget.avatarPath[0] != null) {
+      var hasLocalImage = File(widget.avatarPath[0]).existsSync();
       if (hasLocalImage) {
-        bytes = File(widget.client.avatar).readAsBytesSync();
+        print('init state: ${widget.client.avatar}');
+        bytes = File(widget.avatarPath[0]).readAsBytesSync();
       }
     }
     super.initState();
@@ -282,13 +287,13 @@ class __BodyState extends State<_Body> {
                             var hasLocalImage = File(path).existsSync();
                             if (hasLocalImage) {
                               bytes = File(path).readAsBytesSync();
-                              widget.client.avatar = path;
-                              //widget.bloc.updateClient(widget.client);
+                              print('Avatar path: $path');
+                              widget.avatarPath[0] = path;
                             }
+                            setState(() {});
                           }
-                          setState(() {});
                         },
-                        child: (widget.client.avatar != null)
+                        child: (widget.avatarPath != null)
                             ? Container(
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
@@ -450,132 +455,129 @@ class __BodyState extends State<_Body> {
               viewportFraction: 0.9,
             ),
             items: List.generate(
-              widget.client.images.length + 1,
+              (widget.client.images?.length ?? 0) + 1,
               (index) {
-                if(index==widget.client.images.length){
+                if (index == widget.client.images.length) {
                   return buildAddImage();
-                }else{
+                } else {
                   return Builder(
-                  builder: (BuildContext context) {
-                    return GestureDetector(
-                      child: Hero(
-                        tag: widget.client.images[index],
-                        child: Container(
-                          width: double.infinity,
-                          margin:
-                          const EdgeInsets.symmetric(horizontal: 5.0),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(3.0),
-                            border: Border.all(
-                                color: Theme.of(context).focusColor),
-                          ),
-                          child: Stack(
-                            children: [
-                              Positioned.fill(
-                                child: Image.memory(
-                                  File(widget.client.images[index]).readAsBytesSync(),
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                              Positioned(
-                                top: 5,
-                                right: 5,
-                                child: CircleAvatar(
-                                  backgroundColor: Theme.of(context)
-                                      .cardColor
-                                      .withOpacity(0.6),
-                                  child: IconButton(
-                                    padding: const EdgeInsets.all(0),
-                                    icon: Icon(
-                                      Icons.delete,
-                                      size: 18,
-                                    ),
-                                    color: Theme.of(context).focusColor,
-                                    onPressed: () {
-                                      _showDeleteDialog(
-                                          index,
-                                          widget.client.images);
-                                    },
+                    builder: (BuildContext context) {
+                      return GestureDetector(
+                        child: Hero(
+                          tag: widget.client.images[index],
+                          child: Container(
+                            width: double.infinity,
+                            margin: const EdgeInsets.symmetric(horizontal: 5.0),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(3.0),
+                              border: Border.all(
+                                  color: Theme.of(context).focusColor),
+                            ),
+                            child: Stack(
+                              children: [
+                                Positioned.fill(
+                                  child: Image.memory(
+                                    File(widget.client.images[index])
+                                        .readAsBytesSync(),
+                                    fit: BoxFit.cover,
                                   ),
                                 ),
-                              ),
-                            ],
+                                Positioned(
+                                  top: 5,
+                                  right: 5,
+                                  child: CircleAvatar(
+                                    backgroundColor: Theme.of(context)
+                                        .cardColor
+                                        .withOpacity(0.6),
+                                    child: IconButton(
+                                      padding: const EdgeInsets.all(0),
+                                      icon: Icon(
+                                        Icons.delete,
+                                        size: 18,
+                                      ),
+                                      color: Theme.of(context).focusColor,
+                                      onPressed: () {
+                                        _showDeleteDialog(index);
+                                      },
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                      onTap: () {
-                        final Size size = MediaQuery.of(context).size;
-                        Navigator.push(
-                          context,
-                          NextPageRoute(
-                            nextPage: Scaffold(
-                              body: Stack(
-                                children: [
-                                  Builder(
-                                    builder: (context) {
-                                      return CarouselSlider(
-                                        options: CarouselOptions(
-                                          initialPage:index,
-                                          height: size.height,
-                                          viewportFraction: 1.0,
-                                          enlargeCenterPage: false,
-                                          enableInfiniteScroll: false,
-                                          // autoPlay: false,
-                                        ),
-                                        items: widget.client.images
-                                            .map(
-                                              (item) => Center(
-                                            child: Image.memory(
-                                              File(item)
-                                                  .readAsBytesSync(),
-                                              fit: BoxFit.contain,
-                                              height: size.height,
-                                            ),
+                        onTap: () {
+                          final Size size = MediaQuery.of(context).size;
+                          Navigator.push(
+                            context,
+                            NextPageRoute(
+                              nextPage: Scaffold(
+                                body: Stack(
+                                  children: [
+                                    Builder(
+                                      builder: (context) {
+                                        return CarouselSlider(
+                                          options: CarouselOptions(
+                                            initialPage: index,
+                                            height: size.height,
+                                            viewportFraction: 1.0,
+                                            enlargeCenterPage: false,
+                                            enableInfiniteScroll: false,
+                                            // autoPlay: false,
                                           ),
-                                        )
-                                            .toList(),
-                                      );
-                                    },
-                                  ),
-                                  Positioned(
-                                    top: 0,
-                                    child: SafeArea(
-                                      child: Container(
-                                        alignment: Alignment.center,
-                                        height: 60,
-                                        width: size.width,
-                                        decoration: BoxDecoration(
-                                          color: Colors.black12
-                                              .withOpacity(0.5),
-                                        ),
-                                        child: Row(
-                                          children: [
-                                            IconButton(
-                                              icon: Icon(
-                                                Icons
-                                                    .arrow_back_ios_outlined,
-                                                color: Theme.of(context)
-                                                    .focusColor,
+                                          items: widget.client.images
+                                              .map(
+                                                (item) => Center(
+                                                  child: Image.memory(
+                                                    File(item)
+                                                        .readAsBytesSync(),
+                                                    fit: BoxFit.contain,
+                                                    height: size.height,
+                                                  ),
+                                                ),
+                                              )
+                                              .toList(),
+                                        );
+                                      },
+                                    ),
+                                    Positioned(
+                                      top: 0,
+                                      child: SafeArea(
+                                        child: Container(
+                                          alignment: Alignment.center,
+                                          height: 60,
+                                          width: size.width,
+                                          decoration: BoxDecoration(
+                                            color:
+                                                Colors.black12.withOpacity(0.5),
+                                          ),
+                                          child: Row(
+                                            children: [
+                                              IconButton(
+                                                icon: Icon(
+                                                  Icons.arrow_back_ios_outlined,
+                                                  color: Theme.of(context)
+                                                      .focusColor,
+                                                ),
+                                                onPressed: () {
+                                                  Navigator.pop(context);
+                                                },
                                               ),
-                                              onPressed: () {
-                                                Navigator.pop(context);
-                                              },
-                                            ),
-                                            Spacer(),
-                                          ],
+                                              Spacer(),
+                                            ],
+                                          ),
                                         ),
                                       ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
                             ),
-                          ),
-                        );
-                      },
-                    );
-                  },
-                );
+                          );
+                        },
+                      );
+                    },
+                  );
                 }
               },
             ),
@@ -586,7 +588,7 @@ class __BodyState extends State<_Body> {
     );
   }
 
-  Future<void> _showDeleteDialog(int index, List<String> images) async {
+  Future<void> _showDeleteDialog(int index) async {
     return showDialog<void>(
       context: context,
       barrierDismissible: false, // user must tap button!
@@ -630,7 +632,8 @@ class __BodyState extends State<_Body> {
               ),
               onPressed: () {
                 setState(() {
-                  images.removeAt(index);
+                  widget.client.images.removeAt(index);
+                  widget.bloc.updateClient(widget.client);
                 });
                 Navigator.of(context).pop();
               },
@@ -664,26 +667,26 @@ class __BodyState extends State<_Body> {
         border: Border.all(color: Theme.of(context).focusColor),
       ),
       child: Center(
-              child: IconButton(
-                icon: Icon(
-                  Icons.image_search_outlined,
-                  color: Theme.of(context).cardColor,
-                  size: 30.0,
-                ),
-                onPressed: () async {
-                  String p = await _getImage();
-                  var hasLocalImage = File(p).existsSync();
-                  if (hasLocalImage) {
-                    if (widget.client.images != null)
-                      widget.client.images.add(p);
-                    else
-                      widget.client.images = List.of([p]);
-                    setState(() {});
-                    //widget.bloc.updateClient(widget.client);
-                  }
-                },
-              ),
-            ),
+        child: IconButton(
+          icon: Icon(
+            Icons.image_search_outlined,
+            color: Theme.of(context).cardColor,
+            size: 30.0,
+          ),
+          onPressed: () async {
+            String p = await _getImage() ?? '';
+            var hasLocalImage = File(p).existsSync();
+            if (hasLocalImage) {
+              if (widget.client.images != null)
+                widget.client.images.add(p);
+              else
+                widget.client.images = List<String>.from([p]);
+              setState(() {});
+              //widget.bloc.updateClient(widget.client);
+            }
+          },
+        ),
+      ),
     );
   }
 }

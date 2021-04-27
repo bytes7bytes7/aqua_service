@@ -33,7 +33,6 @@ class ClientBloc {
   }
 
   void updateClient(Client client){
-    print('ClientBloc avatar: ${client.avatar}');
     _clientStreamController.sink.add(ClientState._clientLoading());
     _repository.updateClient(client).then((value) {
       loadAllClients();
