@@ -1,4 +1,4 @@
-/*import 'dart:io';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -7,15 +7,13 @@ import '../screens/widgets/app_header.dart';
 import '../screens/order_info_screen.dart';
 import '../model/order.dart';
 import '../bloc/order_bloc.dart';
-import '../bloc/client_bloc.dart';
 import './widgets/rect_button.dart';
 import './widgets/search_bar.dart';
 import './widgets/loading_circle.dart';
 import 'global/next_page_route.dart';
 
 class OrdersScreen extends StatefulWidget {
-  final _orderRepo = Repository.orderRepository;
-  final _clientRepo = Repository.clientRepository;
+  final _repo = Repository.orderRepository;
 
   @override
   _OrdersScreenState createState() => _OrdersScreenState();
@@ -23,19 +21,16 @@ class OrdersScreen extends StatefulWidget {
 
 class _OrdersScreenState extends State<OrdersScreen> {
   OrderBloc _orderBloc;
-  ClientBloc _clientBloc;
 
   @override
   void initState() {
-    _orderBloc = OrderBloc(widget._orderRepo);
-    _clientBloc = ClientBloc(widget._clientRepo);
+    _orderBloc = OrderBloc(widget._repo);
     super.initState();
   }
 
   @override
   void dispose() {
     _orderBloc.dispose();
-    _clientBloc.dispose();
     super.dispose();
   }
 
@@ -69,8 +64,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
         ],
       ),
       body: _Body(
-        orderBloc: _orderBloc,
-        clientBloc: _clientBloc,
+        bloc: _orderBloc,
       ),
     );
   }
@@ -79,12 +73,10 @@ class _OrdersScreenState extends State<OrdersScreen> {
 class _Body extends StatefulWidget {
   const _Body({
     Key key,
-    @required this.orderBloc,
-    @required this.clientBloc,
+    @required this.bloc,
   }) : super(key: key);
 
-  final OrderBloc orderBloc;
-  final ClientBloc clientBloc;
+  final OrderBloc bloc;
 
   @override
   __BodyState createState() => __BodyState();
@@ -92,7 +84,7 @@ class _Body extends StatefulWidget {
 
 class __BodyState extends State<_Body> {
   @override
-  context context) {
+  Widget build(BuildContext context) {
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       onTap: () {
@@ -101,7 +93,6 @@ class __BodyState extends State<_Body> {
       child: Column(
         children: [
           SearchBar(),
-          //SortBar(),
           Expanded(
             child: StreamBuilder(
               stream: widget.bloc.order,
@@ -204,12 +195,12 @@ class __OrderCardState extends State<_OrderCard> {
   }
 
   void init() {
-    if (widget.bloc..avatar != null) {
+    if (widget.order.client.avatar != null) {
       if (appDocPath == null) getApplicationDirectoryPath();
-      if (widget.client.avatar != null) {
-        var hasLocalImage = File(widget.client.avatar).existsSync();
+      if (widget.order.client.avatar != null) {
+        var hasLocalImage = File(widget.order.client.avatar).existsSync();
         if (hasLocalImage) {
-          bytes = File(widget.client.avatar).readAsBytesSync();
+          bytes = File(widget.order.client.avatar).readAsBytesSync();
         }
       }
     }
@@ -235,6 +226,7 @@ class __OrderCardState extends State<_OrderCard> {
                 nextPage: OrderInfoScreen(
                   title: 'Заказ',
                   order: widget.order,
+                  bloc: widget.bloc,
                 ),
               ),
             );
@@ -298,4 +290,3 @@ class __OrderCardState extends State<_OrderCard> {
     );
   }
 }
-*/

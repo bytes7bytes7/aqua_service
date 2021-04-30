@@ -40,9 +40,9 @@ class DatabaseHelper {
   static const String _retailPrice = 'retailPrice';
   static const String _purchasePrice = 'purchasePrice';
 
-  static const String _clientId = 'clientId';
+  static const String _client = 'client'; // contains only client id (Exp: 1)
   static const String _price = 'price';
-  static const String _fabricIds = 'fabricIds';
+  static const String _fabrics = 'fabrics'; // contains only string of fabric ids (Exp: 1;2;3)
   static const String _expenses = 'expenses';
   static const String _date = 'date';
   static const String _done = 'done';
@@ -84,9 +84,9 @@ class DatabaseHelper {
     await db.execute('''
       CREATE TABLE IF NOT EXISTS  $_orderTableName (
         $_id INTEGER PRIMARY KEY AUTOINCREMENT,
-        $_clientId INTEGER,
+        $_client INTEGER,
         $_price REAL,
-        $_fabricIds TEXT,
+        $_fabrics TEXT,
         $_expenses REAL,
         $_date TEXT,
         $_done BOOLEAN,
@@ -230,12 +230,12 @@ class DatabaseHelper {
     final db = await database;
     order.id = await _getMaxId(db, _orderTableName);
     await db.rawInsert(
-      "INSERT INTO $_orderTableName ($_id, $_clientId, $_price, $_fabricIds, $_expenses, $_date, $_done, $_comment) VALUES (?,?,?,?,?,?,?,?)",
+      "INSERT INTO $_orderTableName ($_id, $_client, $_price, $_fabrics, $_expenses, $_date, $_done, $_comment) VALUES (?,?,?,?,?,?,?,?)",
       [
         order.id,
-        order.clientId,
+        order.client.id,
         order.price,
-        order.fabricIds.join(';'),
+        order.fabrics.map((e) => e.id).join(';'),
         order.expenses,
         order.date,
         order.done,
@@ -247,7 +247,8 @@ class DatabaseHelper {
   Future updateOrder(Order order) async {
     final db = await database;
     var map = order.toMap();
-    map[_fabricIds] = map[_fabricIds]?.join(';');
+    map[_client] = map[_client].id;
+    map[_fabrics] = map[_fabrics].map((e) => e.id)?.join(';');
     await db.update("$_orderTableName", map,
         where: "$_id = ?", whereArgs: [order.id]);
   }
@@ -256,7 +257,8 @@ class DatabaseHelper {
     final db = await database;
     List<Map<String, dynamic>>  res =
         await db.query("$_orderTableName", where: "$_id = ?", whereArgs: [id]);
-    res.first[_fabricIds] = List<int>.from(res.first[_fabricIds]?.split(';'));
+    res.first[_client] = getClient(res.first[_client]);
+    res.first[_fabrics] = List<int>.from(res.first[_fabrics]?.split(';')).map((id) => getFabric(id));
     return res.isNotEmpty ? Order.fromMap(res.first) : null;
   }
 
@@ -267,8 +269,8 @@ class DatabaseHelper {
     if (data.isNotEmpty) {
       for (int i = 0; i < data.length; i++) {
         Map<String, dynamic> m = Map<String, dynamic>.from(data[i]);
-        List<String> a = [];
-        m[_fabricIds] = (m[_fabricIds].length > 0) ? m[_fabricIds].split(';') : a;
+        m[_client] = getClient(m[_client]);
+        m[_fabrics] = (m[_fabrics].length > 0) ? m[_fabrics].split(';').map((id) => getFabric(id)) : List<Fabric>.from(null);
         result.add(m);
       }
       return result.map((e) => Order.fromMap(e)).toList();

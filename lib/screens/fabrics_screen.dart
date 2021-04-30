@@ -43,24 +43,26 @@ class _FabricsScreenState extends State<FabricsScreen> {
     return Scaffold(
       appBar: AppHeader(
         title: 'Материалы',
-        action: [
-          IconButton(
-            icon: Icon(Icons.add,
-                color: Theme.of(context).focusColor, size: 32.0),
-            onPressed: () {
-              Navigator.push(
-                context,
-                NextPageRoute(
-                  nextPage: FabricInfoScreen(
-                    title: 'Новый Материал',
-                    fabric: Fabric(),
-                    bloc: _fabricBloc,
-                  ),
+        action: (widget.forChoice)
+            ? []
+            : [
+                IconButton(
+                  icon: Icon(Icons.add,
+                      color: Theme.of(context).focusColor, size: 32.0),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      NextPageRoute(
+                        nextPage: FabricInfoScreen(
+                          title: 'Новый Материал',
+                          fabric: Fabric(),
+                          bloc: _fabricBloc,
+                        ),
+                      ),
+                    );
+                  },
                 ),
-              );
-            },
-          ),
-        ],
+              ],
       ),
       body: _Body(
         forChoice: widget.forChoice,
@@ -95,7 +97,6 @@ class __BodyState extends State<_Body> {
       child: Column(
         children: [
           SearchBar(),
-          //SortBar(),
           Expanded(
             child: StreamBuilder(
               stream: widget.bloc.fabric,

@@ -1,13 +1,19 @@
-/*import 'package:collection/collection.dart';
-import 'package:flutter/material.dart';
+import 'dart:io';
 
+import 'package:collection/collection.dart';
+import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
+
+import '../model/client.dart';
+import '../model/fabric.dart';
+import 'client_info_screen.dart';
+import 'global/validate_price.dart';
 import '../bloc/order_bloc.dart';
 import 'clients_screen.dart';
 import 'fabrics_screen.dart';
 import '../screens/widgets/rect_button.dart';
 import '../screens/widgets/app_header.dart';
 import '../model/order.dart';
-import 'client_info_screen.dart';
 import 'global/next_page_route.dart';
 import 'widgets/show_no_yes_dialog.dart';
 
@@ -31,10 +37,7 @@ class _OrderInfoScreenState extends State<OrderInfoScreen> {
   TextEditingController priceController;
   TextEditingController expensesController;
   TextEditingController commentController;
-  List<int> clientId;
-  List<int> fabricIds;
-  List<String> date;
-  List<bool> done;
+  Map<String, dynamic> changes = {};
   String _title;
 
   @override
@@ -55,17 +58,22 @@ class _OrderInfoScreenState extends State<OrderInfoScreen> {
   }
 
   void init() {
+    widget.order.client = widget.order.client ?? Client();
     widget.order.price = widget.order.price ?? 0.0;
-    widget.order.fabricIds = widget.order.fabricIds ?? [];
+    widget.order.fabrics = widget.order.fabrics ?? [];
     widget.order.expenses = widget.order.expenses ?? 0.0;
     widget.order.date = widget.order.date ?? '';
     widget.order.done = widget.order.done ?? false;
     widget.order.comment = widget.order.comment ?? '';
 
-    clientId = [widget.order.clientId];
-    fabricIds = List<int>.from(widget.order.fabricIds) ?? [];
-    date = [widget.order.date];
-    done = [widget.order.done];
+    changes['client'] = Client.from(widget.order.client);
+    changes['fabrics'] =
+        widget.order.fabrics.map((e) => Fabric.from(e)).toList();
+    changes['date'] = widget.order.date;
+    changes['done'] = widget.order.done;
+    changes['onTap'] = () {
+      setState(() {});
+    };
 
     priceController.text = widget.order.price.toString();
     expensesController.text = widget.order.expenses.toString();
@@ -75,11 +83,12 @@ class _OrderInfoScreenState extends State<OrderInfoScreen> {
   @override
   Widget build(BuildContext context) {
     init();
-    bool validateClientId = false,
+    bool validateClient = false,
         validateDate = false,
         validatePrice = false,
         validateExpenses = false,
         validateFormat = false;
+    print(changes['client'].id);
     return Scaffold(
       appBar: AppHeader(
         title: _title,
@@ -92,9 +101,11 @@ class _OrderInfoScreenState extends State<OrderInfoScreen> {
             if (priceController.text != widget.order.price.toString() ||
                 expensesController.text != widget.order.expenses.toString() ||
                 commentController.text != widget.order.comment ||
-                clientId[0] != widget.order.clientId ||
-                !ListEquality().equals(fabricIds, widget.order.fabricIds) ||
-                date[0] != widget.order.date) {
+                !ListEquality()
+                    .equals([changes['client']], [widget.order.client]) ||
+                !ListEquality()
+                    .equals(changes['fabrics'], widget.order.fabrics) ||
+                changes['date'] != widget.order.date) {
               showNoYesDialog(
                 context: context,
                 title: 'Изменения будут утеряны',
@@ -102,7 +113,7 @@ class _OrderInfoScreenState extends State<OrderInfoScreen> {
                 noAnswer: () {
                   Navigator.pop(context);
                 },
-                yesAnswer:() {
+                yesAnswer: () {
                   Navigator.pop(context);
                   Navigator.pop(context);
                 },
@@ -113,7 +124,7 @@ class _OrderInfoScreenState extends State<OrderInfoScreen> {
           },
         ),
         action: [
-          if (widget.client.id != null)
+          if (widget.order.id != null)
             IconButton(
                 icon: Icon(
                   Icons.delete,
@@ -122,7 +133,17 @@ class _OrderInfoScreenState extends State<OrderInfoScreen> {
                 onPressed: () {
                   showNoYesDialog(
                     context: context,
-                    title:
+                    title: 'Удаление',
+                    subtitle: 'Удалить заказ?',
+                    noAnswer: () {
+                      Navigator.of(context).pop();
+                    },
+                    yesAnswer: () {
+                      widget.bloc.deleteOrder(widget.order.id);
+                      widget.bloc.loadAllOrders();
+                      Navigator.of(context).pop();
+                      Navigator.of(context).pop();
+                    },
                   );
                 }),
           IconButton(
@@ -132,27 +153,33 @@ class _OrderInfoScreenState extends State<OrderInfoScreen> {
             ),
             onPressed: () {
               FocusScope.of(context).requestFocus(FocusNode());
-              validateName = nameController.text.length > 0;
-              validateCity = cityController.text.length > 0;
-              if (validateName && validateCity) {
-                widget.client
-                  ..avatar = avatarPath[0]
-                  ..name = nameController.text
-                  ..surname = surnameController.text
-                  ..middleName = middleNameController.text
-                  ..city = cityController.text
-                  ..address = addressController.text
-                  ..phone = phoneController.text
-                  ..volume = volumeController.text
-                  ..images = imagesPath;
-                if (widget.client.id == null) {
-                  widget.bloc.addClient(widget.client);
-                  setState(() {
-                    _title = 'Клиент';
-                  });
-                } else {
-                  widget.bloc.updateClient(widget.client);
-                }
+              validateFormat = true;
+              validateClient = changes['client'] != null;
+              validateDate = changes['date'] != null;
+              validatePrice = priceController.text.length > 0;
+              validateExpenses = expensesController.text.length > 0;
+              validateFormat = priceValidation(priceController.text) &&
+                  priceValidation(expensesController.text);
+              if (validatePrice &&
+                  validateExpenses &&
+                  validateFormat &&
+                  validateClient &&
+                  validateDate) {
+                widget.order
+                  ..client = changes['client']
+                  ..price = double.parse(priceController.text)
+                  ..fabrics = changes['fabrics']
+                  ..expenses = double.parse(expensesController.text)
+                  ..date = changes['date']
+                  ..done = changes['done']
+                  ..comment = changes['comment'];
+                (widget.order.id == null)
+                    ? widget.bloc.addOrder(widget.order)
+                    : widget.bloc.updateOrder(widget.order);
+                widget.bloc.loadAllOrders();
+                setState(() {
+                  _title = 'Заказ';
+                });
               }
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
@@ -161,14 +188,26 @@ class _OrderInfoScreenState extends State<OrderInfoScreen> {
                   content: Row(
                     children: [
                       Text(
-                        (validateName && validateCity)
+                        (validatePrice &&
+                                validateExpenses &&
+                                validateFormat &&
+                                validateClient &&
+                                validateDate)
                             ? 'Сохранено!'
-                            : 'Заполните поля со звездочкой',
+                            : (!validateFormat)
+                                ? 'Неверный формат числа'
+                                : (!validateClient || !validateDate)
+                                    ? 'Выберите Клиента и Дату'
+                                    : 'Заполните поля со звездочкой',
                         style: Theme.of(context).textTheme.bodyText1,
                       ),
                       Spacer(),
                       Icon(
-                        (validateName && validateCity)
+                        (validatePrice &&
+                                validateExpenses &&
+                                validateFormat &&
+                                validateClient &&
+                                validateDate)
                             ? Icons.done_all_outlined
                             : Icons.warning_amber_outlined,
                         color: Theme.of(context).cardColor,
@@ -181,28 +220,69 @@ class _OrderInfoScreenState extends State<OrderInfoScreen> {
           ),
         ],
       ),
-      body: _Body(order: widget.order),
+      body: _Body(
+        changes: changes,
+        order: widget.order,
+        priceController: priceController,
+        expensesController: expensesController,
+        commentController: commentController,
+      ),
     );
   }
 }
 
-class _Body extends StatelessWidget {
-  _Body({
+class _Body extends StatefulWidget {
+  const _Body({
     Key key,
+    @required this.changes,
     @required this.order,
+    @required this.priceController,
+    @required this.expensesController,
+    @required this.commentController,
   }) : super(key: key);
 
+  final Map<String, dynamic> changes;
   final Order order;
-  final TextEditingController controller = TextEditingController();
+  final TextEditingController priceController;
+  final TextEditingController expensesController;
+  final TextEditingController commentController;
+
+  @override
+  __BodyState createState() => __BodyState();
+}
+
+class __BodyState extends State<_Body> {
+  String appDocPath;
+  Iterable<int> bytes;
+
+  Future<void> getApplicationDirectoryPath() async {
+    Directory appDocDir = await getApplicationDocumentsDirectory();
+    appDocPath = appDocDir.path;
+  }
+
+  @override
+  void initState() {
+    if (appDocPath == null) getApplicationDirectoryPath();
+    if (widget.changes['client'] != null &&
+        widget.changes['client'].avatar != null) {
+      var hasLocalImage = File(widget.changes['client'].avatar).existsSync();
+      if (hasLocalImage) {
+        bytes = File(widget.changes['client'].avatar).readAsBytesSync();
+      }
+    }
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     String fabrics = '';
-    // if (order != null && order.fabricIds != null && order.fabricIds.length > 0) {
-    //   fabrics = order.fabrics[0].title;
-    //   for (int i = 1; i < order.fabrics.length; i++)
-    //     fabrics += ', ' + order.fabrics[i].title;
-    // }
+    if (widget.order != null &&
+        widget.order.fabrics != null &&
+        widget.order.fabrics.length > 0) {
+      fabrics = widget.order.fabrics[0].title;
+      for (int i = 1; i < widget.order.fabrics.length; i++)
+        fabrics += ', ' + widget.order.fabrics[i].title;
+    }
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       onTap: () {
@@ -214,12 +294,12 @@ class _Body extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(30.0, 20.0, 30.0, 0),
             child: Column(
               children: [
-                _ClientCard(order: order),
+                _ClientCard(
+                  order: widget.order,
+                  changes: widget.changes,
+                ),
                 TextField(
-                  controller: TextEditingController(
-                      text: (order != null && order.price != null)
-                          ? order.price.toString()
-                          : ''),
+                  controller: widget.priceController,
                   style: Theme.of(context).textTheme.bodyText1,
                   keyboardType: TextInputType.number,
                   decoration: InputDecoration(
@@ -232,10 +312,7 @@ class _Body extends StatelessWidget {
                   ),
                 ),
                 TextField(
-                  controller: TextEditingController(
-                      text: (order != null && order.expenses != null)
-                          ? order.expenses.toString()
-                          : ''),
+                  controller: widget.expensesController,
                   style: Theme.of(context).textTheme.bodyText1,
                   keyboardType: TextInputType.number,
                   decoration: InputDecoration(
@@ -253,7 +330,7 @@ class _Body extends StatelessWidget {
                   child: Row(
                     children: [
                       Text(
-                        'Материалы : ' + fabrics,
+                        'Материалы : $fabrics',
                         style: Theme.of(context).textTheme.bodyText1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -279,7 +356,7 @@ class _Body extends StatelessWidget {
                   child: Row(
                     children: [
                       Text(
-                        'Дата : ${(order != null) ? order.date : ''}',
+                        'Дата : ${(widget.order != null) ? widget.order.date : ""}',
                         style: Theme.of(context).textTheme.bodyText1,
                       ),
                       Spacer(),
@@ -303,10 +380,11 @@ class _Body extends StatelessWidget {
                         style: Theme.of(context).textTheme.bodyText1,
                       ),
                       Text(
-                        ((order != null &&
-                                order.price != null &&
-                                order.expenses != null)
-                            ? (order.price - order.expenses).toString()
+                        ((widget.order != null &&
+                                widget.order.price != null &&
+                                widget.order.expenses != null)
+                            ? (widget.order.price - widget.order.expenses)
+                                .toString()
                             : ''),
                         style: Theme.of(context).textTheme.bodyText1,
                       ),
@@ -329,7 +407,7 @@ class _Body extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: <Widget>[
                           TextField(
-                            controller: controller,
+                            controller: widget.commentController,
                             decoration: InputDecoration(
                               hintText: "Ваш комментарий",
                               hintStyle: Theme.of(context).textTheme.headline3,
@@ -347,8 +425,12 @@ class _Body extends StatelessWidget {
                 ),
                 SizedBox(height: 20.0),
                 RectButton(
-                  text: (order != null && order.done) ? 'Заново' : 'Завершить',
-                  onPressed: () {},
+                  text: (widget.order != null && widget.order.done)
+                      ? 'Заново'
+                      : 'Завершить',
+                  onPressed: () {
+                    //TODO: add complete order function
+                  },
                 ),
                 SizedBox(height: 20.0),
               ],
@@ -360,35 +442,51 @@ class _Body extends StatelessWidget {
   }
 }
 
-class _ClientCard extends StatelessWidget {
+class _ClientCard extends StatefulWidget {
   const _ClientCard({
     Key key,
     @required this.order,
+    @required this.changes,
   }) : super(key: key);
 
   final Order order;
+  final Map<String, dynamic> changes;
+
+  @override
+  __ClientCardState createState() => __ClientCardState();
+}
+
+class __ClientCardState extends State<_ClientCard> {
+  Map<String, dynamic> map = {
+    'client': Client(),
+  };
 
   @override
   Widget build(BuildContext context) {
+    map['onTap'] = () {
+      widget.changes['client'] = Client.from(map['client']);
+      widget.changes['onTap']();
+    };
     return Container(
       child: Material(
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(8),
           onTap: () {
-            if (order != null)
+            if (widget.order.client.id != null)
               Navigator.push(
                 context,
                 NextPageRoute(
                   nextPage: ClientInfoScreen(
                     title: 'Клиент',
-                    client: order.client,
+                    client: widget.order.client,
+                    bloc: null,
                   ),
                 ),
               );
           },
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 0.0, vertical: 5.0),
+            padding: const EdgeInsets.symmetric(horizontal: 5.0, vertical: 5.0),
             width: double.infinity,
             child: Row(
               children: [
@@ -401,10 +499,10 @@ class _ClientCard extends StatelessWidget {
                   backgroundColor: Theme.of(context).focusColor,
                 ),
                 SizedBox(width: 14.0),
-                (order != null)
+                (widget.order.client.id != null)
                     ? Text(
-                        '${(order.client.name != '') ? (order.client.name + ' ') : ''}' +
-                            '${order.client.surname ?? ''}'
+                        '${(widget.order.client?.name != '') ? (widget.order.client?.name ?? '' + ' ') : ''}' +
+                            '${widget.order.client?.surname ?? ''}'
                                 .replaceAll(RegExp(r"\s+"), ""),
                         style: Theme.of(context).textTheme.bodyText1,
                         overflow: TextOverflow.ellipsis,
@@ -422,10 +520,10 @@ class _ClientCard extends StatelessWidget {
                     Icons.edit,
                     color: Theme.of(context).focusColor,
                   ),
-                  onPressed: () {
+                  onPressed: () async {
                     Navigator.push(
                       context,
-                      NextPageRoute(nextPage: ClientsScreen(forChoice: true)),
+                      NextPageRoute(nextPage: ClientsScreen(changes: map)),
                     );
                   },
                 ),
@@ -437,4 +535,3 @@ class _ClientCard extends StatelessWidget {
     );
   }
 }
-*/

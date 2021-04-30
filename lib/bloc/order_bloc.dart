@@ -23,6 +23,26 @@ class OrderBloc{
       _orderStreamController.sink.add(OrderState._orderData(orderList));
     });
   }
+  void deleteOrder(int id) {
+    _orderStreamController.sink.add(OrderState._orderLoading());
+    _repository.deleteOrder(id).then((value) {
+      loadAllOrders();
+    });
+  }
+
+  void updateOrder(Order order){
+    _orderStreamController.sink.add(OrderState._orderLoading());
+    _repository.updateOrder(order).then((value) {
+      loadAllOrders();
+    });
+  }
+
+  void addOrder(Order order){
+    _orderStreamController.sink.add(OrderState._orderLoading());
+    _repository.addOrder(order).then((value) {
+      loadAllOrders();
+    });
+  }
 }
 
 class OrderState{

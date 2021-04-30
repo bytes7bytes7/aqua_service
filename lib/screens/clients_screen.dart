@@ -16,10 +16,10 @@ import '../screens/global/next_page_route.dart';
 class ClientsScreen extends StatefulWidget {
   ClientsScreen({
     Key key,
-    this.forChoice = false,
+    this.changes,
   }) : super(key: key);
 
-  final bool forChoice;
+  final Map<String, dynamic> changes;
   final _repo = Repository.clientRepository;
 
   @override
@@ -46,27 +46,29 @@ class _ClientsScreenState extends State<ClientsScreen> {
     return Scaffold(
       appBar: AppHeader(
         title: 'Клиенты',
-        action: [
-          IconButton(
-            icon: Icon(Icons.add,
-                color: Theme.of(context).focusColor, size: 32.0),
-            onPressed: () {
-              Navigator.push(
-                context,
-                NextPageRoute(
-                  nextPage: ClientInfoScreen(
-                    title: 'Новый Клиент',
-                    client: Client(),
-                    bloc: _clientBloc,
-                  ),
+        action: (widget.changes != null)
+            ? []
+            : [
+                IconButton(
+                  icon: Icon(Icons.add,
+                      color: Theme.of(context).focusColor, size: 32.0),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      NextPageRoute(
+                        nextPage: ClientInfoScreen(
+                          title: 'Новый Клиент',
+                          client: Client(),
+                          bloc: _clientBloc,
+                        ),
+                      ),
+                    );
+                  },
                 ),
-              );
-            },
-          ),
-        ],
+              ],
       ),
       body: _Body(
-        forChoice: widget.forChoice,
+        changes: widget.changes,
         bloc: _clientBloc,
       ),
     );
@@ -76,11 +78,11 @@ class _ClientsScreenState extends State<ClientsScreen> {
 class _Body extends StatefulWidget {
   const _Body({
     Key key,
-    @required this.forChoice,
+    @required this.changes,
     @required this.bloc,
   }) : super(key: key);
 
-  final bool forChoice;
+  final Map<String, dynamic> changes;
   final ClientBloc bloc;
 
   @override
@@ -98,7 +100,6 @@ class __BodyState extends State<_Body> {
       child: Column(
         children: [
           SearchBar(),
-          //SortBar(),
           Expanded(
             child: StreamBuilder(
               stream: widget.bloc.client,
@@ -143,7 +144,7 @@ class __BodyState extends State<_Body> {
       itemBuilder: (context, i) {
         return _ClientCard(
           client: clients[i],
-          forChoice: widget.forChoice,
+          changes: widget.changes,
           bloc: widget.bloc,
         );
       },
@@ -176,12 +177,12 @@ class _ClientCard extends StatefulWidget {
   const _ClientCard({
     Key key,
     @required this.client,
-    @required this.forChoice,
+    @required this.changes,
     @required this.bloc,
   }) : super(key: key);
 
   final Client client;
-  final bool forChoice;
+  final Map<String, dynamic> changes;
   final ClientBloc bloc;
 
   @override
@@ -218,8 +219,13 @@ class __ClientCardState extends State<_ClientCard> {
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(8),
-          onTap: (!widget.forChoice)
+          onTap: (widget.changes != null)
               ? () {
+                  widget.changes['client'] = Client.from(widget.client);
+                  widget.changes['onTap']();
+                  Navigator.pop(context);
+                }
+              : () {
                   Navigator.push(
                     context,
                     NextPageRoute(
@@ -230,8 +236,7 @@ class __ClientCardState extends State<_ClientCard> {
                       ),
                     ),
                   );
-                }
-              : () {},
+                },
           child: Container(
             padding:
                 const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),

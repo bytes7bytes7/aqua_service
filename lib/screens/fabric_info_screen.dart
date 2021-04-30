@@ -184,7 +184,8 @@ class _FabricInfoScreenState extends State<FabricInfoScreen> {
                       Icon(
                         (validateTitle &&
                                 validateRetailPrice &&
-                                validatePurchasePrice)
+                                validatePurchasePrice &&
+                                validateFormat)
                             ? Icons.done_all_outlined
                             : Icons.warning_amber_outlined,
                         color: Theme.of(context).cardColor,
@@ -199,9 +200,6 @@ class _FabricInfoScreenState extends State<FabricInfoScreen> {
       ),
       body: _Body(
         fabric: widget.fabric,
-        validateTitle: validateTitle,
-        validateRetailPrice: validateRetailPrice,
-        validatePurchasePrice: validatePurchasePrice,
         titleController: titleController,
         retailPriceController: retailPriceController,
         purchasePriceController: purchasePriceController,
@@ -211,19 +209,15 @@ class _FabricInfoScreenState extends State<FabricInfoScreen> {
 }
 
 class _Body extends StatefulWidget {
-  _Body({
+  const _Body({
     Key key,
     @required this.fabric,
-    @required this.validateTitle,
-    @required this.validateRetailPrice,
-    @required this.validatePurchasePrice,
     @required this.titleController,
     @required this.retailPriceController,
     @required this.purchasePriceController,
   }) : super(key: key);
 
   final Fabric fabric;
-  final bool validateTitle, validateRetailPrice, validatePurchasePrice;
   final TextEditingController titleController;
   final TextEditingController retailPriceController;
   final TextEditingController purchasePriceController;
@@ -252,8 +246,6 @@ class __BodyState extends State<_Body> {
                   decoration: InputDecoration(
                     labelText: 'Название *',
                     labelStyle: Theme.of(context).textTheme.headline3,
-                    errorText: widget.validateTitle ? 'Заполните поле' : null,
-                    errorStyle: Theme.of(context).textTheme.headline4,
                     enabledBorder: UnderlineInputBorder(
                       borderSide:
                           BorderSide(color: Theme.of(context).disabledColor),
@@ -267,9 +259,6 @@ class __BodyState extends State<_Body> {
                   decoration: InputDecoration(
                     labelText: 'Розничная цена *',
                     labelStyle: Theme.of(context).textTheme.headline3,
-                    errorText:
-                        widget.validateRetailPrice ? 'Заполните поле' : null,
-                    errorStyle: Theme.of(context).textTheme.headline4,
                     enabledBorder: UnderlineInputBorder(
                       borderSide:
                           BorderSide(color: Theme.of(context).disabledColor),
@@ -283,9 +272,6 @@ class __BodyState extends State<_Body> {
                   decoration: InputDecoration(
                     labelText: 'Закупочная цена *',
                     labelStyle: Theme.of(context).textTheme.headline3,
-                    errorText:
-                        widget.validatePurchasePrice ? 'Заполните поле' : null,
-                    errorStyle: Theme.of(context).textTheme.headline4,
                     enabledBorder: UnderlineInputBorder(
                       borderSide:
                           BorderSide(color: Theme.of(context).disabledColor),

@@ -1,9 +1,12 @@
+import 'client.dart';
+import 'fabric.dart';
+
 class Order {
   Order({
     this.id,
-    this.clientId,
+    Client client,
     this.price,
-    this.fabricIds,
+    this.fabrics,
     this.expenses,
     this.date,
     this.done,
@@ -11,9 +14,9 @@ class Order {
   });
 
   int id;
-  int clientId;
+  Client client;
   double price;
-  List<int> fabricIds;
+  List<Fabric> fabrics;
   double expenses;
   String date; // YY-MM-DD
   bool done;
@@ -21,9 +24,9 @@ class Order {
 
   Order.fromMap(Map<String, dynamic> map) {
     id = map['id'];
-    clientId = map['clientId'];
+    client = map['client'];
     price = map['price'];
-    fabricIds = map['fabricIds'];
+    fabrics = map['fabrics'];
     expenses = map['expenses'];
     date = map['date'];
     done = map['done'];
@@ -33,9 +36,9 @@ class Order {
   Map<String, dynamic> toMap() {
     return {
       'id':id,
-      'clientId':clientId,
+      'client':client,
       'price':price,
-      'fabricIds':fabricIds,
+      'fabrics':fabrics,
       'expenses':expenses,
       'date':date,
       'done':done,

@@ -11,6 +11,24 @@ class Fabric {
   double retailPrice;
   double purchasePrice;
 
+  @override
+  int get hashCode => super.hashCode;
+
+  @override
+  bool operator ==(other) {
+    return (other.id == id &&
+        other.title == title &&
+        other.retailPrice == retailPrice &&
+        other.purchasePrice == purchasePrice);
+  }
+
+  Fabric.from(Fabric other) {
+    id = other.id;
+    title = other.title;
+    retailPrice = other.retailPrice;
+    purchasePrice = other.purchasePrice;
+  }
+
   Fabric.fromMap(Map<String, dynamic> map) {
     id = map['id'];
     title = map['title'];
@@ -20,7 +38,7 @@ class Fabric {
 
   Map<String, dynamic> toMap() {
     return {
-      'id':id,
+      'id': id,
       'title': title,
       'retailPrice': retailPrice,
       'purchasePrice': purchasePrice,

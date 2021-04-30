@@ -27,11 +27,6 @@ class HomeScreen extends StatelessWidget {
                 flex: 3,
                 child: SvgPicture.asset('assets/svg/logo.svg'),
               ),
-              TextButton(
-                  onPressed: () {
-                    DatabaseHelper.db.dropBD();
-                  },
-                  child: Text("DROP")),
               SizedBox(height: 20.0),
               Text(
                 'Aqua Service',
@@ -114,15 +109,16 @@ class _CardButton extends StatelessWidget {
               case '/clients':
                 page = ClientsScreen();
                 break;
-              // case '/work':
-              //   page = OrdersScreen();
-              //   break;
+              case '/work':
+                page = OrdersScreen();
+                break;
               case '/material':
                 page = FabricsScreen();
                 break;
-              // case '/calendar':
-              //   page = CalendarScreen();
-              //   break;
+              case '/calendar':
+                // page = CalendarScreen();
+                page = A();
+                break;
               // case '/reports':
               //   page = ReportsScreen();
               //   break;
