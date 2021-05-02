@@ -29,7 +29,7 @@ class Order {
     fabrics = map['fabrics'];
     expenses = map['expenses'];
     date = map['date'];
-    done = map['done'];
+    done = map['done']==1 ? true : false;
     comment = map['comment'];
   }
 

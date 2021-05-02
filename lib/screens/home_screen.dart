@@ -27,6 +27,12 @@ class HomeScreen extends StatelessWidget {
                 flex: 3,
                 child: SvgPicture.asset('assets/svg/logo.svg'),
               ),
+              TextButton(
+                onPressed: () {
+                  DatabaseHelper.db.dropBD();
+                },
+                child: Text('Drop'),
+              ),
               SizedBox(height: 20.0),
               Text(
                 'Aqua Service',

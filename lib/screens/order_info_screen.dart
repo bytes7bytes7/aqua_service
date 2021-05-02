@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:collection/collection.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -88,14 +89,15 @@ class _OrderInfoScreenState extends State<OrderInfoScreen> {
         validatePrice = false,
         validateExpenses = false,
         validateFormat = false;
-    print(changes['client'].id);
     return Scaffold(
       appBar: AppHeader(
         title: _title,
         leading: IconButton(
           icon: Icon(
             Icons.arrow_back_ios_outlined,
-            color: Theme.of(context).focusColor,
+            color: Theme
+                .of(context)
+                .focusColor,
           ),
           onPressed: () {
             if (priceController.text != widget.order.price.toString() ||
@@ -128,7 +130,9 @@ class _OrderInfoScreenState extends State<OrderInfoScreen> {
             IconButton(
                 icon: Icon(
                   Icons.delete,
-                  color: Theme.of(context).focusColor,
+                  color: Theme
+                      .of(context)
+                      .focusColor,
                 ),
                 onPressed: () {
                   showNoYesDialog(
@@ -149,7 +153,9 @@ class _OrderInfoScreenState extends State<OrderInfoScreen> {
           IconButton(
             icon: Icon(
               Icons.done,
-              color: Theme.of(context).focusColor,
+              color: Theme
+                  .of(context)
+                  .focusColor,
             ),
             onPressed: () {
               FocusScope.of(context).requestFocus(FocusNode());
@@ -189,28 +195,33 @@ class _OrderInfoScreenState extends State<OrderInfoScreen> {
                     children: [
                       Text(
                         (validatePrice &&
-                                validateExpenses &&
-                                validateFormat &&
-                                validateClient &&
-                                validateDate)
+                            validateExpenses &&
+                            validateFormat &&
+                            validateClient &&
+                            validateDate)
                             ? 'Сохранено!'
                             : (!validateFormat)
-                                ? 'Неверный формат числа'
-                                : (!validateClient || !validateDate)
-                                    ? 'Выберите Клиента и Дату'
-                                    : 'Заполните поля со звездочкой',
-                        style: Theme.of(context).textTheme.bodyText1,
+                            ? 'Неверный формат числа'
+                            : (!validateClient || !validateDate)
+                            ? 'Выберите Клиента и Дату'
+                            : 'Заполните поля со звездочкой',
+                        style: Theme
+                            .of(context)
+                            .textTheme
+                            .bodyText1,
                       ),
                       Spacer(),
                       Icon(
                         (validatePrice &&
-                                validateExpenses &&
-                                validateFormat &&
-                                validateClient &&
-                                validateDate)
+                            validateExpenses &&
+                            validateFormat &&
+                            validateClient &&
+                            validateDate)
                             ? Icons.done_all_outlined
                             : Icons.warning_amber_outlined,
-                        color: Theme.of(context).cardColor,
+                        color: Theme
+                            .of(context)
+                            .cardColor,
                       ),
                     ],
                   ),
@@ -300,27 +311,43 @@ class __BodyState extends State<_Body> {
                 ),
                 TextField(
                   controller: widget.priceController,
-                  style: Theme.of(context).textTheme.bodyText1,
+                  style: Theme
+                      .of(context)
+                      .textTheme
+                      .bodyText1,
                   keyboardType: TextInputType.number,
                   decoration: InputDecoration(
                     labelText: 'Стоимость',
-                    labelStyle: Theme.of(context).textTheme.headline3,
+                    labelStyle: Theme
+                        .of(context)
+                        .textTheme
+                        .headline3,
                     enabledBorder: UnderlineInputBorder(
                       borderSide:
-                          BorderSide(color: Theme.of(context).disabledColor),
+                      BorderSide(color: Theme
+                          .of(context)
+                          .disabledColor),
                     ),
                   ),
                 ),
                 TextField(
                   controller: widget.expensesController,
-                  style: Theme.of(context).textTheme.bodyText1,
+                  style: Theme
+                      .of(context)
+                      .textTheme
+                      .bodyText1,
                   keyboardType: TextInputType.number,
                   decoration: InputDecoration(
                     labelText: 'Затраты',
-                    labelStyle: Theme.of(context).textTheme.headline3,
+                    labelStyle: Theme
+                        .of(context)
+                        .textTheme
+                        .headline3,
                     enabledBorder: UnderlineInputBorder(
                       borderSide:
-                          BorderSide(color: Theme.of(context).disabledColor),
+                      BorderSide(color: Theme
+                          .of(context)
+                          .disabledColor),
                     ),
                   ),
                 ),
@@ -331,14 +358,19 @@ class __BodyState extends State<_Body> {
                     children: [
                       Text(
                         'Материалы : $fabrics',
-                        style: Theme.of(context).textTheme.bodyText1,
+                        style: Theme
+                            .of(context)
+                            .textTheme
+                            .bodyText1,
                         overflow: TextOverflow.ellipsis,
                       ),
                       Spacer(),
                       IconButton(
                         icon: Icon(
                           Icons.content_paste_outlined,
-                          color: Theme.of(context).focusColor,
+                          color: Theme
+                              .of(context)
+                              .focusColor,
                         ),
                         onPressed: () {
                           Navigator.push(
@@ -356,14 +388,21 @@ class __BodyState extends State<_Body> {
                   child: Row(
                     children: [
                       Text(
-                        'Дата : ${(widget.order != null) ? widget.order.date : ""}',
-                        style: Theme.of(context).textTheme.bodyText1,
+                        'Дата : ${(widget.order != null)
+                            ? widget.order.date
+                            : ""}',
+                        style: Theme
+                            .of(context)
+                            .textTheme
+                            .bodyText1,
                       ),
                       Spacer(),
                       IconButton(
                         icon: Icon(
                           Icons.calendar_today_outlined,
-                          color: Theme.of(context).focusColor,
+                          color: Theme
+                              .of(context)
+                              .focusColor,
                         ),
                         onPressed: () {},
                       ),
@@ -377,16 +416,22 @@ class __BodyState extends State<_Body> {
                     children: [
                       Text(
                         'Прибыль : ',
-                        style: Theme.of(context).textTheme.bodyText1,
+                        style: Theme
+                            .of(context)
+                            .textTheme
+                            .bodyText1,
                       ),
                       Text(
                         ((widget.order != null &&
-                                widget.order.price != null &&
-                                widget.order.expenses != null)
+                            widget.order.price != null &&
+                            widget.order.expenses != null)
                             ? (widget.order.price - widget.order.expenses)
-                                .toString()
+                            .toString()
                             : ''),
-                        style: Theme.of(context).textTheme.bodyText1,
+                        style: Theme
+                            .of(context)
+                            .textTheme
+                            .bodyText1,
                       ),
                     ],
                   ),
@@ -394,11 +439,16 @@ class __BodyState extends State<_Body> {
                 SizedBox(height: 20.0),
                 Container(
                   width: double.infinity,
-                  height: 0.4 * MediaQuery.of(context).size.height,
+                  height: 0.4 * MediaQuery
+                      .of(context)
+                      .size
+                      .height,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(5.0),
                     border: Border.all(
-                        width: 2.0, color: Theme.of(context).focusColor),
+                        width: 2.0, color: Theme
+                        .of(context)
+                        .focusColor),
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(10.0),
@@ -410,10 +460,16 @@ class __BodyState extends State<_Body> {
                             controller: widget.commentController,
                             decoration: InputDecoration(
                               hintText: "Ваш комментарий",
-                              hintStyle: Theme.of(context).textTheme.headline3,
+                              hintStyle: Theme
+                                  .of(context)
+                                  .textTheme
+                                  .headline3,
                               border: InputBorder.none,
                             ),
-                            style: Theme.of(context).textTheme.bodyText1,
+                            style: Theme
+                                .of(context)
+                                .textTheme
+                                .bodyText1,
                             scrollPadding: EdgeInsets.all(20.0),
                             keyboardType: TextInputType.multiline,
                             maxLines: 30,
@@ -457,16 +513,34 @@ class _ClientCard extends StatefulWidget {
 }
 
 class __ClientCardState extends State<_ClientCard> {
-  Map<String, dynamic> map = {
-    'client': Client(),
-  };
+  final ValueNotifier<Client> _clientNotifier = ValueNotifier(Client());
+  String appDocPath;
+  Iterable<int> bytes;
+
+  _updateClient(Client client) {
+    _clientNotifier.value = (client.id != null) ? client : Client();
+    widget.order.client = Client.from(_clientNotifier.value);
+    widget.changes['client'] =widget.order.client;
+    bytes = File(widget.order.client.avatar).readAsBytesSync();
+  }
+
+  Future<void> getApplicationDirectoryPath() async {
+    Directory appDocDir = await getApplicationDocumentsDirectory();
+    appDocPath = appDocDir.path;
+  }
+
+  void init() {
+    if (appDocPath == null) getApplicationDirectoryPath();
+    if (widget.order.client.avatar != null) {
+      var hasLocalImage = File(widget.order.client.avatar).existsSync();
+      if (hasLocalImage)
+        bytes = File(widget.order.client.avatar).readAsBytesSync();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    map['onTap'] = () {
-      widget.changes['client'] = Client.from(map['client']);
-      widget.changes['onTap']();
-    };
+    init();
     return Container(
       child: Material(
         color: Colors.transparent,
@@ -490,40 +564,83 @@ class __ClientCardState extends State<_ClientCard> {
             width: double.infinity,
             child: Row(
               children: [
-                CircleAvatar(
-                  radius: 24.0,
-                  child: Icon(
-                    Icons.person,
-                    color: Theme.of(context).cardColor,
-                  ),
-                  backgroundColor: Theme.of(context).focusColor,
+                ValueListenableBuilder(
+                  valueListenable: _clientNotifier,
+                  builder:
+                      (BuildContext context, Client client, Widget child) {
+                    if (widget.order.client.avatar != null) {
+                      return ConstrainedBox(
+                        constraints: BoxConstraints.tightFor(width: 50, height: 50),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            image: DecorationImage(
+                              image: MemoryImage(bytes),
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        ),
+                      );
+                    } else {
+                      return CircleAvatar(
+                        radius: 24.0,
+                        child: Icon(
+                          Icons.person,
+                          color: Theme
+                              .of(context)
+                              .cardColor,
+                        ),
+                        backgroundColor: Theme
+                            .of(context)
+                            .focusColor,
+                      );
+                    }
+                  },
                 ),
                 SizedBox(width: 14.0),
-                (widget.order.client.id != null)
-                    ? Text(
-                        '${(widget.order.client?.name != '') ? (widget.order.client?.name ?? '' + ' ') : ''}' +
-                            '${widget.order.client?.surname ?? ''}'
+                ValueListenableBuilder(
+                  valueListenable: _clientNotifier,
+                  builder: (BuildContext context, Client client, Widget child) {
+                    if (widget.order.client.id != null) {
+                      return Text(
+                        '${(widget.order.client.name != '') ? (widget.order.client.name + ' ') : ''}' +
+                            '${widget.order.client.surname ?? ''}'
                                 .replaceAll(RegExp(r"\s+"), ""),
-                        style: Theme.of(context).textTheme.bodyText1,
+                        style: Theme
+                            .of(context)
+                            .textTheme
+                            .bodyText1,
                         overflow: TextOverflow.ellipsis,
-                      )
-                    : Text(
+                      );
+                    } else {
+                      return Text(
                         'Не выбран',
-                        style: Theme.of(context)
+                        style: Theme
+                            .of(context)
                             .textTheme
                             .bodyText1
-                            .copyWith(color: Theme.of(context).disabledColor),
-                      ),
+                            .copyWith(color: Theme
+                            .of(context)
+                            .disabledColor),
+                      );
+                    }
+                  },
+                ),
                 Spacer(),
                 IconButton(
                   icon: Icon(
                     Icons.edit,
-                    color: Theme.of(context).focusColor,
+                    color: Theme
+                        .of(context)
+                        .focusColor,
                   ),
                   onPressed: () async {
                     Navigator.push(
                       context,
-                      NextPageRoute(nextPage: ClientsScreen(changes: map)),
+                      NextPageRoute(
+                          nextPage: ClientsScreen(
+                            updateClient: _updateClient,
+                          )),
                     );
                   },
                 ),

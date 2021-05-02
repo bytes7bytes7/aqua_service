@@ -16,10 +16,10 @@ import '../screens/global/next_page_route.dart';
 class ClientsScreen extends StatefulWidget {
   ClientsScreen({
     Key key,
-    this.changes,
+    this.updateClient,
   }) : super(key: key);
 
-  final Map<String, dynamic> changes;
+  final Function updateClient;
   final _repo = Repository.clientRepository;
 
   @override
@@ -46,7 +46,7 @@ class _ClientsScreenState extends State<ClientsScreen> {
     return Scaffold(
       appBar: AppHeader(
         title: 'Клиенты',
-        action: (widget.changes != null)
+        action: (widget.updateClient != null)
             ? []
             : [
                 IconButton(
@@ -68,8 +68,8 @@ class _ClientsScreenState extends State<ClientsScreen> {
               ],
       ),
       body: _Body(
-        changes: widget.changes,
         bloc: _clientBloc,
+        updateClient: widget.updateClient,
       ),
     );
   }
@@ -78,11 +78,11 @@ class _ClientsScreenState extends State<ClientsScreen> {
 class _Body extends StatefulWidget {
   const _Body({
     Key key,
-    @required this.changes,
+    this.updateClient,
     @required this.bloc,
   }) : super(key: key);
 
-  final Map<String, dynamic> changes;
+  final Function updateClient;
   final ClientBloc bloc;
 
   @override
@@ -144,8 +144,8 @@ class __BodyState extends State<_Body> {
       itemBuilder: (context, i) {
         return _ClientCard(
           client: clients[i],
-          changes: widget.changes,
           bloc: widget.bloc,
+          updateClient: widget.updateClient,
         );
       },
     );
@@ -177,12 +177,12 @@ class _ClientCard extends StatefulWidget {
   const _ClientCard({
     Key key,
     @required this.client,
-    @required this.changes,
+    this.updateClient,
     @required this.bloc,
   }) : super(key: key);
 
   final Client client;
-  final Map<String, dynamic> changes;
+  final Function updateClient;
   final ClientBloc bloc;
 
   @override
@@ -219,10 +219,10 @@ class __ClientCardState extends State<_ClientCard> {
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(8),
-          onTap: (widget.changes != null)
-              ? () {
-                  widget.changes['client'] = Client.from(widget.client);
-                  widget.changes['onTap']();
+          onTap: (widget.updateClient != null)
+              ? () async {
+                  Client tmp = await widget.bloc.getClient(widget.client.id);
+                  widget.updateClient(tmp);
                   Navigator.pop(context);
                 }
               : () {

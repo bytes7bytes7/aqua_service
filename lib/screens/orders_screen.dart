@@ -43,9 +43,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
           IconButton(
             icon: Icon(
               Icons.add,
-              color: Theme
-                  .of(context)
-                  .focusColor,
+              color: Theme.of(context).focusColor,
               size: 32.0,
             ),
             onPressed: () {
@@ -111,10 +109,7 @@ class __BodyState extends State<_Body> {
                     return Center(
                       child: Text(
                         'Пусто',
-                        style: Theme
-                            .of(context)
-                            .textTheme
-                            .headline2,
+                        style: Theme.of(context).textTheme.headline2,
                       ),
                     );
                 } else {
@@ -153,10 +148,7 @@ class __BodyState extends State<_Body> {
         children: [
           Text(
             'Ошибка',
-            style: Theme
-                .of(context)
-                .textTheme
-                .headline1,
+            style: Theme.of(context).textTheme.headline1,
           ),
           SizedBox(height: 20),
           RectButton(
@@ -233,43 +225,46 @@ class __OrderCardState extends State<_OrderCard> {
           },
           child: Container(
             padding:
-            const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
+                const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
             width: double.infinity,
             child: Row(
               children: [
-                CircleAvatar(
-                  radius: 24.0,
-                  child: Icon(
-                    Icons.person,
-                    color: Theme
-                        .of(context)
-                        .cardColor,
-                  ),
-                  backgroundColor: Theme
-                      .of(context)
-                      .focusColor,
-                ),
+                (widget.order.client.avatar != null)
+                    ? ConstrainedBox(
+                        constraints:
+                            BoxConstraints.tightFor(width: 50, height: 50),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            image: DecorationImage(
+                              image: MemoryImage(bytes),
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        ),
+                      )
+                    : CircleAvatar(
+                        radius: 24.0,
+                        child: Icon(
+                          Icons.person,
+                          color: Theme.of(context).cardColor,
+                        ),
+                        backgroundColor: Theme.of(context).focusColor,
+                      ),
                 SizedBox(width: 14.0),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '${(widget.order.client.name != '') ? (widget.order.client
-                          .name + ' ') : ''}' +
+                      '${(widget.order.client.name != '') ? (widget.order.client.name + ' ') : ''}' +
                           '${widget.order.client.surname ?? ''}'
                               .replaceAll(RegExp(r"\s+"), ""),
-                      style: Theme
-                          .of(context)
-                          .textTheme
-                          .bodyText1,
+                      style: Theme.of(context).textTheme.bodyText1,
                       overflow: TextOverflow.ellipsis,
                     ),
                     Text(
                       widget.order.date,
-                      style: Theme
-                          .of(context)
-                          .textTheme
-                          .subtitle2,
+                      style: Theme.of(context).textTheme.subtitle2,
                       overflow: TextOverflow.ellipsis,
                     ),
                   ],
@@ -277,10 +272,7 @@ class __OrderCardState extends State<_OrderCard> {
                 Spacer(),
                 Text(
                   profit,
-                  style: Theme
-                      .of(context)
-                      .textTheme
-                      .bodyText1,
+                  style: Theme.of(context).textTheme.bodyText1,
                 ),
               ],
             ),

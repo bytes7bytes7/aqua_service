@@ -42,7 +42,8 @@ class DatabaseHelper {
 
   static const String _client = 'client'; // contains only client id (Exp: 1)
   static const String _price = 'price';
-  static const String _fabrics = 'fabrics'; // contains only string of fabric ids (Exp: 1;2;3)
+  static const String _fabrics =
+      'fabrics'; // contains only string of fabric ids (Exp: 1;2;3)
   static const String _expenses = 'expenses';
   static const String _date = 'date';
   static const String _done = 'done';
@@ -148,10 +149,15 @@ class DatabaseHelper {
 
   Future<Client> getClient(int id) async {
     final db = await database;
-    List<Map<String, dynamic>> res =
+    List<Map<String, dynamic>> data =
         await db.query("$_clientTableName", where: "$_id = ?", whereArgs: [id]);
-    res.first[_images] = List<String>.from(res.first[_images]?.split(';'));
-    return res.isNotEmpty ? Client.fromMap(res.first) : null;
+    if (data.isNotEmpty) {
+      Map<String, dynamic> m = Map<String, dynamic>.from(data.first);
+      List<String> a = [];
+      m[_images] = (m[_images].length > 0) ? m[_images].split(';') : a;
+      return Client.fromMap(m);
+    } else
+      return Client();
   }
 
   Future<List<Client>> getAllClients() async {
@@ -203,14 +209,14 @@ class DatabaseHelper {
 
   Future<Fabric> getFabric(int id) async {
     final db = await database;
-    List<Map<String, dynamic>>  res =
+    List<Map<String, dynamic>> res =
         await db.query("$_fabricTableName", where: "$_id = ?", whereArgs: [id]);
     return res.isNotEmpty ? Fabric.fromMap(res.first) : null;
   }
 
   Future<List<Fabric>> getAllFabrics() async {
     final db = await database;
-    List<Map<String, dynamic>>  res = await db.query("$_fabricTableName");
+    List<Map<String, dynamic>> res = await db.query("$_fabricTableName");
     return res.isNotEmpty ? res.map((c) => Fabric.fromMap(c)).toList() : [];
   }
 
@@ -223,7 +229,6 @@ class DatabaseHelper {
     final db = await database;
     db.rawDelete("DELETE * FROM $_fabricTableName");
   }
-
 
   // Order methods
   Future addOrder(Order order) async {
@@ -255,10 +260,11 @@ class DatabaseHelper {
 
   Future<Order> getOrder(int id) async {
     final db = await database;
-    List<Map<String, dynamic>>  res =
+    List<Map<String, dynamic>> res =
         await db.query("$_orderTableName", where: "$_id = ?", whereArgs: [id]);
     res.first[_client] = getClient(res.first[_client]);
-    res.first[_fabrics] = List<int>.from(res.first[_fabrics]?.split(';')).map((id) => getFabric(id));
+    res.first[_fabrics] = List<int>.from(res.first[_fabrics]?.split(';'))
+        .map((id) => getFabric(id));
     return res.isNotEmpty ? Order.fromMap(res.first) : null;
   }
 
@@ -269,8 +275,12 @@ class DatabaseHelper {
     if (data.isNotEmpty) {
       for (int i = 0; i < data.length; i++) {
         Map<String, dynamic> m = Map<String, dynamic>.from(data[i]);
-        m[_client] = getClient(m[_client]);
-        m[_fabrics] = (m[_fabrics].length > 0) ? m[_fabrics].split(';').map((id) => getFabric(id)) : List<Fabric>.from(null);
+        m[_client] = await getClient(m[_client]);
+        m[_fabrics] = (m[_fabrics].length > 0)
+            ? m[_fabrics].split(';').map((id) async {
+                return await getFabric(id);
+              })
+            : List<Fabric>.from([]);
         result.add(m);
       }
       return result.map((e) => Order.fromMap(e)).toList();

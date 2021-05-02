@@ -18,8 +18,8 @@ class ClientBloc {
   void loadAllClients() {
     _clientStreamController.sink.add(ClientState._clientLoading());
     _repository.getAllClients().then((clientList) {
-      clientList.sort((a, b) =>
-          a.city.toLowerCase().compareTo(b.city.toLowerCase()));
+      clientList
+          .sort((a, b) => a.city.toLowerCase().compareTo(b.city.toLowerCase()));
       if (!_clientStreamController.isClosed)
         _clientStreamController.sink.add(ClientState._clientData(clientList));
     });
@@ -32,18 +32,22 @@ class ClientBloc {
     });
   }
 
-  void updateClient(Client client){
+  void updateClient(Client client) {
     _clientStreamController.sink.add(ClientState._clientLoading());
     _repository.updateClient(client).then((value) {
       loadAllClients();
     });
   }
 
-  void addClient(Client client){
+  void addClient(Client client) {
     _clientStreamController.sink.add(ClientState._clientLoading());
     _repository.addClient(client).then((value) {
       loadAllClients();
     });
+  }
+
+  Future<Client> getClient(int id) async {
+    return await _repository.getClient(id);
   }
 }
 

@@ -6,6 +6,10 @@ class ClientRepository {
     return await DatabaseHelper.db.getAllClients();
   }
 
+  Future<Client> getClient(int id)async{
+    return await DatabaseHelper.db.getClient(id);
+  }
+
   Future deleteClient(int id) async{
     await DatabaseHelper.db.deleteClient(id);
   }
