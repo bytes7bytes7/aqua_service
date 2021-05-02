@@ -13,10 +13,10 @@ import 'widgets/search_bar.dart';
 class FabricsScreen extends StatefulWidget {
   FabricsScreen({
     Key key,
-    this.forChoice = false,
+    this.updateFabrics,
   }) : super(key: key);
 
-  final bool forChoice;
+  final Function updateFabrics;
   final _repo = Repository.fabricRepository;
 
   @override
@@ -43,7 +43,7 @@ class _FabricsScreenState extends State<FabricsScreen> {
     return Scaffold(
       appBar: AppHeader(
         title: 'Материалы',
-        action: (widget.forChoice)
+        action: (widget.updateFabrics != null)
             ? []
             : [
                 IconButton(
@@ -65,7 +65,7 @@ class _FabricsScreenState extends State<FabricsScreen> {
               ],
       ),
       body: _Body(
-        forChoice: widget.forChoice,
+        updateFabrics: widget.updateFabrics,
         bloc: _fabricBloc,
       ),
     );
@@ -75,11 +75,11 @@ class _FabricsScreenState extends State<FabricsScreen> {
 class _Body extends StatefulWidget {
   const _Body({
     Key key,
-    @required this.forChoice,
+    @required this.updateFabrics,
     @required this.bloc,
   }) : super(key: key);
 
-  final bool forChoice;
+  final Function updateFabrics;
   final FabricBloc bloc;
 
   @override
@@ -141,7 +141,7 @@ class __BodyState extends State<_Body> {
       itemBuilder: (context, i) {
         return _FabricCard(
           fabric: fabrics[i],
-          forChoice: widget.forChoice,
+          updateFabrics: widget.updateFabrics,
           bloc: widget.bloc,
         );
       },
@@ -174,12 +174,12 @@ class _FabricCard extends StatelessWidget {
   const _FabricCard({
     Key key,
     @required this.fabric,
-    @required this.forChoice,
+    @required this.updateFabrics,
     @required this.bloc,
   }) : super(key: key);
 
   final Fabric fabric;
-  final bool forChoice;
+  final Function updateFabrics;
   final FabricBloc bloc;
 
   @override
@@ -190,8 +190,12 @@ class _FabricCard extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(8),
-          onTap: (!forChoice)
+          onTap: (updateFabrics != null)
               ? () {
+                  updateFabrics(fabric);
+                  Navigator.pop(context);
+                }
+              : () {
                   Navigator.push(
                     context,
                     NextPageRoute(
@@ -202,8 +206,7 @@ class _FabricCard extends StatelessWidget {
                       ),
                     ),
                   );
-                }
-              : () {},
+                },
           child: Container(
             padding:
                 const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),

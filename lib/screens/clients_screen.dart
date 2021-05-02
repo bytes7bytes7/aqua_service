@@ -220,9 +220,8 @@ class __ClientCardState extends State<_ClientCard> {
         child: InkWell(
           borderRadius: BorderRadius.circular(8),
           onTap: (widget.updateClient != null)
-              ? () async {
-                  Client tmp = await widget.bloc.getClient(widget.client.id);
-                  widget.updateClient(tmp);
+              ? () {
+                  widget.updateClient(widget.client);
                   Navigator.pop(context);
                 }
               : () {

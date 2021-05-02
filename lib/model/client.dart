@@ -16,6 +16,11 @@ class Client {
     List<String> images,
   }) : images = images ?? [];
 
+  // To store String in db, first I need to convert String to Uint8List by this way:
+  // List<int> list = 'xxx'.codeUnits;
+  // Uint8List bytes = Uint8List.fromList(list);
+  // String string = String.fromCharCodes(bytes);
+
   int id;
   String avatar;
   String name;

@@ -45,10 +45,6 @@ class ClientBloc {
       loadAllClients();
     });
   }
-
-  Future<Client> getClient(int id) async {
-    return await _repository.getClient(id);
-  }
 }
 
 class ClientState {

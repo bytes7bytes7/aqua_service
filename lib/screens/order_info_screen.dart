@@ -72,9 +72,6 @@ class _OrderInfoScreenState extends State<OrderInfoScreen> {
         widget.order.fabrics.map((e) => Fabric.from(e)).toList();
     changes['date'] = widget.order.date;
     changes['done'] = widget.order.done;
-    changes['onTap'] = () {
-      setState(() {});
-    };
 
     priceController.text = widget.order.price.toString();
     expensesController.text = widget.order.expenses.toString();
@@ -95,9 +92,7 @@ class _OrderInfoScreenState extends State<OrderInfoScreen> {
         leading: IconButton(
           icon: Icon(
             Icons.arrow_back_ios_outlined,
-            color: Theme
-                .of(context)
-                .focusColor,
+            color: Theme.of(context).focusColor,
           ),
           onPressed: () {
             if (priceController.text != widget.order.price.toString() ||
@@ -130,9 +125,7 @@ class _OrderInfoScreenState extends State<OrderInfoScreen> {
             IconButton(
                 icon: Icon(
                   Icons.delete,
-                  color: Theme
-                      .of(context)
-                      .focusColor,
+                  color: Theme.of(context).focusColor,
                 ),
                 onPressed: () {
                   showNoYesDialog(
@@ -153,9 +146,7 @@ class _OrderInfoScreenState extends State<OrderInfoScreen> {
           IconButton(
             icon: Icon(
               Icons.done,
-              color: Theme
-                  .of(context)
-                  .focusColor,
+              color: Theme.of(context).focusColor,
             ),
             onPressed: () {
               FocusScope.of(context).requestFocus(FocusNode());
@@ -178,7 +169,7 @@ class _OrderInfoScreenState extends State<OrderInfoScreen> {
                   ..expenses = double.parse(expensesController.text)
                   ..date = changes['date']
                   ..done = changes['done']
-                  ..comment = changes['comment'];
+                  ..comment = commentController.text;
                 (widget.order.id == null)
                     ? widget.bloc.addOrder(widget.order)
                     : widget.bloc.updateOrder(widget.order);
@@ -195,33 +186,28 @@ class _OrderInfoScreenState extends State<OrderInfoScreen> {
                     children: [
                       Text(
                         (validatePrice &&
-                            validateExpenses &&
-                            validateFormat &&
-                            validateClient &&
-                            validateDate)
+                                validateExpenses &&
+                                validateFormat &&
+                                validateClient &&
+                                validateDate)
                             ? 'Сохранено!'
                             : (!validateFormat)
-                            ? 'Неверный формат числа'
-                            : (!validateClient || !validateDate)
-                            ? 'Выберите Клиента и Дату'
-                            : 'Заполните поля со звездочкой',
-                        style: Theme
-                            .of(context)
-                            .textTheme
-                            .bodyText1,
+                                ? 'Неверный формат числа'
+                                : (!validateClient || !validateDate)
+                                    ? 'Выберите Клиента и Дату'
+                                    : 'Заполните поля со звездочкой',
+                        style: Theme.of(context).textTheme.bodyText1,
                       ),
                       Spacer(),
                       Icon(
                         (validatePrice &&
-                            validateExpenses &&
-                            validateFormat &&
-                            validateClient &&
-                            validateDate)
+                                validateExpenses &&
+                                validateFormat &&
+                                validateClient &&
+                                validateDate)
                             ? Icons.done_all_outlined
                             : Icons.warning_amber_outlined,
-                        color: Theme
-                            .of(context)
-                            .cardColor,
+                        color: Theme.of(context).cardColor,
                       ),
                     ],
                   ),
@@ -263,8 +249,28 @@ class _Body extends StatefulWidget {
 }
 
 class __BodyState extends State<_Body> {
+  final ValueNotifier<List<Fabric>> _fabricsNotifier =
+      ValueNotifier(List<Fabric>.from([]));
   String appDocPath;
   Iterable<int> bytes;
+
+  _updateFabrics(Fabric fabric) {
+    var tmp = Fabric.from(fabric);
+    _fabricsNotifier.value.add(Fabric.from(tmp));
+    //widget.order.fabrics.add(Fabric.from(tmp));
+    widget.changes['fabrics'].add(tmp);
+  }
+
+  _removeFabric(int id) {
+    for (int i = 0; i < widget.changes['fabrics'].length; i++) {
+      if (widget.changes['fabrics'][i].id == id) {
+        // widget.order.fabrics.removeAt(i);
+        _fabricsNotifier.value.removeAt(i);
+        widget.changes['fabrics'].removeAt(i);
+        break;
+      }
+    }
+  }
 
   Future<void> getApplicationDirectoryPath() async {
     Directory appDocDir = await getApplicationDocumentsDirectory();
@@ -286,14 +292,6 @@ class __BodyState extends State<_Body> {
 
   @override
   Widget build(BuildContext context) {
-    String fabrics = '';
-    if (widget.order != null &&
-        widget.order.fabrics != null &&
-        widget.order.fabrics.length > 0) {
-      fabrics = widget.order.fabrics[0].title;
-      for (int i = 1; i < widget.order.fabrics.length; i++)
-        fabrics += ', ' + widget.order.fabrics[i].title;
-    }
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       onTap: () {
@@ -311,43 +309,27 @@ class __BodyState extends State<_Body> {
                 ),
                 TextField(
                   controller: widget.priceController,
-                  style: Theme
-                      .of(context)
-                      .textTheme
-                      .bodyText1,
+                  style: Theme.of(context).textTheme.bodyText1,
                   keyboardType: TextInputType.number,
                   decoration: InputDecoration(
                     labelText: 'Стоимость',
-                    labelStyle: Theme
-                        .of(context)
-                        .textTheme
-                        .headline3,
+                    labelStyle: Theme.of(context).textTheme.headline3,
                     enabledBorder: UnderlineInputBorder(
                       borderSide:
-                      BorderSide(color: Theme
-                          .of(context)
-                          .disabledColor),
+                          BorderSide(color: Theme.of(context).disabledColor),
                     ),
                   ),
                 ),
                 TextField(
                   controller: widget.expensesController,
-                  style: Theme
-                      .of(context)
-                      .textTheme
-                      .bodyText1,
+                  style: Theme.of(context).textTheme.bodyText1,
                   keyboardType: TextInputType.number,
                   decoration: InputDecoration(
                     labelText: 'Затраты',
-                    labelStyle: Theme
-                        .of(context)
-                        .textTheme
-                        .headline3,
+                    labelStyle: Theme.of(context).textTheme.headline3,
                     enabledBorder: UnderlineInputBorder(
                       borderSide:
-                      BorderSide(color: Theme
-                          .of(context)
-                          .disabledColor),
+                          BorderSide(color: Theme.of(context).disabledColor),
                     ),
                   ),
                 ),
@@ -357,52 +339,35 @@ class __BodyState extends State<_Body> {
                   child: Row(
                     children: [
                       Text(
-                        'Материалы : $fabrics',
-                        style: Theme
-                            .of(context)
-                            .textTheme
-                            .bodyText1,
-                        overflow: TextOverflow.ellipsis,
+                        'Прибыль : ',
+                        style: Theme.of(context).textTheme.bodyText1,
                       ),
-                      Spacer(),
-                      IconButton(
-                        icon: Icon(
-                          Icons.content_paste_outlined,
-                          color: Theme
-                              .of(context)
-                              .focusColor,
-                        ),
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            NextPageRoute(
-                                nextPage: FabricsScreen(forChoice: true)),
-                          );
-                        },
+                      Text(
+                        ((widget.order != null &&
+                                widget.order.price != null &&
+                                widget.order.expenses != null)
+                            ? (widget.order.price - widget.order.expenses)
+                                .toString()
+                            : ''),
+                        style: Theme.of(context).textTheme.bodyText1,
                       ),
                     ],
                   ),
                 ),
+                SizedBox(height: 20.0),
                 Container(
                   width: double.infinity,
                   child: Row(
                     children: [
                       Text(
-                        'Дата : ${(widget.order != null)
-                            ? widget.order.date
-                            : ""}',
-                        style: Theme
-                            .of(context)
-                            .textTheme
-                            .bodyText1,
+                        'Дата : ${(widget.order != null) ? widget.order.date : ""}',
+                        style: Theme.of(context).textTheme.bodyText1,
                       ),
                       Spacer(),
                       IconButton(
                         icon: Icon(
                           Icons.calendar_today_outlined,
-                          color: Theme
-                              .of(context)
-                              .focusColor,
+                          color: Theme.of(context).focusColor,
                         ),
                         onPressed: () {},
                       ),
@@ -415,40 +380,58 @@ class __BodyState extends State<_Body> {
                   child: Row(
                     children: [
                       Text(
-                        'Прибыль : ',
-                        style: Theme
-                            .of(context)
-                            .textTheme
-                            .bodyText1,
+                        'Материалы:',
+                        style: Theme.of(context).textTheme.bodyText1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      Text(
-                        ((widget.order != null &&
-                            widget.order.price != null &&
-                            widget.order.expenses != null)
-                            ? (widget.order.price - widget.order.expenses)
-                            .toString()
-                            : ''),
-                        style: Theme
-                            .of(context)
-                            .textTheme
-                            .bodyText1,
+                      Spacer(),
+                      IconButton(
+                        icon: Icon(
+                          Icons.add,
+                          color: Theme.of(context).focusColor,
+                        ),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            NextPageRoute(
+                              nextPage: FabricsScreen(
+                                updateFabrics: _updateFabrics,
+                              ),
+                            ),
+                          );
+                        },
                       ),
                     ],
                   ),
                 ),
+                ValueListenableBuilder(
+                  valueListenable: _fabricsNotifier,
+                  builder: (BuildContext context, List<Fabric> fabrics,
+                      Widget child) {
+                    if (fabrics.length > 0) {
+                      return Column(
+                        children: List.generate(
+                          fabrics.length,
+                          (index) {
+                            return _FabricCard(
+                              fabric: fabrics[index],
+                              removeFabric: _removeFabric,
+                            );
+                          },
+                        ),
+                      );
+                    } else
+                      return SizedBox.shrink();
+                  },
+                ),
                 SizedBox(height: 20.0),
                 Container(
                   width: double.infinity,
-                  height: 0.4 * MediaQuery
-                      .of(context)
-                      .size
-                      .height,
+                  height: 0.4 * MediaQuery.of(context).size.height,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(5.0),
                     border: Border.all(
-                        width: 2.0, color: Theme
-                        .of(context)
-                        .focusColor),
+                        width: 2.0, color: Theme.of(context).focusColor),
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(10.0),
@@ -460,16 +443,10 @@ class __BodyState extends State<_Body> {
                             controller: widget.commentController,
                             decoration: InputDecoration(
                               hintText: "Ваш комментарий",
-                              hintStyle: Theme
-                                  .of(context)
-                                  .textTheme
-                                  .headline3,
+                              hintStyle: Theme.of(context).textTheme.headline3,
                               border: InputBorder.none,
                             ),
-                            style: Theme
-                                .of(context)
-                                .textTheme
-                                .bodyText1,
+                            style: Theme.of(context).textTheme.bodyText1,
                             scrollPadding: EdgeInsets.all(20.0),
                             keyboardType: TextInputType.multiline,
                             maxLines: 30,
@@ -519,8 +496,8 @@ class __ClientCardState extends State<_ClientCard> {
 
   _updateClient(Client client) {
     _clientNotifier.value = (client.id != null) ? client : Client();
-    widget.order.client = Client.from(_clientNotifier.value);
-    widget.changes['client'] =widget.order.client;
+    // widget.order.client = Client.from(_clientNotifier.value);
+    widget.changes['client'] = widget.order.client;
     bytes = File(widget.order.client.avatar).readAsBytesSync();
   }
 
@@ -566,11 +543,11 @@ class __ClientCardState extends State<_ClientCard> {
               children: [
                 ValueListenableBuilder(
                   valueListenable: _clientNotifier,
-                  builder:
-                      (BuildContext context, Client client, Widget child) {
+                  builder: (BuildContext context, Client client, Widget child) {
                     if (widget.order.client.avatar != null) {
                       return ConstrainedBox(
-                        constraints: BoxConstraints.tightFor(width: 50, height: 50),
+                        constraints:
+                            BoxConstraints.tightFor(width: 50, height: 50),
                         child: Container(
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
@@ -586,13 +563,9 @@ class __ClientCardState extends State<_ClientCard> {
                         radius: 24.0,
                         child: Icon(
                           Icons.person,
-                          color: Theme
-                              .of(context)
-                              .cardColor,
+                          color: Theme.of(context).cardColor,
                         ),
-                        backgroundColor: Theme
-                            .of(context)
-                            .focusColor,
+                        backgroundColor: Theme.of(context).focusColor,
                       );
                     }
                   },
@@ -606,22 +579,16 @@ class __ClientCardState extends State<_ClientCard> {
                         '${(widget.order.client.name != '') ? (widget.order.client.name + ' ') : ''}' +
                             '${widget.order.client.surname ?? ''}'
                                 .replaceAll(RegExp(r"\s+"), ""),
-                        style: Theme
-                            .of(context)
-                            .textTheme
-                            .bodyText1,
+                        style: Theme.of(context).textTheme.bodyText1,
                         overflow: TextOverflow.ellipsis,
                       );
                     } else {
                       return Text(
                         'Не выбран',
-                        style: Theme
-                            .of(context)
+                        style: Theme.of(context)
                             .textTheme
                             .bodyText1
-                            .copyWith(color: Theme
-                            .of(context)
-                            .disabledColor),
+                            .copyWith(color: Theme.of(context).disabledColor),
                       );
                     }
                   },
@@ -630,17 +597,15 @@ class __ClientCardState extends State<_ClientCard> {
                 IconButton(
                   icon: Icon(
                     Icons.edit,
-                    color: Theme
-                        .of(context)
-                        .focusColor,
+                    color: Theme.of(context).focusColor,
                   ),
                   onPressed: () async {
                     Navigator.push(
                       context,
                       NextPageRoute(
                           nextPage: ClientsScreen(
-                            updateClient: _updateClient,
-                          )),
+                        updateClient: _updateClient,
+                      )),
                     );
                   },
                 ),
@@ -648,6 +613,41 @@ class __ClientCardState extends State<_ClientCard> {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _FabricCard extends StatelessWidget {
+  const _FabricCard({
+    Key key,
+    @required this.fabric,
+    @required this.removeFabric,
+  }) : super(key: key);
+
+  final Fabric fabric;
+  final Function removeFabric;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 30,
+      child: Row(
+        children: [
+          Text(
+            '- ${fabric.title}',
+            style: Theme.of(context).textTheme.bodyText1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          Spacer(),
+          IconButton(
+            icon: Icon(
+              Icons.remove,
+              color: Theme.of(context).focusColor,
+            ),
+            onPressed: removeFabric(fabric.id),
+          ),
+        ],
       ),
     );
   }
