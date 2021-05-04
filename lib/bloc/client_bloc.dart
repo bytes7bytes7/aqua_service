@@ -7,9 +7,13 @@ class ClientBloc {
   ClientBloc(this._repository);
 
   final ClientRepository _repository;
-  final _clientStreamController = StreamController<ClientState>();
+  static StreamController _clientStreamController;
 
-  Stream<ClientState> get client => _clientStreamController.stream;
+  Stream<ClientState> get client {
+    if (_clientStreamController == null || _clientStreamController.isClosed)
+      _clientStreamController = StreamController<ClientState>();
+    return _clientStreamController.stream;
+  }
 
   void dispose() {
     _clientStreamController.close();

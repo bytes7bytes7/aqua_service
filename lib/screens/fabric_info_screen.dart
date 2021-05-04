@@ -1,21 +1,20 @@
 import 'package:flutter/material.dart';
 
 import 'widgets/show_no_yes_dialog.dart';
-import '../bloc/fabric_bloc.dart';
-import '../screens/widgets/app_header.dart';
+import 'widgets/app_header.dart';
+import 'global/show_info_snack_bar.dart';
 import '../model/fabric.dart';
+import '../bloc/bloc.dart';
 
 class FabricInfoScreen extends StatefulWidget {
   const FabricInfoScreen({
     Key key,
     @required this.title,
     @required this.fabric,
-    @required this.bloc,
   }) : super(key: key);
 
   final String title;
   final Fabric fabric;
-  final FabricBloc bloc;
 
   @override
   _FabricInfoScreenState createState() => _FabricInfoScreenState();
@@ -108,8 +107,8 @@ class _FabricInfoScreenState extends State<FabricInfoScreen> {
                     Navigator.of(context).pop();
                   },
                   yesAnswer: () {
-                    widget.bloc.deleteFabric(widget.fabric.id);
-                    widget.bloc.loadAllFabrics();
+                    Bloc.bloc.fabricBloc.deleteFabric(widget.fabric.id);
+                    Bloc.bloc.fabricBloc.loadAllFabrics();
                     Navigator.of(context).pop();
                     Navigator.of(context).pop();
                   },
@@ -154,46 +153,33 @@ class _FabricInfoScreenState extends State<FabricInfoScreen> {
                   ..retailPrice = double.parse(retailPriceController.text)
                   ..purchasePrice = double.parse(purchasePriceController.text);
                 (widget.fabric.id == null)
-                    ? widget.bloc.addFabric(widget.fabric)
-                    : widget.bloc.updateFabric(widget.fabric);
-                widget.bloc.loadAllFabrics();
+                    ? Bloc.bloc.fabricBloc.addFabric(widget.fabric)
+                    : Bloc.bloc.fabricBloc.updateFabric(widget.fabric);
+                Bloc.bloc.fabricBloc.loadAllFabrics();
                 setState(() {
                   _title = 'Материал';
                 });
               }
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  backgroundColor: Colors.black.withOpacity(0.5),
-                  duration: const Duration(seconds: 1),
-                  content: Row(
-                    children: [
-                      Text(
-                        (validateTitle &&
-                                validateRetailPrice &&
-                                validatePurchasePrice &&
-                                validateFormat)
-                            ? 'Сохранено!'
-                            : (validateTitle &&
-                                    validateRetailPrice &&
-                                    validatePurchasePrice)
-                                ? 'Неверный формат числа'
-                                : 'Заполните поля со звездочкой',
-                        style: Theme.of(context).textTheme.bodyText1,
-                      ),
-                      Spacer(),
-                      Icon(
-                        (validateTitle &&
-                                validateRetailPrice &&
-                                validatePurchasePrice &&
-                                validateFormat)
-                            ? Icons.done_all_outlined
-                            : Icons.warning_amber_outlined,
-                        color: Theme.of(context).cardColor,
-                      ),
-                    ],
-                  ),
-                ),
-              );
+              if (validateTitle &&
+                  validateRetailPrice &&
+                  validatePurchasePrice &&
+                  validateFormat)
+                showInfoSnackBar(
+                    context: context,
+                    info: 'Сохранено!',
+                    icon: Icons.done_all_outlined);
+              else if (validateTitle &&
+                  validateRetailPrice &&
+                  validatePurchasePrice)
+                showInfoSnackBar(
+                    context: context,
+                    info: 'Неверный формат числа',
+                    icon: Icons.warning_amber_outlined);
+              else
+                showInfoSnackBar(
+                    context: context,
+                    info: 'Заполните поля со звездочкой',
+                    icon: Icons.warning_amber_outlined);
             },
           ),
         ],

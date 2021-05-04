@@ -7,9 +7,13 @@ class FabricBloc{
   FabricBloc(this._repository);
 
   final FabricRepository _repository;
-  final StreamController _fabricStreamController = StreamController<FabricState>();
+  static StreamController _fabricStreamController;
 
-  Stream<FabricState> get fabric => _fabricStreamController.stream;
+  Stream<FabricState> get fabric {
+    if (_fabricStreamController == null || _fabricStreamController.isClosed)
+      _fabricStreamController = StreamController<FabricState>();
+    return _fabricStreamController.stream;
+  }
 
   void dispose(){
     _fabricStreamController.close();

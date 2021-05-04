@@ -2,16 +2,15 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 
-import '../repository/repository.dart';
-import '../screens/widgets/app_header.dart';
-import '../bloc/client_bloc.dart';
-import './widgets/rect_button.dart';
-import './widgets/search_bar.dart';
-import './widgets/loading_circle.dart';
-import '../model/client.dart';
-import '../screens/client_info_screen.dart';
+import 'widgets/app_header.dart';
+import 'widgets/rect_button.dart';
+import 'widgets/search_bar.dart';
+import 'widgets/loading_circle.dart';
 import 'global/next_page_route.dart';
-import '../screens/global/next_page_route.dart';
+import '../model/client.dart';
+import 'client_info_screen.dart';
+import '../bloc/bloc.dart';
+import '../bloc/client_bloc.dart';
 
 class ClientsScreen extends StatefulWidget {
   ClientsScreen({
@@ -20,27 +19,12 @@ class ClientsScreen extends StatefulWidget {
   }) : super(key: key);
 
   final Function updateClient;
-  final _repo = Repository.clientRepository;
 
   @override
   _ClientsScreenState createState() => _ClientsScreenState();
 }
 
 class _ClientsScreenState extends State<ClientsScreen> {
-  ClientBloc _clientBloc;
-
-  @override
-  void initState() {
-    _clientBloc = ClientBloc(widget._repo);
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    _clientBloc.dispose();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -59,7 +43,6 @@ class _ClientsScreenState extends State<ClientsScreen> {
                         nextPage: ClientInfoScreen(
                           title: 'Новый Клиент',
                           client: Client(),
-                          bloc: _clientBloc,
                         ),
                       ),
                     );
@@ -68,7 +51,6 @@ class _ClientsScreenState extends State<ClientsScreen> {
               ],
       ),
       body: _Body(
-        bloc: _clientBloc,
         updateClient: widget.updateClient,
       ),
     );
@@ -79,17 +61,22 @@ class _Body extends StatefulWidget {
   const _Body({
     Key key,
     this.updateClient,
-    @required this.bloc,
   }) : super(key: key);
 
   final Function updateClient;
-  final ClientBloc bloc;
 
   @override
   __BodyState createState() => __BodyState();
 }
 
 class __BodyState extends State<_Body> {
+
+  @override
+  void dispose() {
+    Bloc.bloc.clientBloc.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -102,11 +89,11 @@ class __BodyState extends State<_Body> {
           SearchBar(),
           Expanded(
             child: StreamBuilder(
-              stream: widget.bloc.client,
+              stream: Bloc.bloc.clientBloc.client,
               initialData: ClientInitState(),
               builder: (context, snapshot) {
                 if (snapshot.data is ClientInitState) {
-                  widget.bloc.loadAllClients();
+                  Bloc.bloc.clientBloc.loadAllClients();
                   return SizedBox.shrink();
                 } else if (snapshot.data is ClientLoadingState) {
                   return _buildLoading();
@@ -144,7 +131,6 @@ class __BodyState extends State<_Body> {
       itemBuilder: (context, i) {
         return _ClientCard(
           client: clients[i],
-          bloc: widget.bloc,
           updateClient: widget.updateClient,
         );
       },
@@ -164,7 +150,7 @@ class __BodyState extends State<_Body> {
           RectButton(
             text: 'Обновить',
             onPressed: () {
-              widget.bloc.loadAllClients();
+              Bloc.bloc.clientBloc.loadAllClients();
             },
           ),
         ],
@@ -178,12 +164,10 @@ class _ClientCard extends StatefulWidget {
     Key key,
     @required this.client,
     this.updateClient,
-    @required this.bloc,
   }) : super(key: key);
 
   final Client client;
   final Function updateClient;
-  final ClientBloc bloc;
 
   @override
   __ClientCardState createState() => __ClientCardState();
@@ -231,7 +215,6 @@ class __ClientCardState extends State<_ClientCard> {
                       nextPage: ClientInfoScreen(
                         title: 'Клиент',
                         client: widget.client,
-                        bloc: widget.bloc,
                       ),
                     ),
                   );

@@ -7,9 +7,13 @@ class ReportBloc {
   ReportBloc(this._repository);
 
   final ReportRepository _repository;
-  final _reportStreamController = StreamController<ReportState>();
+  static StreamController _reportStreamController;
 
-  Stream<ReportState> get report => _reportStreamController.stream;
+  Stream<ReportState> get report {
+    if (_reportStreamController == null || _reportStreamController.isClosed)
+      _reportStreamController = StreamController<ReportState>();
+    return _reportStreamController.stream;
+  }
 
   void dispose() {
     _reportStreamController.close();

@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:aqua_service/bloc/bloc.dart';
+import 'package:aqua_service/screens/global/show_info_snack_bar.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -7,28 +9,25 @@ import 'package:path_provider/path_provider.dart';
 
 import '../model/client.dart';
 import '../model/fabric.dart';
+import '../model/order.dart';
 import 'client_info_screen.dart';
-import 'global/validate_price.dart';
-import '../bloc/order_bloc.dart';
 import 'clients_screen.dart';
 import 'fabrics_screen.dart';
-import '../screens/widgets/rect_button.dart';
-import '../screens/widgets/app_header.dart';
-import '../model/order.dart';
-import 'global/next_page_route.dart';
+import 'widgets/rect_button.dart';
+import 'widgets/app_header.dart';
 import 'widgets/show_no_yes_dialog.dart';
+import 'global/validate_price.dart';
+import 'global/next_page_route.dart';
 
 class OrderInfoScreen extends StatefulWidget {
   const OrderInfoScreen({
     Key key,
     @required this.title,
     @required this.order,
-    @required this.bloc,
   }) : super(key: key);
 
   final String title;
   final Order order;
-  final OrderBloc bloc;
 
   @override
   _OrderInfoScreenState createState() => _OrderInfoScreenState();
@@ -136,8 +135,8 @@ class _OrderInfoScreenState extends State<OrderInfoScreen> {
                       Navigator.of(context).pop();
                     },
                     yesAnswer: () {
-                      widget.bloc.deleteOrder(widget.order.id);
-                      widget.bloc.loadAllOrders();
+                      Bloc.bloc.orderBloc.deleteOrder(widget.order.id);
+                      Bloc.bloc.orderBloc.loadAllOrders();
                       Navigator.of(context).pop();
                       Navigator.of(context).pop();
                     },
@@ -171,48 +170,37 @@ class _OrderInfoScreenState extends State<OrderInfoScreen> {
                   ..done = changes['done']
                   ..comment = commentController.text;
                 (widget.order.id == null)
-                    ? widget.bloc.addOrder(widget.order)
-                    : widget.bloc.updateOrder(widget.order);
-                widget.bloc.loadAllOrders();
+                    ? Bloc.bloc.orderBloc.addOrder(widget.order)
+                    : Bloc.bloc.orderBloc.updateOrder(widget.order);
+                Bloc.bloc.orderBloc.loadAllOrders();
                 setState(() {
                   _title = 'Заказ';
                 });
               }
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  backgroundColor: Colors.black.withOpacity(0.5),
-                  duration: const Duration(seconds: 1),
-                  content: Row(
-                    children: [
-                      Text(
-                        (validatePrice &&
-                                validateExpenses &&
-                                validateFormat &&
-                                validateClient &&
-                                validateDate)
-                            ? 'Сохранено!'
-                            : (!validateFormat)
-                                ? 'Неверный формат числа'
-                                : (!validateClient || !validateDate)
-                                    ? 'Выберите Клиента и Дату'
-                                    : 'Заполните поля со звездочкой',
-                        style: Theme.of(context).textTheme.bodyText1,
-                      ),
-                      Spacer(),
-                      Icon(
-                        (validatePrice &&
-                                validateExpenses &&
-                                validateFormat &&
-                                validateClient &&
-                                validateDate)
-                            ? Icons.done_all_outlined
-                            : Icons.warning_amber_outlined,
-                        color: Theme.of(context).cardColor,
-                      ),
-                    ],
-                  ),
-                ),
-              );
+              if (validatePrice &&
+                  validateExpenses &&
+                  validateFormat &&
+                  validateClient &&
+                  validateDate)
+                showInfoSnackBar(
+                    context: context,
+                    info: 'Сохранено!',
+                    icon: Icons.done_all_outlined);
+              else if (!validateFormat)
+                showInfoSnackBar(
+                    context: context,
+                    info: 'Неверный формат числа',
+                    icon: Icons.warning_amber_outlined);
+              else if (!validateClient || !validateDate)
+                showInfoSnackBar(
+                    context: context,
+                    info: 'Выберите Клиента и Дату',
+                    icon: Icons.warning_amber_outlined);
+              else
+                showInfoSnackBar(
+                    context: context,
+                    info: 'Заполните поля со звездочкой',
+                    icon: Icons.warning_amber_outlined);
             },
           ),
         ],
@@ -531,7 +519,6 @@ class __ClientCardState extends State<_ClientCard> {
                   nextPage: ClientInfoScreen(
                     title: 'Клиент',
                     client: widget.order.client,
-                    bloc: null,
                   ),
                 ),
               );

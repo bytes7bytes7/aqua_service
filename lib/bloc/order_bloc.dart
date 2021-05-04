@@ -7,9 +7,13 @@ class OrderBloc{
   OrderBloc(this._repository);
 
   final OrderRepository _repository;
-  final _orderStreamController = StreamController<OrderState>();
+  static StreamController _orderStreamController;
 
-  Stream<OrderState> get order => _orderStreamController.stream;
+  Stream<OrderState> get order {
+    if (_orderStreamController == null || _orderStreamController.isClosed)
+      _orderStreamController = StreamController<OrderState>();
+    return _orderStreamController.stream;
+  }
 
   void dispose(){
     _orderStreamController.close();

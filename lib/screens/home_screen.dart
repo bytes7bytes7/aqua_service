@@ -1,8 +1,8 @@
-import 'package:aqua_service/database/database_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 
-import './global/next_page_route.dart';
+import '../database/database_helper.dart';
+import 'global/next_page_route.dart';
 import 'screens.dart';
 
 class HomeScreen extends StatelessWidget {

@@ -2,38 +2,22 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 
-import '../repository/repository.dart';
-import '../screens/widgets/app_header.dart';
-import '../screens/order_info_screen.dart';
-import '../model/order.dart';
+import 'widgets/app_header.dart';
+import 'widgets/rect_button.dart';
+import 'widgets/search_bar.dart';
+import 'widgets/loading_circle.dart';
+import '../bloc/bloc.dart';
 import '../bloc/order_bloc.dart';
-import './widgets/rect_button.dart';
-import './widgets/search_bar.dart';
-import './widgets/loading_circle.dart';
 import 'global/next_page_route.dart';
+import 'order_info_screen.dart';
+import '../model/order.dart';
 
 class OrdersScreen extends StatefulWidget {
-  final _repo = Repository.orderRepository;
-
   @override
   _OrdersScreenState createState() => _OrdersScreenState();
 }
 
 class _OrdersScreenState extends State<OrdersScreen> {
-  OrderBloc _orderBloc;
-
-  @override
-  void initState() {
-    _orderBloc = OrderBloc(widget._repo);
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    _orderBloc.dispose();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -53,7 +37,6 @@ class _OrdersScreenState extends State<OrdersScreen> {
                   nextPage: OrderInfoScreen(
                     title: 'Новый Заказ',
                     order: Order(),
-                    bloc: _orderBloc,
                   ),
                 ),
               );
@@ -61,26 +44,24 @@ class _OrdersScreenState extends State<OrdersScreen> {
           ),
         ],
       ),
-      body: _Body(
-        bloc: _orderBloc,
-      ),
+      body: _Body(),
     );
   }
 }
 
 class _Body extends StatefulWidget {
-  const _Body({
-    Key key,
-    @required this.bloc,
-  }) : super(key: key);
-
-  final OrderBloc bloc;
-
   @override
   __BodyState createState() => __BodyState();
 }
 
 class __BodyState extends State<_Body> {
+
+  @override
+  void dispose() {
+    Bloc.bloc.orderBloc.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -93,11 +74,11 @@ class __BodyState extends State<_Body> {
           SearchBar(),
           Expanded(
             child: StreamBuilder(
-              stream: widget.bloc.order,
+              stream: Bloc.bloc.orderBloc.order,
               initialData: OrderInitState(),
               builder: (context, snapshot) {
                 if (snapshot.data is OrderInitState) {
-                  widget.bloc.loadAllOrders();
+                  Bloc.bloc.orderBloc.loadAllOrders();
                   return SizedBox.shrink();
                 } else if (snapshot.data is OrderLoadingState) {
                   return _buildLoading();
@@ -135,7 +116,6 @@ class __BodyState extends State<_Body> {
       itemBuilder: (context, i) {
         return _OrderCard(
           order: orders[i],
-          bloc: widget.bloc,
         );
       },
     );
@@ -154,7 +134,7 @@ class __BodyState extends State<_Body> {
           RectButton(
             text: 'Обновить',
             onPressed: () {
-              widget.bloc.loadAllOrders();
+              Bloc.bloc.orderBloc.loadAllOrders();
             },
           ),
         ],
@@ -167,11 +147,9 @@ class _OrderCard extends StatefulWidget {
   const _OrderCard({
     Key key,
     @required this.order,
-    @required this.bloc,
   }) : super(key: key);
 
   final Order order;
-  final OrderBloc bloc;
 
   @override
   __OrderCardState createState() => __OrderCardState();
@@ -218,7 +196,6 @@ class __OrderCardState extends State<_OrderCard> {
                 nextPage: OrderInfoScreen(
                   title: 'Заказ',
                   order: widget.order,
-                  bloc: widget.bloc,
                 ),
               ),
             );

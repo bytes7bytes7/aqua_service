@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 
-import '../bloc/fabric_bloc.dart';
-import '../model/fabric.dart';
-import '../repository/repository.dart';
-import '../screens/widgets/app_header.dart';
-import 'fabric_info_screen.dart';
-import 'global/next_page_route.dart';
+import 'widgets/app_header.dart';
 import 'widgets/loading_circle.dart';
 import 'widgets/rect_button.dart';
 import 'widgets/search_bar.dart';
+import '../model/fabric.dart';
+import 'fabric_info_screen.dart';
+import 'global/next_page_route.dart';
+import '../bloc/bloc.dart';
+import '../bloc/fabric_bloc.dart';
 
 class FabricsScreen extends StatefulWidget {
   FabricsScreen({
@@ -17,27 +17,12 @@ class FabricsScreen extends StatefulWidget {
   }) : super(key: key);
 
   final Function updateFabrics;
-  final _repo = Repository.fabricRepository;
 
   @override
   _FabricsScreenState createState() => _FabricsScreenState();
 }
 
 class _FabricsScreenState extends State<FabricsScreen> {
-  FabricBloc _fabricBloc;
-
-  @override
-  void initState() {
-    _fabricBloc = FabricBloc(widget._repo);
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    _fabricBloc.dispose();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -56,7 +41,6 @@ class _FabricsScreenState extends State<FabricsScreen> {
                         nextPage: FabricInfoScreen(
                           title: 'Новый Материал',
                           fabric: Fabric(),
-                          bloc: _fabricBloc,
                         ),
                       ),
                     );
@@ -66,7 +50,6 @@ class _FabricsScreenState extends State<FabricsScreen> {
       ),
       body: _Body(
         updateFabrics: widget.updateFabrics,
-        bloc: _fabricBloc,
       ),
     );
   }
@@ -76,17 +59,22 @@ class _Body extends StatefulWidget {
   const _Body({
     Key key,
     @required this.updateFabrics,
-    @required this.bloc,
   }) : super(key: key);
 
   final Function updateFabrics;
-  final FabricBloc bloc;
 
   @override
   __BodyState createState() => __BodyState();
 }
 
 class __BodyState extends State<_Body> {
+
+  @override
+  void dispose() {
+    Bloc.bloc.fabricBloc.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -99,11 +87,11 @@ class __BodyState extends State<_Body> {
           SearchBar(),
           Expanded(
             child: StreamBuilder(
-              stream: widget.bloc.fabric,
+              stream: Bloc.bloc.fabricBloc.fabric,
               initialData: FabricInitState(),
               builder: (context, snapshot) {
                 if (snapshot.data is FabricInitState) {
-                  widget.bloc.loadAllFabrics();
+                  Bloc.bloc.fabricBloc.loadAllFabrics();
                   return SizedBox.shrink();
                 } else if (snapshot.data is FabricLoadingState) {
                   return _buildLoading();
@@ -142,7 +130,6 @@ class __BodyState extends State<_Body> {
         return _FabricCard(
           fabric: fabrics[i],
           updateFabrics: widget.updateFabrics,
-          bloc: widget.bloc,
         );
       },
     );
@@ -161,7 +148,7 @@ class __BodyState extends State<_Body> {
           RectButton(
             text: 'Обновить',
             onPressed: () {
-              widget.bloc.loadAllFabrics();
+              Bloc.bloc.fabricBloc.loadAllFabrics();
             },
           ),
         ],
@@ -175,12 +162,10 @@ class _FabricCard extends StatelessWidget {
     Key key,
     @required this.fabric,
     @required this.updateFabrics,
-    @required this.bloc,
   }) : super(key: key);
 
   final Fabric fabric;
   final Function updateFabrics;
-  final FabricBloc bloc;
 
   @override
   Widget build(BuildContext context) {
@@ -202,7 +187,6 @@ class _FabricCard extends StatelessWidget {
                       nextPage: FabricInfoScreen(
                         title: 'Материал',
                         fabric: fabric,
-                        bloc: bloc,
                       ),
                     ),
                   );

@@ -1,12 +1,11 @@
-import 'package:aqua_service/bloc/report_bloc.dart';
-import 'package:aqua_service/model/report.dart';
 import 'package:flutter/material.dart';
 
-import '../repository/report_repository.dart';
-import '../repository/repository.dart';
-import '../screens/widgets/app_header.dart';
+import 'widgets/app_header.dart';
 import 'widgets/loading_circle.dart';
 import 'widgets/rect_button.dart';
+import '../bloc/bloc.dart';
+import '../bloc/report_bloc.dart';
+import '../model/report.dart';
 
 class ReportsScreen extends StatefulWidget {
   @override
@@ -24,24 +23,15 @@ class _ReportsScreenState extends State<ReportsScreen> {
 }
 
 class _Body extends StatefulWidget {
-  final ReportRepository _repo = Repository.reportRepository;
-
   @override
   __BodyState createState() => __BodyState();
 }
 
 class __BodyState extends State<_Body> {
-  ReportBloc _reportBloc;
-
-  @override
-  void initState() {
-    _reportBloc = ReportBloc(widget._repo);
-    super.initState();
-  }
 
   @override
   void dispose() {
-    _reportBloc.dispose();
+    Bloc.bloc.reportBloc.dispose();
     super.dispose();
   }
 
@@ -56,11 +46,11 @@ class __BodyState extends State<_Body> {
         children: [
           Expanded(
             child: StreamBuilder(
-              stream: _reportBloc.report,
+              stream: Bloc.bloc.reportBloc.report,
               initialData: ReportInitState(),
               builder: (context, snapshot) {
                 if (snapshot.data is ReportInitState) {
-                  _reportBloc.loadAllReports();
+                  Bloc.bloc.reportBloc.loadAllReports();
                   return SizedBox.shrink();
                 } else if (snapshot.data is ReportLoadingState) {
                   return _buildLoading();
@@ -108,7 +98,7 @@ class __BodyState extends State<_Body> {
           RectButton(
               text: 'Обновить',
               onPressed: () {
-                _reportBloc.loadAllReports();
+                Bloc.bloc.reportBloc.loadAllReports();
               }),
         ],
       ),
