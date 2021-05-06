@@ -13,10 +13,10 @@ import '../bloc/fabric_bloc.dart';
 class FabricsScreen extends StatefulWidget {
   FabricsScreen({
     Key key,
-    this.updateFabrics,
+    this.addFabric,
   }) : super(key: key);
 
-  final Function updateFabrics;
+  final Function addFabric;
 
   @override
   _FabricsScreenState createState() => _FabricsScreenState();
@@ -28,7 +28,7 @@ class _FabricsScreenState extends State<FabricsScreen> {
     return Scaffold(
       appBar: AppHeader(
         title: 'Материалы',
-        action: (widget.updateFabrics != null)
+        action: (widget.addFabric != null)
             ? []
             : [
                 IconButton(
@@ -49,7 +49,7 @@ class _FabricsScreenState extends State<FabricsScreen> {
               ],
       ),
       body: _Body(
-        updateFabrics: widget.updateFabrics,
+        addFabric: widget.addFabric,
       ),
     );
   }
@@ -58,10 +58,10 @@ class _FabricsScreenState extends State<FabricsScreen> {
 class _Body extends StatefulWidget {
   const _Body({
     Key key,
-    @required this.updateFabrics,
+    @required this.addFabric,
   }) : super(key: key);
 
-  final Function updateFabrics;
+  final Function addFabric;
 
   @override
   __BodyState createState() => __BodyState();
@@ -129,7 +129,7 @@ class __BodyState extends State<_Body> {
       itemBuilder: (context, i) {
         return _FabricCard(
           fabric: fabrics[i],
-          updateFabrics: widget.updateFabrics,
+          addFabric: widget.addFabric,
         );
       },
     );
@@ -161,11 +161,11 @@ class _FabricCard extends StatelessWidget {
   const _FabricCard({
     Key key,
     @required this.fabric,
-    @required this.updateFabrics,
+    @required this.addFabric,
   }) : super(key: key);
 
   final Fabric fabric;
-  final Function updateFabrics;
+  final Function addFabric;
 
   @override
   Widget build(BuildContext context) {
@@ -175,9 +175,9 @@ class _FabricCard extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(8),
-          onTap: (updateFabrics != null)
+          onTap: (addFabric != null)
               ? () {
-                  updateFabrics(fabric);
+                  addFabric(fabric);
                   Navigator.pop(context);
                 }
               : () {

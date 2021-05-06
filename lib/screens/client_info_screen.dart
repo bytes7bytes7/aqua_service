@@ -18,10 +18,12 @@ class ClientInfoScreen extends StatefulWidget {
   ClientInfoScreen({
     @required this.title,
     @required this.client,
+    this.readMode = false,
   });
 
   final String title;
   final Client client;
+  final bool readMode;
 
   @override
   _ClientInfoScreenState createState() => _ClientInfoScreenState();
@@ -127,7 +129,7 @@ class _ClientInfoScreenState extends State<ClientInfoScreen> {
           },
         ),
         action: [
-          if (widget.client.id != null)
+          if (widget.client.id != null && !widget.readMode)
             IconButton(
               icon: Icon(
                 Icons.delete,
@@ -149,50 +151,52 @@ class _ClientInfoScreenState extends State<ClientInfoScreen> {
                 );
               },
             ),
-          IconButton(
-            icon: Icon(
-              Icons.done,
-              color: Theme.of(context).focusColor,
-            ),
-            onPressed: () {
-              FocusScope.of(context).requestFocus(FocusNode());
-              validateName = nameController.text.length > 0;
-              validateCity = cityController.text.length > 0;
-              if (validateName && validateCity) {
-                widget.client
-                  ..avatar = changes['avatarPath']
-                  ..name = nameController.text
-                  ..surname = surnameController.text
-                  ..middleName = middleNameController.text
-                  ..city = cityController.text
-                  ..address = addressController.text
-                  ..phone = phoneController.text
-                  ..volume = volumeController.text
-                  ..images = changes['imagesPath'];
-                if (widget.client.id == null) {
-                  Bloc.bloc.clientBloc.addClient(widget.client);
-                  setState(() {
-                    _title = 'Клиент';
-                  });
-                } else {
-                  Bloc.bloc.clientBloc.updateClient(widget.client);
+          if (!widget.readMode)
+            IconButton(
+              icon: Icon(
+                Icons.done,
+                color: Theme.of(context).focusColor,
+              ),
+              onPressed: () {
+                FocusScope.of(context).requestFocus(FocusNode());
+                validateName = nameController.text.length > 0;
+                validateCity = cityController.text.length > 0;
+                if (validateName && validateCity) {
+                  widget.client
+                    ..avatar = changes['avatarPath']
+                    ..name = nameController.text
+                    ..surname = surnameController.text
+                    ..middleName = middleNameController.text
+                    ..city = cityController.text
+                    ..address = addressController.text
+                    ..phone = phoneController.text
+                    ..volume = volumeController.text
+                    ..images = changes['imagesPath'];
+                  if (widget.client.id == null) {
+                    Bloc.bloc.clientBloc.addClient(widget.client);
+                    setState(() {
+                      _title = 'Клиент';
+                    });
+                  } else {
+                    Bloc.bloc.clientBloc.updateClient(widget.client);
+                  }
                 }
-              }
-              if (validateName && validateCity)
-                showInfoSnackBar(
-                    context: context,
-                    info: 'Сохранено!',
-                    icon: Icons.done_all_outlined);
-              else
-                showInfoSnackBar(
-                    context: context,
-                    info: 'Заполните поля со звездочкой',
-                    icon: Icons.warning_amber_outlined);
-            },
-          ),
+                if (validateName && validateCity)
+                  showInfoSnackBar(
+                      context: context,
+                      info: 'Сохранено!',
+                      icon: Icons.done_all_outlined);
+                else
+                  showInfoSnackBar(
+                      context: context,
+                      info: 'Заполните поля со звездочкой',
+                      icon: Icons.warning_amber_outlined);
+              },
+            ),
         ],
       ),
       body: _Body(
+        readMode: widget.readMode,
         changes: changes,
         client: widget.client,
         nameController: nameController,
@@ -210,6 +214,7 @@ class _ClientInfoScreenState extends State<ClientInfoScreen> {
 class _Body extends StatefulWidget {
   const _Body({
     Key key,
+    @required this.readMode,
     @required this.changes,
     @required this.client,
     @required this.nameController,
@@ -221,6 +226,7 @@ class _Body extends StatefulWidget {
     @required this.volumeController,
   }) : super(key: key);
 
+  final bool readMode;
   final Map<String, dynamic> changes;
   final Client client;
   final TextEditingController nameController;
@@ -275,15 +281,21 @@ class __BodyState extends State<_Body> {
                     child: Material(
                       child: InkWell(
                         onTap: () async {
-                          String path = await _getImage();
-                          if (path != null) {
-                            var hasLocalImage = File(path).existsSync();
-                            if (hasLocalImage) {
-                              bytes = File(path).readAsBytesSync();
-                              widget.changes['avatarPath'] = path;
+                          if (!widget.readMode) {
+                            String path = await _getImage();
+                            if (path != null) {
+                              var hasLocalImage = File(path).existsSync();
+                              if (hasLocalImage) {
+                                bytes = File(path).readAsBytesSync();
+                                widget.changes['avatarPath'] = path;
+                              }
+                              setState(() {});
                             }
-                            setState(() {});
-                          }
+                          } else
+                            showInfoSnackBar(
+                                context: context,
+                                info: 'Режим чтения',
+                                icon: Icons.warning_amber_outlined);
                         },
                         child: (widget.changes['avatarPath'] != null)
                             ? Container(
@@ -309,6 +321,7 @@ class __BodyState extends State<_Body> {
                 TextField(
                   controller: widget.nameController,
                   style: Theme.of(context).textTheme.bodyText1,
+                  enabled: !widget.readMode,
                   decoration: InputDecoration(
                     labelText: 'Имя *',
                     labelStyle: Theme.of(context).textTheme.headline3,
@@ -321,6 +334,7 @@ class __BodyState extends State<_Body> {
                 TextField(
                   controller: widget.surnameController,
                   style: Theme.of(context).textTheme.bodyText1,
+                  enabled: !widget.readMode,
                   decoration: InputDecoration(
                     labelText: 'Фамилия',
                     labelStyle: Theme.of(context).textTheme.headline3,
@@ -333,6 +347,7 @@ class __BodyState extends State<_Body> {
                 TextField(
                   controller: widget.middleNameController,
                   style: Theme.of(context).textTheme.bodyText1,
+                  enabled: !widget.readMode,
                   decoration: InputDecoration(
                     labelText: 'Отчество',
                     labelStyle: Theme.of(context).textTheme.headline3,
@@ -345,6 +360,7 @@ class __BodyState extends State<_Body> {
                 TextField(
                   controller: widget.cityController,
                   style: Theme.of(context).textTheme.bodyText1,
+                  enabled: !widget.readMode,
                   decoration: InputDecoration(
                     labelText: 'Город *',
                     labelStyle: Theme.of(context).textTheme.headline3,
@@ -357,6 +373,7 @@ class __BodyState extends State<_Body> {
                 TextField(
                   controller: widget.addressController,
                   style: Theme.of(context).textTheme.bodyText1,
+                  enabled: !widget.readMode,
                   decoration: InputDecoration(
                     labelText: 'Адрес',
                     labelStyle: Theme.of(context).textTheme.headline3,
@@ -369,6 +386,7 @@ class __BodyState extends State<_Body> {
                 TextField(
                   controller: widget.phoneController,
                   style: Theme.of(context).textTheme.bodyText1,
+                  enabled: !widget.readMode,
                   keyboardType: TextInputType.number,
                   decoration: InputDecoration(
                     labelText: 'Телефон',
@@ -382,6 +400,7 @@ class __BodyState extends State<_Body> {
                 TextField(
                   controller: widget.volumeController,
                   style: Theme.of(context).textTheme.bodyText1,
+                  enabled: !widget.readMode,
                   keyboardType: TextInputType.number,
                   decoration: InputDecoration(
                     labelText: 'Объем аквариума',
@@ -408,7 +427,16 @@ class __BodyState extends State<_Body> {
                           Icons.calendar_today_outlined,
                           color: Theme.of(context).focusColor,
                         ),
-                        onPressed: () {},
+                        onPressed: () {
+                          if (!widget.readMode) {
+                            //TODO: do smth
+                          } else {
+                            showInfoSnackBar(
+                                context: context,
+                                info: 'Режим чтения',
+                                icon: Icons.warning_amber_outlined);
+                          }
+                        },
                       ),
                     ],
                   ),
@@ -428,7 +456,16 @@ class __BodyState extends State<_Body> {
                           Icons.calendar_today_outlined,
                           color: Theme.of(context).focusColor,
                         ),
-                        onPressed: () {},
+                        onPressed: () {
+                          if (!widget.readMode) {
+                            //TODO: do smth
+                          } else {
+                            showInfoSnackBar(
+                                context: context,
+                                info: 'Режим чтения',
+                                icon: Icons.warning_amber_outlined);
+                          }
+                        },
                       ),
                     ],
                   ),
@@ -473,39 +510,40 @@ class __BodyState extends State<_Body> {
                                     fit: BoxFit.cover,
                                   ),
                                 ),
-                                Positioned(
-                                  top: 5,
-                                  right: 5,
-                                  child: CircleAvatar(
-                                    backgroundColor: Theme.of(context)
-                                        .cardColor
-                                        .withOpacity(0.6),
-                                    child: IconButton(
-                                      padding: const EdgeInsets.all(0),
-                                      icon: Icon(
-                                        Icons.delete,
-                                        size: 18,
+                                if (!widget.readMode)
+                                  Positioned(
+                                    top: 5,
+                                    right: 5,
+                                    child: CircleAvatar(
+                                      backgroundColor: Theme.of(context)
+                                          .cardColor
+                                          .withOpacity(0.6),
+                                      child: IconButton(
+                                        padding: const EdgeInsets.all(0),
+                                        icon: Icon(
+                                          Icons.delete,
+                                          size: 18,
+                                        ),
+                                        color: Theme.of(context).focusColor,
+                                        onPressed: () {
+                                          showNoYesDialog(
+                                            context: context,
+                                            title: 'Удаление',
+                                            subtitle: 'Удалить снимок?',
+                                            noAnswer: () {
+                                              Navigator.of(context).pop();
+                                            },
+                                            yesAnswer: () {
+                                              widget.changes['imagesPath']
+                                                  .removeAt(index);
+                                              setState(() {});
+                                              Navigator.of(context).pop();
+                                            },
+                                          );
+                                        },
                                       ),
-                                      color: Theme.of(context).focusColor,
-                                      onPressed: () {
-                                        showNoYesDialog(
-                                          context: context,
-                                          title: 'Удаление',
-                                          subtitle: 'Удалить снимок?',
-                                          noAnswer: () {
-                                            Navigator.of(context).pop();
-                                          },
-                                          yesAnswer: () {
-                                            widget.changes['imagesPath']
-                                                .removeAt(index);
-                                            setState(() {});
-                                            Navigator.of(context).pop();
-                                          },
-                                        );
-                                      },
                                     ),
                                   ),
-                                ),
                               ],
                             ),
                           ),
@@ -610,14 +648,21 @@ class __BodyState extends State<_Body> {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: () async {
-          String p = await _getImage() ?? '';
-          var hasLocalImage = File(p).existsSync();
-          if (hasLocalImage) {
-            widget.changes['imagesPath'].add(p);
-            setState(() {});
-          }
-        },
+        onTap: (!widget.readMode)
+            ? () async {
+                String p = await _getImage() ?? '';
+                var hasLocalImage = File(p).existsSync();
+                if (hasLocalImage) {
+                  widget.changes['imagesPath'].add(p);
+                  setState(() {});
+                }
+              }
+            : () {
+                showInfoSnackBar(
+                    context: context,
+                    info: 'Режим чтения',
+                    icon: Icons.warning_amber_outlined);
+              },
         child: Container(
           height: 200,
           width: double.infinity,

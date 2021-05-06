@@ -70,7 +70,6 @@ class _Body extends StatefulWidget {
 }
 
 class __BodyState extends State<_Body> {
-
   @override
   void dispose() {
     Bloc.bloc.clientBloc.dispose();

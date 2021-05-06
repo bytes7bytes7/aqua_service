@@ -1,18 +1,21 @@
 import 'dart:io';
 
-import 'package:aqua_service/bloc/bloc.dart';
-import 'package:aqua_service/screens/global/show_info_snack_bar.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 
+import '../bloc/bloc.dart';
+import '../model/fabric.dart';
+import '../model/fabric.dart';
+import 'global/show_info_snack_bar.dart';
 import '../model/client.dart';
 import '../model/fabric.dart';
 import '../model/order.dart';
 import 'client_info_screen.dart';
 import 'clients_screen.dart';
 import 'fabrics_screen.dart';
+import 'global/show_info_snack_bar.dart';
 import 'widgets/rect_button.dart';
 import 'widgets/app_header.dart';
 import 'widgets/show_no_yes_dialog.dart';
@@ -67,8 +70,7 @@ class _OrderInfoScreenState extends State<OrderInfoScreen> {
     widget.order.comment = widget.order.comment ?? '';
 
     changes['client'] = Client.from(widget.order.client);
-    changes['fabrics'] =
-        widget.order.fabrics.map((e) => Fabric.from(e)).toList();
+    changes['fabrics'] = List<Fabric>.from(widget.order.fabrics);
     changes['date'] = widget.order.date;
     changes['done'] = widget.order.done;
 
@@ -148,9 +150,10 @@ class _OrderInfoScreenState extends State<OrderInfoScreen> {
               color: Theme.of(context).focusColor,
             ),
             onPressed: () {
+              print('save changes: ${changes['fabrics']}');
               FocusScope.of(context).requestFocus(FocusNode());
               validateFormat = true;
-              validateClient = changes['client'] != null;
+              validateClient = changes['client'].id != null;
               validateDate = changes['date'] != null;
               validatePrice = priceController.text.length > 0;
               validateExpenses = expensesController.text.length > 0;
@@ -164,7 +167,7 @@ class _OrderInfoScreenState extends State<OrderInfoScreen> {
                 widget.order
                   ..client = changes['client']
                   ..price = double.parse(priceController.text)
-                  ..fabrics = changes['fabrics']
+                  ..fabrics = changes['fabrics'].toList()
                   ..expenses = double.parse(expensesController.text)
                   ..date = changes['date']
                   ..done = changes['done']
@@ -237,27 +240,36 @@ class _Body extends StatefulWidget {
 }
 
 class __BodyState extends State<_Body> {
-  final ValueNotifier<List<Fabric>> _fabricsNotifier =
-      ValueNotifier(List<Fabric>.from([]));
+  final ValueNotifier<Fabric> _fabricsNotifier = ValueNotifier(Fabric());
   String appDocPath;
   Iterable<int> bytes;
 
-  _updateFabrics(Fabric fabric) {
-    var tmp = Fabric.from(fabric);
-    _fabricsNotifier.value.add(Fabric.from(tmp));
-    //widget.order.fabrics.add(Fabric.from(tmp));
-    widget.changes['fabrics'].add(tmp);
+  _addFabric(Fabric fabric) {
+    if (fabric.id != null) {
+      _fabricsNotifier.value = Fabric.from(fabric);
+      for (int i = 0; i < widget.changes['fabrics'].length; i++) {
+        if (widget.changes['fabrics'][i].id == fabric.id) {
+          showInfoSnackBar(
+              context: context,
+              info: 'Материал уже выбран',
+              icon: Icons.warning_amber_outlined);
+          return;
+        }
+      }
+      widget.changes['fabrics'].add(Fabric.from(fabric));
+    }
   }
 
   _removeFabric(int id) {
-    for (int i = 0; i < widget.changes['fabrics'].length; i++) {
+    for (int i = 0; i < widget.changes['fabrics'].length; i++)
       if (widget.changes['fabrics'][i].id == id) {
-        // widget.order.fabrics.removeAt(i);
-        _fabricsNotifier.value.removeAt(i);
         widget.changes['fabrics'].removeAt(i);
         break;
       }
-    }
+    if(widget.changes['fabrics'].length!=0){
+      _fabricsNotifier.value = widget.changes['fabrics'][widget.changes['fabrics'].length-1];
+    }else _fabricsNotifier.value = Fabric();
+    print(widget.changes['fabrics']);
   }
 
   Future<void> getApplicationDirectoryPath() async {
@@ -368,7 +380,7 @@ class __BodyState extends State<_Body> {
                   child: Row(
                     children: [
                       Text(
-                        'Материалы:',
+                        'Материалы :',
                         style: Theme.of(context).textTheme.bodyText1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -383,7 +395,7 @@ class __BodyState extends State<_Body> {
                             context,
                             NextPageRoute(
                               nextPage: FabricsScreen(
-                                updateFabrics: _updateFabrics,
+                                addFabric: _addFabric,
                               ),
                             ),
                           );
@@ -392,25 +404,44 @@ class __BodyState extends State<_Body> {
                     ],
                   ),
                 ),
-                ValueListenableBuilder(
-                  valueListenable: _fabricsNotifier,
-                  builder: (BuildContext context, List<Fabric> fabrics,
-                      Widget child) {
-                    if (fabrics.length > 0) {
-                      return Column(
-                        children: List.generate(
-                          fabrics.length,
-                          (index) {
-                            return _FabricCard(
-                              fabric: fabrics[index],
-                              removeFabric: _removeFabric,
-                            );
-                          },
-                        ),
-                      );
-                    } else
-                      return SizedBox.shrink();
-                  },
+                Container(
+                  width: double.infinity,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(3),
+                    border: Border.all(
+                      color: Theme.of(context).focusColor,
+                    ),
+                  ),
+                  child: Container(
+                    height: 200,
+                    child: ValueListenableBuilder(
+                      valueListenable: _fabricsNotifier,
+                      builder:
+                          (BuildContext context, Fabric fabric, Widget child) {
+                        print('notifier length: ${widget.changes['fabrics'].length}');
+                        if(widget.changes['fabrics'].length ==0){
+                          return SizedBox.shrink();
+                        }
+                        else {
+                          return ListView(
+                            controller: ScrollController(),
+                            children: List.generate(
+                              widget.changes['fabrics'].length,
+                              (index) {
+                                return _FabricCard(
+                                  title: widget.changes['fabrics'][index].title,
+                                  id: widget.changes['fabrics'][index].id,
+                                  removeFabric: _removeFabric,
+                                );
+                              },
+                            ),
+                          );
+                        }
+                      },
+                    ),
+                  ),
                 ),
                 SizedBox(height: 20.0),
                 Container(
@@ -483,10 +514,10 @@ class __ClientCardState extends State<_ClientCard> {
   Iterable<int> bytes;
 
   _updateClient(Client client) {
-    _clientNotifier.value = (client.id != null) ? client : Client();
-    // widget.order.client = Client.from(_clientNotifier.value);
-    widget.changes['client'] = widget.order.client;
-    bytes = File(widget.order.client.avatar).readAsBytesSync();
+    _clientNotifier.value = Client.from(client);
+    widget.changes['client'] = _clientNotifier.value;
+    if (widget.changes['client'].avatar != null)
+      bytes = File(widget.changes['client'].avatar).readAsBytesSync();
   }
 
   Future<void> getApplicationDirectoryPath() async {
@@ -496,10 +527,10 @@ class __ClientCardState extends State<_ClientCard> {
 
   void init() {
     if (appDocPath == null) getApplicationDirectoryPath();
-    if (widget.order.client.avatar != null) {
-      var hasLocalImage = File(widget.order.client.avatar).existsSync();
+    if (widget.changes['client'].avatar != null) {
+      var hasLocalImage = File(widget.changes['client'].avatar).existsSync();
       if (hasLocalImage)
-        bytes = File(widget.order.client.avatar).readAsBytesSync();
+        bytes = File(widget.changes['client'].avatar).readAsBytesSync();
     }
   }
 
@@ -512,13 +543,14 @@ class __ClientCardState extends State<_ClientCard> {
         child: InkWell(
           borderRadius: BorderRadius.circular(8),
           onTap: () {
-            if (widget.order.client.id != null)
+            if (widget.changes['client'].id != null)
               Navigator.push(
                 context,
                 NextPageRoute(
                   nextPage: ClientInfoScreen(
                     title: 'Клиент',
-                    client: widget.order.client,
+                    client: widget.changes['client'],
+                    readMode: true,
                   ),
                 ),
               );
@@ -531,7 +563,7 @@ class __ClientCardState extends State<_ClientCard> {
                 ValueListenableBuilder(
                   valueListenable: _clientNotifier,
                   builder: (BuildContext context, Client client, Widget child) {
-                    if (widget.order.client.avatar != null) {
+                    if (widget.changes['client'].avatar != null) {
                       return ConstrainedBox(
                         constraints:
                             BoxConstraints.tightFor(width: 50, height: 50),
@@ -561,10 +593,10 @@ class __ClientCardState extends State<_ClientCard> {
                 ValueListenableBuilder(
                   valueListenable: _clientNotifier,
                   builder: (BuildContext context, Client client, Widget child) {
-                    if (widget.order.client.id != null) {
+                    if (widget.changes['client'].id != null) {
                       return Text(
-                        '${(widget.order.client.name != '') ? (widget.order.client.name + ' ') : ''}' +
-                            '${widget.order.client.surname ?? ''}'
+                        '${(widget.changes['client'].name != '') ? (widget.changes['client'].name + ' ') : ''}' +
+                            '${widget.changes['client'].surname ?? ''}'
                                 .replaceAll(RegExp(r"\s+"), ""),
                         style: Theme.of(context).textTheme.bodyText1,
                         overflow: TextOverflow.ellipsis,
@@ -608,11 +640,13 @@ class __ClientCardState extends State<_ClientCard> {
 class _FabricCard extends StatelessWidget {
   const _FabricCard({
     Key key,
-    @required this.fabric,
+    @required this.title,
+    @required this.id,
     @required this.removeFabric,
   }) : super(key: key);
 
-  final Fabric fabric;
+  final String title;
+  final int id;
   final Function removeFabric;
 
   @override
@@ -622,17 +656,21 @@ class _FabricCard extends StatelessWidget {
       child: Row(
         children: [
           Text(
-            '- ${fabric.title}',
+            title,
             style: Theme.of(context).textTheme.bodyText1,
             overflow: TextOverflow.ellipsis,
           ),
           Spacer(),
           IconButton(
+            padding: const EdgeInsets.all(0),
             icon: Icon(
               Icons.remove,
               color: Theme.of(context).focusColor,
             ),
-            onPressed: removeFabric(fabric.id),
+            onPressed: () {
+              print('id to delete: $id');
+              removeFabric(id);
+            },
           ),
         ],
       ),
