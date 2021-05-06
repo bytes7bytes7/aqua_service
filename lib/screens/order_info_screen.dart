@@ -7,15 +7,12 @@ import 'package:path_provider/path_provider.dart';
 
 import '../bloc/bloc.dart';
 import '../model/fabric.dart';
-import '../model/fabric.dart';
 import 'global/show_info_snack_bar.dart';
 import '../model/client.dart';
-import '../model/fabric.dart';
 import '../model/order.dart';
 import 'client_info_screen.dart';
 import 'clients_screen.dart';
 import 'fabrics_screen.dart';
-import 'global/show_info_snack_bar.dart';
 import 'widgets/rect_button.dart';
 import 'widgets/app_header.dart';
 import 'widgets/show_no_yes_dialog.dart';
@@ -70,7 +67,7 @@ class _OrderInfoScreenState extends State<OrderInfoScreen> {
     widget.order.comment = widget.order.comment ?? '';
 
     changes['client'] = Client.from(widget.order.client);
-    changes['fabrics'] = List<Fabric>.from(widget.order.fabrics);
+    changes['fabrics'] = widget.order.fabrics.map<Fabric>((e) => Fabric.from(e)).toList();
     changes['date'] = widget.order.date;
     changes['done'] = widget.order.done;
 
@@ -150,7 +147,6 @@ class _OrderInfoScreenState extends State<OrderInfoScreen> {
               color: Theme.of(context).focusColor,
             ),
             onPressed: () {
-              print('save changes: ${changes['fabrics']}');
               FocusScope.of(context).requestFocus(FocusNode());
               validateFormat = true;
               validateClient = changes['client'].id != null;
@@ -167,7 +163,7 @@ class _OrderInfoScreenState extends State<OrderInfoScreen> {
                 widget.order
                   ..client = changes['client']
                   ..price = double.parse(priceController.text)
-                  ..fabrics = changes['fabrics'].toList()
+                  ..fabrics = changes['fabrics'].map<Fabric>((e) => Fabric.from(e)).toList()
                   ..expenses = double.parse(expensesController.text)
                   ..date = changes['date']
                   ..done = changes['done']
@@ -266,10 +262,11 @@ class __BodyState extends State<_Body> {
         widget.changes['fabrics'].removeAt(i);
         break;
       }
-    if(widget.changes['fabrics'].length!=0){
-      _fabricsNotifier.value = widget.changes['fabrics'][widget.changes['fabrics'].length-1];
-    }else _fabricsNotifier.value = Fabric();
-    print(widget.changes['fabrics']);
+    if (widget.changes['fabrics'].length != 0) {
+      _fabricsNotifier.value =
+          widget.changes['fabrics'][widget.changes['fabrics'].length - 1];
+    } else
+      _fabricsNotifier.value = Fabric();
   }
 
   Future<void> getApplicationDirectoryPath() async {
@@ -374,7 +371,6 @@ class __BodyState extends State<_Body> {
                     ],
                   ),
                 ),
-                SizedBox(height: 20.0),
                 Container(
                   width: double.infinity,
                   child: Row(
@@ -420,19 +416,21 @@ class __BodyState extends State<_Body> {
                       valueListenable: _fabricsNotifier,
                       builder:
                           (BuildContext context, Fabric fabric, Widget child) {
-                        print('notifier length: ${widget.changes['fabrics'].length}');
-                        if(widget.changes['fabrics'].length ==0){
-                          return SizedBox.shrink();
-                        }
-                        else {
+                        if (widget.changes['fabrics'].length == 0) {
+                          return Center(
+                            child: Text(
+                              'Пусто',
+                              style: Theme.of(context).textTheme.headline3,
+                            ),
+                          );
+                        } else {
                           return ListView(
                             controller: ScrollController(),
                             children: List.generate(
                               widget.changes['fabrics'].length,
                               (index) {
                                 return _FabricCard(
-                                  title: widget.changes['fabrics'][index].title,
-                                  id: widget.changes['fabrics'][index].id,
+                                  fabric: widget.changes['fabrics'][index],
                                   removeFabric: _removeFabric,
                                 );
                               },
@@ -640,36 +638,36 @@ class __ClientCardState extends State<_ClientCard> {
 class _FabricCard extends StatelessWidget {
   const _FabricCard({
     Key key,
-    @required this.title,
-    @required this.id,
+    @required this.fabric,
     @required this.removeFabric,
   }) : super(key: key);
 
-  final String title;
-  final int id;
+  final Fabric fabric;
   final Function removeFabric;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 30,
       child: Row(
         children: [
           Text(
-            title,
+            fabric.title,
             style: Theme.of(context).textTheme.bodyText1,
             overflow: TextOverflow.ellipsis,
           ),
           Spacer(),
+          Text(
+            (fabric.retailPrice - fabric.purchasePrice).toString(),
+            style: Theme.of(context).textTheme.bodyText1,
+          ),
           IconButton(
             padding: const EdgeInsets.all(0),
             icon: Icon(
-              Icons.remove,
+              Icons.close,
               color: Theme.of(context).focusColor,
             ),
             onPressed: () {
-              print('id to delete: $id');
-              removeFabric(id);
+              removeFabric(fabric.id);
             },
           ),
         ],

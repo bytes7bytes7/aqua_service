@@ -31,7 +31,7 @@ class HomeScreen extends StatelessWidget {
                 onPressed: () {
                   DatabaseHelper.db.dropBD();
                 },
-                child: Text('Drop'),
+                child: Text('Drop Orders'),
               ),
               SizedBox(height: 20.0),
               Text(

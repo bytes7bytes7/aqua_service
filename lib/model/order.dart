@@ -26,7 +26,7 @@ class Order {
     id = map['id'];
     client = map['client'];
     price = map['price'];
-    fabrics = map['fabrics'];
+    fabrics = map['fabrics'].map<Fabric>((e) => Fabric.from(e)).toList();
     expenses = map['expenses'];
     date = map['date'];
     done = map['done']==1 ? true : false;

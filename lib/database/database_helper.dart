@@ -106,9 +106,9 @@ class DatabaseHelper {
 
   Future dropBD() async {
     final db = await database;
-    await db.execute('DROP TABLE IF EXISTS $_clientTableName;');
+    //await db.execute('DROP TABLE IF EXISTS $_clientTableName;');
     await db.execute('DROP TABLE IF EXISTS $_orderTableName;');
-    await db.execute('DROP TABLE IF EXISTS $_fabricTableName;');
+    //await db.execute('DROP TABLE IF EXISTS $_fabricTableName;');
     _createDB(db, _databaseVersion);
   }
 
@@ -276,14 +276,17 @@ class DatabaseHelper {
       for (int i = 0; i < data.length; i++) {
         Map<String, dynamic> m = Map<String, dynamic>.from(data[i]);
         m[_client] = await getClient(m[_client]);
-        m[_fabrics] = (m[_fabrics].length > 0)
-            ? m[_fabrics].split(';').map((id) async {
-                return await getFabric(id);
-              })
-            : List<Fabric>.from([]);
+        if (m[_fabrics].length > 0) {
+          List<String> ids = m[_fabrics].split(';');
+          m[_fabrics] = List<Fabric>.from([]).toList();
+          for (int j = 0; j < ids.length; j++)
+            await m[_fabrics].add(await getFabric(int.parse(ids[j])));
+        } else
+          m[_fabrics] = List<Fabric>.from([]).toList();
+
         result.add(m);
       }
-      return result.map((e) => Order.fromMap(e)).toList();
+      return result.map<Order>((e) => Order.fromMap(e)).toList();
     } else
       return [];
   }
