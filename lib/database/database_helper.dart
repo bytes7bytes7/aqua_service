@@ -106,9 +106,9 @@ class DatabaseHelper {
 
   Future dropBD() async {
     final db = await database;
-    //await db.execute('DROP TABLE IF EXISTS $_clientTableName;');
+    await db.execute('DROP TABLE IF EXISTS $_clientTableName;');
     await db.execute('DROP TABLE IF EXISTS $_orderTableName;');
-    //await db.execute('DROP TABLE IF EXISTS $_fabricTableName;');
+    await db.execute('DROP TABLE IF EXISTS $_fabricTableName;');
     _createDB(db, _databaseVersion);
   }
 

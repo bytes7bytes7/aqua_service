@@ -262,11 +262,7 @@ class __BodyState extends State<_Body> {
         widget.changes['fabrics'].removeAt(i);
         break;
       }
-    if (widget.changes['fabrics'].length != 0) {
-      _fabricsNotifier.value =
-          widget.changes['fabrics'][widget.changes['fabrics'].length - 1];
-    } else
-      _fabricsNotifier.value = Fabric();
+    _fabricsNotifier.notifyListeners();
   }
 
   Future<void> getApplicationDirectoryPath() async {

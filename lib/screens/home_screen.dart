@@ -6,10 +6,6 @@ import 'global/next_page_route.dart';
 import 'screens.dart';
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({
-    Key key,
-  }) : super(key: key);
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -31,7 +27,7 @@ class HomeScreen extends StatelessWidget {
                 onPressed: () {
                   DatabaseHelper.db.dropBD();
                 },
-                child: Text('Drop Orders'),
+                child: Text('Drop DB'),
               ),
               SizedBox(height: 20.0),
               Text(
@@ -121,9 +117,9 @@ class _CardButton extends StatelessWidget {
               case '/material':
                 page = FabricsScreen();
                 break;
-              // case '/calendar':
-              //   page = CalendarScreen();
-              //   break;
+              case '/calendar':
+                page = CalendarScreen();
+                break;
               // case '/reports':
               //   page = ReportsScreen();
               //   break;

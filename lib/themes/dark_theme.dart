@@ -3,6 +3,7 @@ import '../constants.dart';
 
 var darkTheme = ThemeData(
   scaffoldBackgroundColor: ConstColors.scaffoldBackgroundColor,
+  accentColor: ConstColors.accentColor,
   primaryColor: ConstColors.cardColor,
   cardColor: ConstColors.cardColor,
   focusColor: ConstColors.focusColor,

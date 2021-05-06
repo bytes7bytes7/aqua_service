@@ -6,6 +6,7 @@ abstract class ConstColors {
   static const Color headline1Color = Colors.white;
   static const Color focusColor = Colors.white;
   static const Color disabledColor = Color(0xFFCFCFCF);
+  static const Color accentColor = Color(0xFF215AFA);
 }
 
 abstract class ConstSize{
