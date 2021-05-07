@@ -43,9 +43,9 @@ class ClientBloc {
     });
   }
 
-  void addClient(Client client) {
+  Future addClient(Client client) async{
     _clientStreamController.sink.add(ClientState._clientLoading());
-    _repository.addClient(client).then((value) {
+    await _repository.addClient(client).then((value) {
       loadAllClients();
     });
   }

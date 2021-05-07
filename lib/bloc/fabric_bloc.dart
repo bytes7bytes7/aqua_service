@@ -42,9 +42,9 @@ class FabricBloc{
     });
   }
 
-  void addFabric(Fabric fabric){
+  Future addFabric(Fabric fabric)async{
     _fabricStreamController.sink.add(FabricState._fabricLoading());
-    _repository.addFabric(fabric).then((value) {
+    await _repository.addFabric(fabric).then((value) {
       loadAllFabrics();
     });
   }

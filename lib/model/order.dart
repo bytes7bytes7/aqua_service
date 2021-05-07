@@ -18,7 +18,7 @@ class Order {
   double price;
   List<Fabric> fabrics;
   double expenses;
-  String date; // YY-MM-DD
+  String date; // dd-MM-yyyy
   bool done;
   String comment;
 
@@ -44,12 +44,5 @@ class Order {
       'done':done,
       'comment':comment,
     };
-  }
-
-  String dateToString({String year, String month, String day}) {
-    while (year.length < 4) year = '0' + year;
-    while (month.length < 2) month = '0' + month;
-    while (day.length < 2) day = '0' + day;
-    return year + month + day;
   }
 }

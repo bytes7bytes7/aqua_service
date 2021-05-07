@@ -41,9 +41,9 @@ class OrderBloc{
     });
   }
 
-  void addOrder(Order order){
+  Future addOrder(Order order)async{
     _orderStreamController.sink.add(OrderState._orderLoading());
-    _repository.addOrder(order).then((value) {
+    await _repository.addOrder(order).then((value) {
       loadAllOrders();
     });
   }

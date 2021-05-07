@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:aqua_service/bloc/bloc.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -8,6 +7,8 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 
+import '../bloc/bloc.dart';
+import 'calendar_screen.dart';
 import 'global/show_info_snack_bar.dart';
 import '../screens/widgets/app_header.dart';
 import 'global/next_page_route.dart';
@@ -157,7 +158,7 @@ class _ClientInfoScreenState extends State<ClientInfoScreen> {
                 Icons.done,
                 color: Theme.of(context).focusColor,
               ),
-              onPressed: () {
+              onPressed: () async {
                 FocusScope.of(context).requestFocus(FocusNode());
                 validateName = nameController.text.length > 0;
                 validateCity = cityController.text.length > 0;
@@ -173,7 +174,7 @@ class _ClientInfoScreenState extends State<ClientInfoScreen> {
                     ..volume = volumeController.text
                     ..images = changes['imagesPath'];
                   if (widget.client.id == null) {
-                    Bloc.bloc.clientBloc.addClient(widget.client);
+                    await Bloc.bloc.clientBloc.addClient(widget.client);
                     setState(() {
                       _title = 'Клиент';
                     });
@@ -415,30 +416,9 @@ class __BodyState extends State<_Body> {
                 Container(
                   padding: const EdgeInsets.symmetric(vertical: 10.0),
                   width: double.infinity,
-                  child: Row(
-                    children: [
-                      Text(
-                        'Посл. чистка : ${(widget.client.previousDate != null) ? widget.client.previousDate : '-- -- --'}',
-                        style: Theme.of(context).textTheme.bodyText1,
-                      ),
-                      Spacer(),
-                      IconButton(
-                        icon: Icon(
-                          Icons.calendar_today_outlined,
-                          color: Theme.of(context).focusColor,
-                        ),
-                        onPressed: () {
-                          if (!widget.readMode) {
-                            //TODO: do smth
-                          } else {
-                            showInfoSnackBar(
-                                context: context,
-                                info: 'Режим чтения',
-                                icon: Icons.warning_amber_outlined);
-                          }
-                        },
-                      ),
-                    ],
+                  child: Text(
+                    'Посл. чистка : ${(widget.client.previousDate != null) ? widget.client.previousDate : '-- -- --'}',
+                    style: Theme.of(context).textTheme.bodyText1,
                   ),
                 ),
                 Container(
@@ -458,7 +438,12 @@ class __BodyState extends State<_Body> {
                         ),
                         onPressed: () {
                           if (!widget.readMode) {
-                            //TODO: do smth
+                            Navigator.push(
+                              context,
+                              NextPageRoute(
+                                nextPage: CalendarScreen(),
+                              ),
+                            );
                           } else {
                             showInfoSnackBar(
                                 context: context,

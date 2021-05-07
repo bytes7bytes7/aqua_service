@@ -120,7 +120,7 @@ class _FabricInfoScreenState extends State<FabricInfoScreen> {
               Icons.done,
               color: Theme.of(context).focusColor,
             ),
-            onPressed: () {
+            onPressed: () async{
               FocusScope.of(context).requestFocus(FocusNode());
               validateFormat = true;
               validateTitle = titleController.text.length > 0;
@@ -153,7 +153,7 @@ class _FabricInfoScreenState extends State<FabricInfoScreen> {
                   ..retailPrice = double.parse(retailPriceController.text)
                   ..purchasePrice = double.parse(purchasePriceController.text);
                 (widget.fabric.id == null)
-                    ? Bloc.bloc.fabricBloc.addFabric(widget.fabric)
+                    ? await Bloc.bloc.fabricBloc.addFabric(widget.fabric)
                     : Bloc.bloc.fabricBloc.updateFabric(widget.fabric);
                 Bloc.bloc.fabricBloc.loadAllFabrics();
                 setState(() {

@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:intl/intl.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -7,6 +8,7 @@ import 'package:path_provider/path_provider.dart';
 
 import '../bloc/bloc.dart';
 import '../model/fabric.dart';
+import 'calendar_screen.dart';
 import 'global/show_info_snack_bar.dart';
 import '../model/client.dart';
 import '../model/order.dart';
@@ -62,13 +64,19 @@ class _OrderInfoScreenState extends State<OrderInfoScreen> {
     widget.order.price = widget.order.price ?? 0.0;
     widget.order.fabrics = widget.order.fabrics ?? [];
     widget.order.expenses = widget.order.expenses ?? 0.0;
-    widget.order.date = widget.order.date ?? '';
+    // widget.order.date = widget.order.date;
     widget.order.done = widget.order.done ?? false;
     widget.order.comment = widget.order.comment ?? '';
 
     changes['client'] = Client.from(widget.order.client);
-    changes['fabrics'] = widget.order.fabrics.map<Fabric>((e) => Fabric.from(e)).toList();
-    changes['date'] = widget.order.date;
+    changes['fabrics'] =
+        widget.order.fabrics.map<Fabric>((e) => Fabric.from(e)).toList();
+    if (widget.order.date == null || widget.order.date=='') {
+      DateTime now = DateTime.now();
+      changes['date'] = DateFormat('dd.MM.yyyy').format(now);
+    } else {
+      changes['date'] = widget.order.date;
+    }
     changes['done'] = widget.order.done;
 
     priceController.text = widget.order.price.toString();
@@ -146,7 +154,7 @@ class _OrderInfoScreenState extends State<OrderInfoScreen> {
               Icons.done,
               color: Theme.of(context).focusColor,
             ),
-            onPressed: () {
+            onPressed: () async {
               FocusScope.of(context).requestFocus(FocusNode());
               validateFormat = true;
               validateClient = changes['client'].id != null;
@@ -163,13 +171,15 @@ class _OrderInfoScreenState extends State<OrderInfoScreen> {
                 widget.order
                   ..client = changes['client']
                   ..price = double.parse(priceController.text)
-                  ..fabrics = changes['fabrics'].map<Fabric>((e) => Fabric.from(e)).toList()
+                  ..fabrics = changes['fabrics']
+                      .map<Fabric>((e) => Fabric.from(e))
+                      .toList()
                   ..expenses = double.parse(expensesController.text)
                   ..date = changes['date']
                   ..done = changes['done']
                   ..comment = commentController.text;
                 (widget.order.id == null)
-                    ? Bloc.bloc.orderBloc.addOrder(widget.order)
+                    ? await Bloc.bloc.orderBloc.addOrder(widget.order)
                     : Bloc.bloc.orderBloc.updateOrder(widget.order);
                 Bloc.bloc.orderBloc.loadAllOrders();
                 setState(() {
@@ -190,10 +200,10 @@ class _OrderInfoScreenState extends State<OrderInfoScreen> {
                     context: context,
                     info: 'Неверный формат числа',
                     icon: Icons.warning_amber_outlined);
-              else if (!validateClient || !validateDate)
+              else if (!validateClient)
                 showInfoSnackBar(
                     context: context,
-                    info: 'Выберите Клиента и Дату',
+                    info: 'Выберите клиента',
                     icon: Icons.warning_amber_outlined);
               else
                 showInfoSnackBar(
@@ -206,7 +216,6 @@ class _OrderInfoScreenState extends State<OrderInfoScreen> {
       ),
       body: _Body(
         changes: changes,
-        order: widget.order,
         priceController: priceController,
         expensesController: expensesController,
         commentController: commentController,
@@ -219,14 +228,12 @@ class _Body extends StatefulWidget {
   const _Body({
     Key key,
     @required this.changes,
-    @required this.order,
     @required this.priceController,
     @required this.expensesController,
     @required this.commentController,
   }) : super(key: key);
 
   final Map<String, dynamic> changes;
-  final Order order;
   final TextEditingController priceController;
   final TextEditingController expensesController;
   final TextEditingController commentController;
@@ -236,7 +243,10 @@ class _Body extends StatefulWidget {
 }
 
 class __BodyState extends State<_Body> {
-  final ValueNotifier<Fabric> _fabricsNotifier = ValueNotifier(Fabric());
+  final DateFormat dateTimeFormat = DateFormat("dd.MM.yyyy");
+  ValueNotifier<Fabric> _fabricsNotifier = ValueNotifier(Fabric());
+  ValueNotifier<DateTime> _dateTimeNotifier;
+  ValueNotifier<bool> _doneNotifier;
   String appDocPath;
   Iterable<int> bytes;
 
@@ -270,8 +280,17 @@ class __BodyState extends State<_Body> {
     appDocPath = appDocDir.path;
   }
 
+  _updateDateTime(DateTime dateTime) {
+    _dateTimeNotifier.value = dateTime;
+    widget.changes['date'] = dateTimeFormat.format(_dateTimeNotifier.value);
+    Navigator.pop(context);
+  }
+
   @override
   void initState() {
+    _dateTimeNotifier =
+        ValueNotifier(dateTimeFormat.parse(widget.changes['date']));
+    _doneNotifier = ValueNotifier(widget.changes['done']);
     if (appDocPath == null) getApplicationDirectoryPath();
     if (widget.changes['client'] != null &&
         widget.changes['client'].avatar != null) {
@@ -297,7 +316,6 @@ class __BodyState extends State<_Body> {
             child: Column(
               children: [
                 _ClientCard(
-                  order: widget.order,
                   changes: widget.changes,
                 ),
                 TextField(
@@ -336,25 +354,44 @@ class __BodyState extends State<_Body> {
                         style: Theme.of(context).textTheme.bodyText1,
                       ),
                       Text(
-                        ((widget.order != null &&
-                                widget.order.price != null &&
-                                widget.order.expenses != null)
-                            ? (widget.order.price - widget.order.expenses)
-                                .toString()
-                            : ''),
+                        (double.parse(widget.priceController.text) -
+                                double.parse(widget.expensesController.text))
+                            .toString(),
                         style: Theme.of(context).textTheme.bodyText1,
                       ),
                     ],
                   ),
                 ),
-                SizedBox(height: 20.0),
+                SizedBox(height: 10.0),
                 Container(
                   width: double.infinity,
                   child: Row(
                     children: [
                       Text(
-                        'Дата : ${(widget.order != null) ? widget.order.date : ""}',
+                        'Дата : ',
                         style: Theme.of(context).textTheme.bodyText1,
+                      ),
+                      ValueListenableBuilder(
+                        valueListenable: _dateTimeNotifier,
+                        builder: (BuildContext context, DateTime dateTime,
+                            Widget child) {
+                          String date = '-- -- --';
+                          if (dateTime != null) {
+                            String day, month, year;
+                            day = dateTime.day.toString();
+                            month = dateTime.month.toString();
+                            year = dateTime.year.toString();
+                            while (day.length < 2) day = '0' + day;
+                            while (month.length < 2) month = '0' + month;
+                            while (year.length < 4) year = '0' + year;
+                            date = '$day.$month.$year';
+                          }
+
+                          return Text(
+                            date,
+                            style: Theme.of(context).textTheme.bodyText1,
+                          );
+                        },
                       ),
                       Spacer(),
                       IconButton(
@@ -362,7 +399,16 @@ class __BodyState extends State<_Body> {
                           Icons.calendar_today_outlined,
                           color: Theme.of(context).focusColor,
                         ),
-                        onPressed: () {},
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            NextPageRoute(
+                              nextPage: CalendarScreen(
+                                updateDate: _updateDateTime,
+                              ),
+                            ),
+                          );
+                        },
                       ),
                     ],
                   ),
@@ -470,12 +516,16 @@ class __BodyState extends State<_Body> {
                   ),
                 ),
                 SizedBox(height: 20.0),
-                RectButton(
-                  text: (widget.order != null && widget.order.done)
-                      ? 'Заново'
-                      : 'Завершить',
-                  onPressed: () {
-                    //TODO: add complete order function
+                ValueListenableBuilder(
+                  valueListenable: _doneNotifier,
+                  builder: (BuildContext context, bool done, Widget child) {
+                    return RectButton(
+                      text: (widget.changes['done']) ? 'Заново' : 'Завершить',
+                      onPressed: () {
+                        _doneNotifier.value = !_doneNotifier.value;
+                        widget.changes['done'] = _doneNotifier.value;
+                      },
+                    );
                   },
                 ),
                 SizedBox(height: 20.0),
@@ -491,11 +541,9 @@ class __BodyState extends State<_Body> {
 class _ClientCard extends StatefulWidget {
   const _ClientCard({
     Key key,
-    @required this.order,
     @required this.changes,
   }) : super(key: key);
 
-  final Order order;
   final Map<String, dynamic> changes;
 
   @override

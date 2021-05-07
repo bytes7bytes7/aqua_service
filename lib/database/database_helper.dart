@@ -211,7 +211,7 @@ class DatabaseHelper {
     final db = await database;
     List<Map<String, dynamic>> res =
         await db.query("$_fabricTableName", where: "$_id = ?", whereArgs: [id]);
-    return res.isNotEmpty ? Fabric.fromMap(res.first) : null;
+    return res.isNotEmpty ? Fabric.fromMap(res.first) : Fabric();
   }
 
   Future<List<Fabric>> getAllFabrics() async {
@@ -276,11 +276,21 @@ class DatabaseHelper {
       for (int i = 0; i < data.length; i++) {
         Map<String, dynamic> m = Map<String, dynamic>.from(data[i]);
         m[_client] = await getClient(m[_client]);
+        if (m[_client].id==null){
+          await deleteOrder(m[_id]);
+          continue;
+        }
         if (m[_fabrics].length > 0) {
           List<String> ids = m[_fabrics].split(';');
           m[_fabrics] = List<Fabric>.from([]).toList();
-          for (int j = 0; j < ids.length; j++)
-            await m[_fabrics].add(await getFabric(int.parse(ids[j])));
+          for (int j = 0; j < ids.length; j++){
+            Fabric f = await getFabric(int.parse(ids[j]));
+            if(f.id==null){
+              await deleteFabric(int.parse(ids[j]));
+            }else{
+              await m[_fabrics].add(f);
+            }
+          }
         } else
           m[_fabrics] = List<Fabric>.from([]).toList();
 
