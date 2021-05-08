@@ -7,8 +7,6 @@ import 'package:flutter_calendar_carousel/classes/event.dart';
 import 'package:flutter_calendar_carousel/classes/event_list.dart';
 import 'package:intl/intl.dart' show DateFormat;
 
-import 'order_short_info_screen.dart';
-import 'order_info_screen.dart';
 import '../bloc/bloc.dart';
 import 'widgets/app_header.dart';
 import 'widgets/loading_circle.dart';
@@ -17,7 +15,7 @@ import 'widgets/rect_button.dart';
 class CalendarScreen extends StatefulWidget {
   CalendarScreen({
     Key key,
-    @required this.updateDate,
+    this.updateDate,
   }) : super(key: key);
   final Function updateDate;
 
@@ -146,15 +144,16 @@ class _CalendarContentState extends State<CalendarContent> {
         widget.orders.map(
           (e) => [
             Event(
+              id: e.id,
               date: DateFormat("dd.MM.yyyy").parse(e.date),
               title: '${(e.client.name != '') ? (e.client.name + ' ') : ''}' +
                   '${e.client.surname ?? ''}'.replaceAll(RegExp(r"\s+"), ""),
-              icon: _EventIcon(),
             ),
           ],
         ),
       ),
     );
+    List<Order> _selectedOrders = [];
     return Stack(
       children: [
         Positioned(
@@ -228,7 +227,11 @@ class _CalendarContentState extends State<CalendarContent> {
                           .copyWith(color: Theme.of(context).disabledColor),
                       onDayPressed: (date, events) {
                         _updateCurrentDate2(date);
-                        events.forEach((event) => print(event.title));
+                        _selectedOrders = [];
+                        events.forEach((ev) => _selectedOrders.addAll(widget
+                            .orders
+                            .where((item) => item.id == ev.id)
+                            .toList()));
                       },
                       onCalendarChanged: (DateTime date) {
                         _updateTargetDateTime(date);
@@ -268,10 +271,10 @@ class _CalendarContentState extends State<CalendarContent> {
                   builder: (BuildContext context, _, Widget child) {
                     return ListView.builder(
                       controller: scrollController,
-                      itemCount: widget.orders.length + 1,
+                      itemCount: _selectedOrders.length + 1,
                       itemBuilder: (BuildContext context, int index) {
                         Iterable<int> bytes;
-                        if (index == 0)
+                        if (index == 0) {
                           return Center(
                             child: Column(
                               children: [
@@ -294,66 +297,96 @@ class _CalendarContentState extends State<CalendarContent> {
                               ],
                             ),
                           );
-                        else
+                        } else {
                           return Container(
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 20.0, vertical: 10.0),
                             width: double.infinity,
-                            child: Row(
-                              children: [
-                                CircleAvatar(
-                                  radius: 24.0,
-                                  backgroundColor: Theme.of(context).focusColor,
-                                  child: (bytes != null)
-                                      ? Container(
-                                          decoration: BoxDecoration(
-                                            shape: BoxShape.circle,
-                                            image: DecorationImage(
-                                              image: MemoryImage(bytes),
-                                              fit: BoxFit.cover,
-                                            ),
-                                          ),
-                                        )
-                                      : Icon(
-                                          Icons.person,
-                                          color: Theme.of(context).cardColor,
+                            child: Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                onTap: () {},
+                                borderRadius: BorderRadius.circular(8),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 5.0, vertical: 5.0),
+                                  width: double.infinity,
+                                  child: Material(
+                                    color: Colors.transparent,
+                                    child: Row(
+                                      children: [
+                                        CircleAvatar(
+                                          radius: 24.0,
+                                          backgroundColor:
+                                              Theme.of(context).focusColor,
+                                          child: (bytes != null)
+                                              ? Container(
+                                                  decoration: BoxDecoration(
+                                                    shape: BoxShape.circle,
+                                                    image: DecorationImage(
+                                                      image: MemoryImage(bytes),
+                                                      fit: BoxFit.cover,
+                                                    ),
+                                                  ),
+                                                )
+                                              : Icon(
+                                                  Icons.person,
+                                                  color: Theme.of(context)
+                                                      .cardColor,
+                                                ),
                                         ),
-                                ),
-                                SizedBox(width: 14.0),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      '${(widget.orders[index - 1].client.name != '') ? (widget.orders[index - 1].client.name + ' ') : ''}' +
-                                          '${widget.orders[index - 1].client.surname ?? ''}'
-                                              .replaceAll(RegExp(r"\s+"), ""),
-                                      style:
-                                          Theme.of(context).textTheme.bodyText1,
-                                      overflow: TextOverflow.ellipsis,
+                                        SizedBox(width: 14.0),
+                                        Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              '${(_selectedOrders[index - 1].client.name != '') ? (_selectedOrders[index - 1].client.name + ' ') : ''}' +
+                                                  '${_selectedOrders[index - 1].client.surname ?? ''}'
+                                                      .replaceAll(
+                                                          RegExp(r"\s+"), ""),
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .bodyText1,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                            Text(
+                                              _selectedOrders[index - 1]
+                                                  .client
+                                                  .city,
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .subtitle2,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ],
+                                        ),
+                                        Spacer(),
+                                        Text(
+                                          (_selectedOrders[index - 1].price !=
+                                                      null &&
+                                                  _selectedOrders[index - 1]
+                                                          .expenses !=
+                                                      null)
+                                              ? (_selectedOrders[index - 1]
+                                                          .price -
+                                                      _selectedOrders[index - 1]
+                                                          .expenses)
+                                                  .toString()
+                                              : '0.0',
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodyText1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ],
                                     ),
-                                    Text(
-                                      widget.orders[index - 1].client.city,
-                                      style:
-                                          Theme.of(context).textTheme.subtitle2,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ],
+                                  ),
                                 ),
-                                Spacer(),
-                                Text(
-                                  (widget.orders[index - 1].price != null &&
-                                          widget.orders[index - 1].expenses !=
-                                              null)
-                                      ? (widget.orders[index - 1].price -
-                                              widget.orders[index - 1].expenses)
-                                          .toString()
-                                      : '0.0',
-                                  style: Theme.of(context).textTheme.bodyText1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ],
+                              ),
                             ),
                           );
+                        }
                       },
                     );
                   },
@@ -363,22 +396,6 @@ class _CalendarContentState extends State<CalendarContent> {
           ),
         ),
       ],
-    );
-  }
-}
-
-class _EventIcon extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-          color: Theme.of(context).focusColor,
-          borderRadius: BorderRadius.all(Radius.circular(1000)),
-          border: Border.all(color: Theme.of(context).accentColor, width: 2.0)),
-      child: Icon(
-        Icons.person,
-        color: Theme.of(context).focusColor,
-      ),
     );
   }
 }
