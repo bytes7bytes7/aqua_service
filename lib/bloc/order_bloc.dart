@@ -3,7 +3,7 @@ import 'dart:async';
 import '../model/order.dart';
 import '../repository/order_repository.dart';
 
-class OrderBloc{
+class OrderBloc {
   OrderBloc(this._repository);
 
   final OrderRepository _repository;
@@ -15,18 +15,24 @@ class OrderBloc{
     return _orderStreamController.stream;
   }
 
-  void dispose(){
+  void dispose() {
     _orderStreamController.close();
   }
 
-  void loadAllOrders(){
+  void loadAllOrders() {
     _orderStreamController.sink.add(OrderState._orderLoading());
     _repository.getAllOrders().then((orderList) {
-      orderList.sort((a,b) => a.date.compareTo(b.date));
-      if(!_orderStreamController.isClosed)
-      _orderStreamController.sink.add(OrderState._orderData(orderList));
+      orderList.sort((a, b) => a.date.compareTo(b.date));
+      for (int i = 0; i < orderList.length; i++) {
+        List<String> date = orderList[i].date.split('.');
+        String year = date[0], month = date[1], day = date[2];
+        orderList[i].date = day + '.' + month + '.' + year;
+      }
+      if (!_orderStreamController.isClosed)
+        _orderStreamController.sink.add(OrderState._orderData(orderList));
     });
   }
+
   void deleteOrder(int id) {
     _orderStreamController.sink.add(OrderState._orderLoading());
     _repository.deleteOrder(id).then((value) {
@@ -34,32 +40,43 @@ class OrderBloc{
     });
   }
 
-  void updateOrder(Order order){
+  void updateOrder(Order order) {
     _orderStreamController.sink.add(OrderState._orderLoading());
-    _repository.updateOrder(order).then((value) {
+    Order newOrder = Order.from(order);
+    List<String> date = newOrder.date.split('.');
+    String day = date[0], month = date[1], year = date[2];
+    newOrder.date = year + '.' + month + '.' + day;
+    _repository.updateOrder(newOrder).then((value) {
       loadAllOrders();
     });
   }
 
-  Future addOrder(Order order)async{
+  Future addOrder(Order order) async {
     _orderStreamController.sink.add(OrderState._orderLoading());
-    await _repository.addOrder(order).then((value) {
+    Order newOrder = Order.from(order);
+    List<String> date = newOrder.date.split('.');
+    String day = date[0], month = date[1], year = date[2];
+    newOrder.date = year + '.' + month + '.' + day;
+    await _repository.addOrder(newOrder).then((value) {
       loadAllOrders();
     });
   }
 }
 
-class OrderState{
+class OrderState {
   OrderState();
+
   factory OrderState._orderData(List<Order> orders) = OrderDataState;
+
   factory OrderState._orderLoading() = OrderLoadingState;
 }
 
-class OrderInitState extends OrderState{}
+class OrderInitState extends OrderState {}
 
-class OrderLoadingState extends OrderState{}
+class OrderLoadingState extends OrderState {}
 
-class OrderDataState extends OrderState{
+class OrderDataState extends OrderState {
   OrderDataState(this.orders);
+
   final List<Order> orders;
 }

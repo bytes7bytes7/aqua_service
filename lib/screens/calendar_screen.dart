@@ -1,3 +1,4 @@
+import 'package:aqua_service/screens/order_info_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_calendar_carousel/flutter_calendar_carousel.dart'
     show CalendarCarousel;
@@ -5,6 +6,7 @@ import 'package:flutter_calendar_carousel/classes/event.dart';
 import 'package:flutter_calendar_carousel/classes/event_list.dart';
 import 'package:intl/intl.dart' show DateFormat;
 
+import 'order_short_info_screen.dart';
 import 'widgets/app_header.dart';
 
 class CalendarScreen extends StatelessWidget {
@@ -113,79 +115,120 @@ class CalendarScreen extends StatelessWidget {
       appBar: AppHeader(
         title: 'Календарь',
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: <Widget>[
-            Container(
-              margin: EdgeInsets.symmetric(horizontal: 16.0),
-              child: ValueListenableBuilder(
-                valueListenable: _calendarNotifier,
-                builder: (BuildContext context, bool b, Widget child) {
-                  return CalendarCarousel<Event>(
-                    customGridViewPhysics: NeverScrollableScrollPhysics(),
-                    locale: "RU",
-                    firstDayOfWeek: 1,
-                    height: 420.0,
-                    markedDatesMap: _markedDateMap,
-                    selectedDateTime: _currentDate2Notifier.value,
-                    targetDateTime: _targetDateTimeNotifier.value,
-                    minSelectedDate: _currentDate.subtract(Duration(days: 360)),
-                    maxSelectedDate: _currentDate.add(Duration(days: 360)),
-                    daysHaveCircularBorder: false,
-                    showOnlyCurrentMonthDate: false,
-                    showHeader: true,
-                    weekFormat: false,
-                    iconColor: Theme.of(context).focusColor,
-                    headerTextStyle: Theme.of(context).textTheme.headline2,
-                    thisMonthDayBorderColor: Colors.transparent,
-                    selectedDayBorderColor: Colors.transparent,
-                    selectedDayButtonColor: Theme.of(context).cardColor,
-                    todayBorderColor: Theme.of(context).cardColor,
-                    todayButtonColor: Colors.transparent,
-                    weekdayTextStyle: TextStyle(
-                      color: Theme.of(context).focusColor,
-                    ),
-                    todayTextStyle: TextStyle(
-                      color: Theme.of(context).cardColor,
-                    ),
-                    markedDateCustomTextStyle: TextStyle(
-                      color: Theme.of(context).accentColor,
-                    ),
-                    selectedDayTextStyle: TextStyle(
-                      color: Theme.of(context).focusColor,
-                    ),
-                    inactiveDaysTextStyle: TextStyle(
-                      color: Theme.of(context).disabledColor,
-                    ),
-                    weekendTextStyle: TextStyle(
-                      color: Theme.of(context).cardColor,
-                    ),
-                    prevDaysTextStyle: TextStyle(
-                      color: Theme.of(context).disabledColor,
-                    ),
-                    nextDaysTextStyle: TextStyle(
-                      color: Theme.of(context).disabledColor,
-                    ),
-                    onDayPressed: (date, events) {
-                      _updateCurrentDate2(date);
-                      events.forEach((event) => print(event.title));
+      body: Stack(
+        children: [
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: ValueListenableBuilder(
+                    valueListenable: _calendarNotifier,
+                    builder: (BuildContext context, bool b, Widget child) {
+                      return CalendarCarousel<Event>(
+                        customGridViewPhysics: NeverScrollableScrollPhysics(),
+                        locale: "RU",
+                        firstDayOfWeek: 1,
+                        height: 420.0,
+                        weekDayMargin: const EdgeInsets.only(bottom: 15),
+                        markedDatesMap: _markedDateMap,
+                        selectedDateTime: _currentDate2Notifier.value,
+                        targetDateTime: _targetDateTimeNotifier.value,
+                        minSelectedDate:
+                            _currentDate.subtract(Duration(days: 360)),
+                        maxSelectedDate:
+                            _currentDate.add(Duration(days: 360)),
+                        daysHaveCircularBorder: true,
+                        showOnlyCurrentMonthDate: true,
+                        showHeader: true,
+                        weekFormat: false,
+                        iconColor: Theme.of(context).focusColor,
+                        headerTextStyle:
+                            Theme.of(context).textTheme.headline2,
+                        thisMonthDayBorderColor: Colors.transparent,
+                        selectedDayBorderColor: Colors.transparent,
+                        selectedDayButtonColor: Theme.of(context).cardColor,
+                        todayBorderColor: Theme.of(context).cardColor,
+                        todayButtonColor: Colors.transparent,
+                        daysTextStyle: Theme.of(context).textTheme.bodyText1,
+                        weekdayTextStyle: Theme.of(context)
+                            .textTheme
+                            .bodyText1
+                            .copyWith(color: Theme.of(context).focusColor),
+                        todayTextStyle: Theme.of(context)
+                            .textTheme
+                            .bodyText1
+                            .copyWith(color: Theme.of(context).cardColor),
+                        markedDateCustomTextStyle: Theme.of(context)
+                            .textTheme
+                            .bodyText1
+                            .copyWith(color: Theme.of(context).accentColor),
+                        selectedDayTextStyle: Theme.of(context)
+                            .textTheme
+                            .bodyText1
+                            .copyWith(color: Theme.of(context).focusColor),
+                        inactiveDaysTextStyle: Theme.of(context)
+                            .textTheme
+                            .bodyText1
+                            .copyWith(color: Theme.of(context).disabledColor),
+                        weekendTextStyle: Theme.of(context)
+                            .textTheme
+                            .bodyText1
+                            .copyWith(color: Theme.of(context).cardColor),
+                        prevDaysTextStyle: Theme.of(context)
+                            .textTheme
+                            .bodyText1
+                            .copyWith(color: Theme.of(context).disabledColor),
+                        nextDaysTextStyle: Theme.of(context)
+                            .textTheme
+                            .bodyText1
+                            .copyWith(color: Theme.of(context).disabledColor),
+                        onDayPressed: (date, events) {
+                          _updateCurrentDate2(date);
+                          events.forEach((event) => print(event.title));
+                        },
+                        onCalendarChanged: (DateTime date) {
+                          _updateTargetDateTime(date);
+                          _updateCurrentMonth(DateFormat.yMMM()
+                              .format(_targetDateTimeNotifier.value));
+                        },
+                        onDayLongPressed: (DateTime date) {
+                          print('long pressed date $date');
+                        },
+                      );
                     },
-                    onCalendarChanged: (DateTime date) {
-                      _updateTargetDateTime(date);
-                      _updateCurrentMonth(DateFormat.yMMM()
-                          .format(_targetDateTimeNotifier.value));
-                    },
-                    onDayLongPressed: (DateTime date) {
-                      print('long pressed date $date');
-                    },
-                  );
-                },
-              ),
-            ), //
-          ],
-        ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+            DraggableScrollableSheet(
+              expand: true,
+              initialChildSize: 0.2,
+              minChildSize: 0.2,
+              maxChildSize: 0.95,
+              builder:
+                  (BuildContext context, ScrollController scrollController) {
+                return Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(30),
+                      topRight: Radius.circular(30),
+                    ),
+                    color: Theme.of(context).cardColor,
+                  ),
+                  // child: OrderShortInfoScreen(
+                  //   order: null,
+                  // ),
+                );
+              },
+            ),
+        ],
       ),
     );
   }

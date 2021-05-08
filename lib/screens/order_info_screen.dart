@@ -48,6 +48,29 @@ class _OrderInfoScreenState extends State<OrderInfoScreen> {
     priceController = TextEditingController();
     expensesController = TextEditingController();
     commentController = TextEditingController();
+
+    widget.order.client = widget.order.client ?? Client();
+    // widget.order.price = widget.order.price;
+    // widget.order.expenses = widget.order.expenses;
+    widget.order.fabrics = widget.order.fabrics ?? [];
+    // widget.order.date = widget.order.date;
+    widget.order.done = widget.order.done ?? false;
+    widget.order.comment = widget.order.comment ?? '';
+
+    changes['client'] = Client.from(widget.order.client);
+    changes['fabrics'] =
+        widget.order.fabrics.map<Fabric>((e) => Fabric.from(e)).toList();
+    if (widget.order.date == null || widget.order.date == '') {
+      DateTime now = DateTime.now();
+      changes['date'] = DateFormat('dd.MM.yyyy').format(now);
+    } else {
+      changes['date'] = widget.order.date;
+    }
+    changes['done'] = widget.order.done;
+
+    priceController.text = widget.order.price?.toString();
+    expensesController.text = widget.order.expenses?.toString();
+    commentController.text = widget.order.comment;
     super.initState();
   }
 
@@ -59,34 +82,8 @@ class _OrderInfoScreenState extends State<OrderInfoScreen> {
     super.dispose();
   }
 
-  void init() {
-    widget.order.client = widget.order.client ?? Client();
-    widget.order.price = widget.order.price ?? 0.0;
-    widget.order.fabrics = widget.order.fabrics ?? [];
-    widget.order.expenses = widget.order.expenses ?? 0.0;
-    // widget.order.date = widget.order.date;
-    widget.order.done = widget.order.done ?? false;
-    widget.order.comment = widget.order.comment ?? '';
-
-    changes['client'] = Client.from(widget.order.client);
-    changes['fabrics'] =
-        widget.order.fabrics.map<Fabric>((e) => Fabric.from(e)).toList();
-    if (widget.order.date == null || widget.order.date=='') {
-      DateTime now = DateTime.now();
-      changes['date'] = DateFormat('dd.MM.yyyy').format(now);
-    } else {
-      changes['date'] = widget.order.date;
-    }
-    changes['done'] = widget.order.done;
-
-    priceController.text = widget.order.price.toString();
-    expensesController.text = widget.order.expenses.toString();
-    commentController.text = widget.order.comment;
-  }
-
   @override
   Widget build(BuildContext context) {
-    init();
     bool validateClient = false,
         validateDate = false,
         validatePrice = false,
@@ -101,14 +98,18 @@ class _OrderInfoScreenState extends State<OrderInfoScreen> {
             color: Theme.of(context).focusColor,
           ),
           onPressed: () {
-            if (priceController.text != widget.order.price.toString() ||
-                expensesController.text != widget.order.expenses.toString() ||
-                commentController.text != widget.order.comment ||
-                !ListEquality()
+            if (!ListEquality()
                     .equals([changes['client']], [widget.order.client]) ||
+                priceController.text != widget.order.price.toString() &&
+                    !(!(priceController.text != '') &&
+                        !(widget.order.price != null)) ||
+                expensesController.text != widget.order.expenses.toString() &&
+                    !(!(expensesController.text != '') &&
+                        !(widget.order.expenses != null)) ||
+                changes['date'] != widget.order.date ||
                 !ListEquality()
                     .equals(changes['fabrics'], widget.order.fabrics) ||
-                changes['date'] != widget.order.date) {
+                commentController.text != widget.order.comment) {
               showNoYesDialog(
                 context: context,
                 title: 'Изменения будут утеряны',
@@ -181,6 +182,9 @@ class _OrderInfoScreenState extends State<OrderInfoScreen> {
                 (widget.order.id == null)
                     ? await Bloc.bloc.orderBloc.addOrder(widget.order)
                     : Bloc.bloc.orderBloc.updateOrder(widget.order);
+
+                priceController.text = widget.order.price.toString();
+                expensesController.text = widget.order.expenses.toString();
                 Bloc.bloc.orderBloc.loadAllOrders();
                 setState(() {
                   _title = 'Заказ';
@@ -354,9 +358,13 @@ class __BodyState extends State<_Body> {
                         style: Theme.of(context).textTheme.bodyText1,
                       ),
                       Text(
-                        (double.parse(widget.priceController.text) -
-                                double.parse(widget.expensesController.text))
-                            .toString(),
+                        (widget.priceController.text != '' &&
+                                widget.expensesController.text != '')
+                            ? (double.parse(widget.priceController.text) -
+                                    double.parse(
+                                        widget.expensesController.text))
+                                .toString()
+                            : '0.0',
                         style: Theme.of(context).textTheme.bodyText1,
                       ),
                     ],
@@ -556,10 +564,24 @@ class __ClientCardState extends State<_ClientCard> {
   Iterable<int> bytes;
 
   _updateClient(Client client) {
-    _clientNotifier.value = Client.from(client);
-    widget.changes['client'] = _clientNotifier.value;
-    if (widget.changes['client'].avatar != null)
-      bytes = File(widget.changes['client'].avatar).readAsBytesSync();
+    if (client.id != null) {
+      _clientNotifier.value = Client.from(client);
+      widget.changes['client'] = Client.from(client);
+      // widget.changes['client'].id = client.id;
+      // widget.changes['client'].avatar = client.avatar;
+      // widget.changes['client'].name = client.name;
+      // widget.changes['client'].surname = client.surname;
+      // widget.changes['client'].middleName = client.middleName;
+      // widget.changes['client'].city = client.city;
+      // widget.changes['client'].address = client.address;
+      // widget.changes['client'].phone = client.phone;
+      // widget.changes['client'].volume = client.volume;
+      // widget.changes['client'].previousDate = client.previousDate;
+      // widget.changes['client'].nextDate = client.nextDate;
+      // widget.changes['client'].images = client.images;
+      if (widget.changes['client'].avatar != null)
+        bytes = File(widget.changes['client'].avatar).readAsBytesSync();
+    }
   }
 
   Future<void> getApplicationDirectoryPath() async {

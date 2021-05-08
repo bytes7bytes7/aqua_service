@@ -32,6 +32,14 @@ class _FabricInfoScreenState extends State<FabricInfoScreen> {
     titleController = TextEditingController();
     retailPriceController = TextEditingController();
     purchasePriceController = TextEditingController();
+
+    widget.fabric.title = widget.fabric.title ?? '';
+    // widget.fabric.retailPrice = widget.fabric.retailPrice;
+    // widget.fabric.purchasePrice = widget.fabric.purchasePrice;
+
+    titleController.text = widget.fabric.title;
+    retailPriceController.text = widget.fabric.retailPrice?.toString();
+    purchasePriceController.text = widget.fabric.purchasePrice?.toString();
     super.initState();
   }
 
@@ -43,19 +51,8 @@ class _FabricInfoScreenState extends State<FabricInfoScreen> {
     super.dispose();
   }
 
-  void init() {
-    widget.fabric.title = widget.fabric.title ?? '';
-    widget.fabric.retailPrice = widget.fabric.retailPrice ?? 0.0;
-    widget.fabric.purchasePrice = widget.fabric.purchasePrice ?? 0.0;
-
-    titleController.text = widget.fabric.title;
-    retailPriceController.text = widget.fabric.retailPrice.toString();
-    purchasePriceController.text = widget.fabric.purchasePrice.toString();
-  }
-
   @override
   Widget build(BuildContext context) {
-    init();
     bool validateTitle = false,
         validateRetailPrice = false,
         validatePurchasePrice = false,
@@ -71,9 +68,13 @@ class _FabricInfoScreenState extends State<FabricInfoScreen> {
           onPressed: () {
             if (titleController.text != widget.fabric.title ||
                 retailPriceController.text !=
-                    widget.fabric.retailPrice.toString() ||
+                        widget.fabric.retailPrice.toString() &&
+                    !(!(retailPriceController.text != '') &&
+                        !(widget.fabric.retailPrice != null)) ||
                 purchasePriceController.text !=
-                    widget.fabric.purchasePrice.toString()) {
+                        widget.fabric.purchasePrice.toString() &&
+                    !(!(purchasePriceController.text != '') &&
+                        !(widget.fabric.purchasePrice != null))) {
               showNoYesDialog(
                 context: context,
                 title: 'Изменения будут утеряны',
@@ -120,7 +121,7 @@ class _FabricInfoScreenState extends State<FabricInfoScreen> {
               Icons.done,
               color: Theme.of(context).focusColor,
             ),
-            onPressed: () async{
+            onPressed: () async {
               FocusScope.of(context).requestFocus(FocusNode());
               validateFormat = true;
               validateTitle = titleController.text.length > 0;
@@ -155,6 +156,8 @@ class _FabricInfoScreenState extends State<FabricInfoScreen> {
                 (widget.fabric.id == null)
                     ? await Bloc.bloc.fabricBloc.addFabric(widget.fabric)
                     : Bloc.bloc.fabricBloc.updateFabric(widget.fabric);
+                retailPriceController.text = widget.fabric.retailPrice.toString();
+                purchasePriceController.text = widget.fabric.purchasePrice.toString();
                 Bloc.bloc.fabricBloc.loadAllFabrics();
                 setState(() {
                   _title = 'Материал';

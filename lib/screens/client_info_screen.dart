@@ -51,22 +51,7 @@ class _ClientInfoScreenState extends State<ClientInfoScreen> {
     addressController = TextEditingController();
     phoneController = TextEditingController();
     volumeController = TextEditingController();
-    super.initState();
-  }
 
-  @override
-  void dispose() {
-    nameController.dispose();
-    surnameController.dispose();
-    middleNameController.dispose();
-    cityController.dispose();
-    addressController.dispose();
-    phoneController.dispose();
-    volumeController.dispose();
-    super.dispose();
-  }
-
-  void init() {
     widget.client.name = widget.client.name ?? '';
     widget.client.surname = widget.client.surname ?? '';
     widget.client.middleName = widget.client.middleName ?? '';
@@ -87,11 +72,23 @@ class _ClientInfoScreenState extends State<ClientInfoScreen> {
     addressController.text = widget.client.address;
     phoneController.text = widget.client.phone;
     volumeController.text = widget.client.volume;
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    nameController.dispose();
+    surnameController.dispose();
+    middleNameController.dispose();
+    cityController.dispose();
+    addressController.dispose();
+    phoneController.dispose();
+    volumeController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    init();
     bool validateName = false, validateCity = false;
     return Scaffold(
       appBar: AppHeader(
