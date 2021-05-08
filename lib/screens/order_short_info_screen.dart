@@ -1,56 +1,36 @@
 import 'dart:io';
 
 import 'package:intl/intl.dart';
-import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 
-import '../bloc/bloc.dart';
 import '../model/fabric.dart';
-import 'calendar_screen.dart';
-import 'global/show_info_snack_bar.dart';
 import '../model/client.dart';
 import '../model/order.dart';
 import 'client_info_screen.dart';
-import 'clients_screen.dart';
-import 'fabrics_screen.dart';
 import 'widgets/rect_button.dart';
-import 'widgets/app_header.dart';
-import 'widgets/show_no_yes_dialog.dart';
-import 'global/validate_price.dart';
 import 'global/next_page_route.dart';
 
 class OrderShortInfoScreen extends StatefulWidget {
   const OrderShortInfoScreen({
     Key key,
-    @required this.order,
+    @required this.orders,
   }) : super(key: key);
 
-  final Order order;
+  final List<Order> orders;
 
   @override
   _OrderShortInfoScreenState createState() => _OrderShortInfoScreenState();
 }
 
 class _OrderShortInfoScreenState extends State<OrderShortInfoScreen> {
-  @override
-  void initState() {
-    widget.order.client = widget.order.client ?? Client();
-    widget.order.price = widget.order.price ?? 0.0;
-    widget.order.fabrics = widget.order.fabrics ?? [];
-    widget.order.expenses = widget.order.expenses ?? 0.0;
-    // widget.order.date = widget.order.date;
-    widget.order.done = widget.order.done ?? false;
-    widget.order.comment = widget.order.comment ?? '';
-    super.initState();
-  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: _Body(
-        order: widget.order,
+        orders: widget.orders,
       ),
     );
   }
@@ -59,10 +39,10 @@ class _OrderShortInfoScreenState extends State<OrderShortInfoScreen> {
 class _Body extends StatefulWidget {
   const _Body({
     Key key,
-    @required this.order,
+    @required this.orders,
   }) : super(key: key);
 
-  final Order order;
+  final List<Order> orders;
 
   @override
   __BodyState createState() => __BodyState();
@@ -83,13 +63,13 @@ class __BodyState extends State<_Body> {
 
   @override
   void initState() {
-    _dateTimeNotifier = ValueNotifier(dateTimeFormat.parse(widget.order.date));
-    _doneNotifier = ValueNotifier(widget.order.done);
+    _dateTimeNotifier = ValueNotifier(dateTimeFormat.parse(widget.orders[0].date));
+    _doneNotifier = ValueNotifier(widget.orders[0].done);
     if (appDocPath == null) getApplicationDirectoryPath();
-    if (widget.order.client != null && widget.order.client.avatar != null) {
-      var hasLocalImage = File(widget.order.client.avatar).existsSync();
+    if (widget.orders[0].client != null && widget.orders[0].client.avatar != null) {
+      var hasLocalImage = File(widget.orders[0].client.avatar).existsSync();
       if (hasLocalImage) {
-        bytes = File(widget.order.client.avatar).readAsBytesSync();
+        bytes = File(widget.orders[0].client.avatar).readAsBytesSync();
       }
     }
     super.initState();
@@ -109,7 +89,7 @@ class __BodyState extends State<_Body> {
             child: Column(
               children: [
                 _ClientCard(
-                  client: widget.order.client,
+                  client: widget.orders[0].client,
                 ),
                 TextField(
                   enabled: false,
@@ -147,7 +127,7 @@ class __BodyState extends State<_Body> {
                         style: Theme.of(context).textTheme.bodyText1,
                       ),
                       Text(
-                        (widget.order.price - widget.order.expenses).toString(),
+                        (widget.orders[0].price - widget.orders[0].expenses).toString(),
                         style: Theme.of(context).textTheme.bodyText1,
                       ),
                     ],
@@ -209,7 +189,7 @@ class __BodyState extends State<_Body> {
                       valueListenable: _fabricsNotifier,
                       builder:
                           (BuildContext context, Fabric fabric, Widget child) {
-                        if (widget.order.fabrics.length == 0) {
+                        if (widget.orders[0].fabrics.length == 0) {
                           return Center(
                             child: Text(
                               'Пусто',
@@ -220,10 +200,10 @@ class __BodyState extends State<_Body> {
                           return ListView(
                             controller: ScrollController(),
                             children: List.generate(
-                              widget.order.fabrics.length,
+                              widget.orders[0].fabrics.length,
                               (index) {
                                 return _FabricCard(
-                                  fabric: widget.order.fabrics[index],
+                                  fabric: widget.orders[0].fabrics[index],
                                 );
                               },
                             ),
@@ -270,10 +250,10 @@ class __BodyState extends State<_Body> {
                   valueListenable: _doneNotifier,
                   builder: (BuildContext context, bool done, Widget child) {
                     return RectButton(
-                      text: (widget.order.done) ? 'Заново' : 'Завершить',
+                      text: (widget.orders[0].done) ? 'Заново' : 'Завершить',
                       onPressed: () {
                         _doneNotifier.value = !_doneNotifier.value;
-                        widget.order.done = _doneNotifier.value;
+                        widget.orders[0].done = _doneNotifier.value;
                       },
                     );
                   },

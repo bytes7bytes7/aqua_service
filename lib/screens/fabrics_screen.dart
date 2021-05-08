@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'widgets/app_header.dart';
 import 'widgets/loading_circle.dart';
 import 'widgets/rect_button.dart';
-import 'widgets/search_bar.dart';
 import '../model/fabric.dart';
 import 'fabric_info_screen.dart';
 import 'global/next_page_route.dart';
@@ -82,37 +81,30 @@ class __BodyState extends State<_Body> {
       onTap: () {
         FocusScope.of(context).requestFocus(FocusNode());
       },
-      child: Column(
-        children: [
-          SearchBar(),
-          Expanded(
-            child: StreamBuilder(
-              stream: Bloc.bloc.fabricBloc.fabric,
-              initialData: FabricInitState(),
-              builder: (context, snapshot) {
-                if (snapshot.data is FabricInitState) {
-                  Bloc.bloc.fabricBloc.loadAllFabrics();
-                  return SizedBox.shrink();
-                } else if (snapshot.data is FabricLoadingState) {
-                  return _buildLoading();
-                } else if (snapshot.data is FabricDataState) {
-                  FabricDataState state = snapshot.data;
-                  if (state.fabrics.length > 0)
-                    return _buildContent(state.fabrics);
-                  else
-                    return Center(
-                      child: Text(
-                        'Пусто',
-                        style: Theme.of(context).textTheme.headline2,
-                      ),
-                    );
-                } else {
-                  return _buildError();
-                }
-              },
-            ),
-          ),
-        ],
+      child: StreamBuilder(
+        stream: Bloc.bloc.fabricBloc.fabric,
+        initialData: FabricInitState(),
+        builder: (context, snapshot) {
+          if (snapshot.data is FabricInitState) {
+            Bloc.bloc.fabricBloc.loadAllFabrics();
+            return SizedBox.shrink();
+          } else if (snapshot.data is FabricLoadingState) {
+            return _buildLoading();
+          } else if (snapshot.data is FabricDataState) {
+            FabricDataState state = snapshot.data;
+            if (state.fabrics.length > 0)
+              return _buildContent(state.fabrics);
+            else
+              return Center(
+                child: Text(
+                  'Пусто',
+                  style: Theme.of(context).textTheme.headline2,
+                ),
+              );
+          } else {
+            return _buildError();
+          }
+        },
       ),
     );
   }

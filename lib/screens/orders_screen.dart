@@ -4,7 +4,6 @@ import 'package:path_provider/path_provider.dart';
 
 import 'widgets/app_header.dart';
 import 'widgets/rect_button.dart';
-import 'widgets/search_bar.dart';
 import 'widgets/loading_circle.dart';
 import '../bloc/bloc.dart';
 import '../bloc/order_bloc.dart';
@@ -69,37 +68,30 @@ class __BodyState extends State<_Body> {
       onTap: () {
         FocusScope.of(context).requestFocus(FocusNode());
       },
-      child: Column(
-        children: [
-          SearchBar(),
-          Expanded(
-            child: StreamBuilder(
-              stream: Bloc.bloc.orderBloc.order,
-              initialData: OrderInitState(),
-              builder: (context, snapshot) {
-                if (snapshot.data is OrderInitState) {
-                  Bloc.bloc.orderBloc.loadAllOrders();
-                  return SizedBox.shrink();
-                } else if (snapshot.data is OrderLoadingState) {
-                  return _buildLoading();
-                } else if (snapshot.data is OrderDataState) {
-                  OrderDataState state = snapshot.data;
-                  if (state.orders.length > 0)
-                    return _buildContent(state.orders);
-                  else
-                    return Center(
-                      child: Text(
-                        'Пусто',
-                        style: Theme.of(context).textTheme.headline2,
-                      ),
-                    );
-                } else {
-                  return _buildError();
-                }
-              },
-            ),
-          ),
-        ],
+      child: StreamBuilder(
+        stream: Bloc.bloc.orderBloc.order,
+        initialData: OrderInitState(),
+        builder: (context, snapshot) {
+          if (snapshot.data is OrderInitState) {
+            Bloc.bloc.orderBloc.loadAllOrders();
+            return SizedBox.shrink();
+          } else if (snapshot.data is OrderLoadingState) {
+            return _buildLoading();
+          } else if (snapshot.data is OrderDataState) {
+            OrderDataState state = snapshot.data;
+            if (state.orders.length > 0)
+              return _buildContent(state.orders);
+            else
+              return Center(
+                child: Text(
+                  'Пусто',
+                  style: Theme.of(context).textTheme.headline2,
+                ),
+              );
+          } else {
+            return _buildError();
+          }
+        },
       ),
     );
   }

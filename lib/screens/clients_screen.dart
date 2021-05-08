@@ -4,7 +4,6 @@ import 'package:path_provider/path_provider.dart';
 
 import 'widgets/app_header.dart';
 import 'widgets/rect_button.dart';
-import 'widgets/search_bar.dart';
 import 'widgets/loading_circle.dart';
 import 'global/next_page_route.dart';
 import '../model/client.dart';
@@ -83,37 +82,30 @@ class __BodyState extends State<_Body> {
       onTap: () {
         FocusScope.of(context).requestFocus(FocusNode());
       },
-      child: Column(
-        children: [
-          SearchBar(),
-          Expanded(
-            child: StreamBuilder(
-              stream: Bloc.bloc.clientBloc.client,
-              initialData: ClientInitState(),
-              builder: (context, snapshot) {
-                if (snapshot.data is ClientInitState) {
-                  Bloc.bloc.clientBloc.loadAllClients();
-                  return SizedBox.shrink();
-                } else if (snapshot.data is ClientLoadingState) {
-                  return _buildLoading();
-                } else if (snapshot.data is ClientDataState) {
-                  ClientDataState state = snapshot.data;
-                  if (state.clients.length > 0)
-                    return _buildContent(state.clients);
-                  else
-                    return Center(
-                      child: Text(
-                        'Пусто',
-                        style: Theme.of(context).textTheme.headline2,
-                      ),
-                    );
-                } else {
-                  return _buildError();
-                }
-              },
-            ),
-          ),
-        ],
+      child: StreamBuilder(
+        stream: Bloc.bloc.clientBloc.client,
+        initialData: ClientInitState(),
+        builder: (context, snapshot) {
+          if (snapshot.data is ClientInitState) {
+            Bloc.bloc.clientBloc.loadAllClients();
+            return SizedBox.shrink();
+          } else if (snapshot.data is ClientLoadingState) {
+            return _buildLoading();
+          } else if (snapshot.data is ClientDataState) {
+            ClientDataState state = snapshot.data;
+            if (state.clients.length > 0)
+              return _buildContent(state.clients);
+            else
+              return Center(
+                child: Text(
+                  'Пусто',
+                  style: Theme.of(context).textTheme.headline2,
+                ),
+              );
+          } else {
+            return _buildError();
+          }
+        },
       ),
     );
   }
