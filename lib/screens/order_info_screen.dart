@@ -186,7 +186,6 @@ class _OrderInfoScreenState extends State<OrderInfoScreen> {
                   (widget.order.id == null)
                       ? await Bloc.bloc.orderBloc.addOrder(widget.order)
                       : Bloc.bloc.orderBloc.updateOrder(widget.order);
-
                   priceController.text = widget.order.price.toString();
                   expensesController.text = widget.order.expenses.toString();
                   Bloc.bloc.orderBloc.loadAllOrders();
