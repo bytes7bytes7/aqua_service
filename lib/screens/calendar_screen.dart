@@ -1,13 +1,18 @@
+import 'dart:io';
+
 import 'package:aqua_service/bloc/order_bloc.dart';
 import 'package:aqua_service/model/order.dart';
+import 'package:aqua_service/screens/order_info_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_calendar_carousel/flutter_calendar_carousel.dart'
     show CalendarCarousel;
 import 'package:flutter_calendar_carousel/classes/event.dart';
 import 'package:flutter_calendar_carousel/classes/event_list.dart';
 import 'package:intl/intl.dart' show DateFormat;
+import 'package:path_provider/path_provider.dart';
 
 import '../bloc/bloc.dart';
+import 'global/next_page_route.dart';
 import 'widgets/app_header.dart';
 import 'widgets/loading_circle.dart';
 import 'widgets/rect_button.dart';
@@ -41,18 +46,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
             return _buildLoading();
           } else if (snapshot.data is OrderDataState) {
             OrderDataState state = snapshot.data;
-            if (state.orders.length > 0)
-              return CalendarContent(
-                orders: state.orders,
-                updateDate: widget.updateDate,
-              );
-            else
-              return Center(
-                child: Text(
-                  'Пусто',
-                  style: Theme.of(context).textTheme.headline2,
-                ),
-              );
+            return CalendarContent(
+              orders: state.orders,
+              updateDate: widget.updateDate,
+            );
           } else {
             return _buildError();
           }
@@ -105,8 +102,7 @@ class CalendarContent extends StatefulWidget {
 class _CalendarContentState extends State<CalendarContent> {
   final DateTime _currentDate = DateTime.now();
   final ValueNotifier<bool> _calendarNotifier = ValueNotifier(false);
-  final ValueNotifier<DateTime> _currentDate2Notifier =
-      ValueNotifier(DateTime.now());
+  final ValueNotifier<DateTime> _currentDate2Notifier = ValueNotifier(null);
   final ValueNotifier<String> _currentMonthNotifier =
       ValueNotifier(DateFormat.yMMM().format(DateTime.now()));
   final ValueNotifier<DateTime> _targetDateTimeNotifier =
@@ -134,6 +130,11 @@ class _CalendarContentState extends State<CalendarContent> {
   void _updateTargetDateTime(DateTime dateTime) {
     _targetDateTimeNotifier.value = dateTime;
     _updateCalendar();
+  }
+
+  Future<String> getApplicationDirectoryPath() async {
+    Directory appDocDir = await getApplicationDocumentsDirectory();
+    return appDocDir.path;
   }
 
   @override
@@ -230,7 +231,9 @@ class _CalendarContentState extends State<CalendarContent> {
                         _selectedOrders = [];
                         events.forEach((ev) => _selectedOrders.addAll(widget
                             .orders
-                            .where((item) => item.id == ev.id)
+                            .where((item) =>
+                                DateFormat("dd.MM.yyyy").parse(item.date) ==
+                                ev.date)
                             .toList()));
                       },
                       onCalendarChanged: (DateTime date) {
@@ -273,7 +276,29 @@ class _CalendarContentState extends State<CalendarContent> {
                       controller: scrollController,
                       itemCount: _selectedOrders.length + 1,
                       itemBuilder: (BuildContext context, int index) {
+                        String appDocPath;
                         Iterable<int> bytes;
+                        Future init() async {
+                          if (appDocPath == null && index != 0) {
+                            getApplicationDirectoryPath().then((value) {
+                              if (_selectedOrders[index - 1].client.avatar !=
+                                  null) {
+                                var hasLocalImage = File(
+                                        _selectedOrders[index - 1]
+                                            .client
+                                            .avatar)
+                                    .existsSync();
+                                if (hasLocalImage) {
+                                  bytes = File(_selectedOrders[index - 1]
+                                          .client
+                                          .avatar)
+                                      .readAsBytesSync();
+                                }
+                              }
+                            });
+                          }
+                        }
+                        init();
                         if (index == 0) {
                           return Center(
                             child: Column(
@@ -305,7 +330,18 @@ class _CalendarContentState extends State<CalendarContent> {
                             child: Material(
                               color: Colors.transparent,
                               child: InkWell(
-                                onTap: () {},
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    NextPageRoute(
+                                      nextPage: OrderInfoScreen(
+                                        title: 'Заказ',
+                                        order: _selectedOrders[index - 1],
+                                        readMode: true,
+                                      ),
+                                    ),
+                                  );
+                                },
                                 borderRadius: BorderRadius.circular(8),
                                 child: Container(
                                   padding: const EdgeInsets.symmetric(

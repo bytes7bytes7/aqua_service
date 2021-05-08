@@ -26,10 +26,12 @@ class OrderInfoScreen extends StatefulWidget {
     Key key,
     @required this.title,
     @required this.order,
+    this.readMode = false,
   }) : super(key: key);
 
   final String title;
   final Order order;
+  final bool readMode;
 
   @override
   _OrderInfoScreenState createState() => _OrderInfoScreenState();
@@ -98,8 +100,9 @@ class _OrderInfoScreenState extends State<OrderInfoScreen> {
             color: Theme.of(context).focusColor,
           ),
           onPressed: () {
-            if (!ListEquality()
-                    .equals([changes['client']], [widget.order.client]) ||
+            if (!widget.readMode &&
+                    !ListEquality()
+                        .equals([changes['client']], [widget.order.client]) ||
                 priceController.text != widget.order.price.toString() &&
                     !(!(priceController.text != '') &&
                         !(widget.order.price != null)) ||
@@ -128,7 +131,7 @@ class _OrderInfoScreenState extends State<OrderInfoScreen> {
           },
         ),
         action: [
-          if (widget.order.id != null)
+          if (widget.order.id != null && !widget.readMode)
             IconButton(
                 icon: Icon(
                   Icons.delete,
@@ -150,75 +153,77 @@ class _OrderInfoScreenState extends State<OrderInfoScreen> {
                     },
                   );
                 }),
-          IconButton(
-            icon: Icon(
-              Icons.done,
-              color: Theme.of(context).focusColor,
-            ),
-            onPressed: () async {
-              FocusScope.of(context).requestFocus(FocusNode());
-              validateFormat = true;
-              validateClient = changes['client'].id != null;
-              validateDate = changes['date'] != null;
-              validatePrice = priceController.text.length > 0;
-              validateExpenses = expensesController.text.length > 0;
-              validateFormat = priceValidation(priceController.text) &&
-                  priceValidation(expensesController.text);
-              if (validatePrice &&
-                  validateExpenses &&
-                  validateFormat &&
-                  validateClient &&
-                  validateDate) {
-                widget.order
-                  ..client = changes['client']
-                  ..price = double.parse(priceController.text)
-                  ..fabrics = changes['fabrics']
-                      .map<Fabric>((e) => Fabric.from(e))
-                      .toList()
-                  ..expenses = double.parse(expensesController.text)
-                  ..date = changes['date']
-                  ..done = changes['done']
-                  ..comment = commentController.text;
-                (widget.order.id == null)
-                    ? await Bloc.bloc.orderBloc.addOrder(widget.order)
-                    : Bloc.bloc.orderBloc.updateOrder(widget.order);
+          if (!widget.readMode)
+            IconButton(
+              icon: Icon(
+                Icons.done,
+                color: Theme.of(context).focusColor,
+              ),
+              onPressed: () async {
+                FocusScope.of(context).requestFocus(FocusNode());
+                validateFormat = true;
+                validateClient = changes['client'].id != null;
+                validateDate = changes['date'] != null;
+                validatePrice = priceController.text.length > 0;
+                validateExpenses = expensesController.text.length > 0;
+                validateFormat = priceValidation(priceController.text) &&
+                    priceValidation(expensesController.text);
+                if (validatePrice &&
+                    validateExpenses &&
+                    validateFormat &&
+                    validateClient &&
+                    validateDate) {
+                  widget.order
+                    ..client = changes['client']
+                    ..price = double.parse(priceController.text)
+                    ..fabrics = changes['fabrics']
+                        .map<Fabric>((e) => Fabric.from(e))
+                        .toList()
+                    ..expenses = double.parse(expensesController.text)
+                    ..date = changes['date']
+                    ..done = changes['done']
+                    ..comment = commentController.text;
+                  (widget.order.id == null)
+                      ? await Bloc.bloc.orderBloc.addOrder(widget.order)
+                      : Bloc.bloc.orderBloc.updateOrder(widget.order);
 
-                priceController.text = widget.order.price.toString();
-                expensesController.text = widget.order.expenses.toString();
-                Bloc.bloc.orderBloc.loadAllOrders();
-                setState(() {
-                  _title = 'Заказ';
-                });
-              }
-              if (validatePrice &&
-                  validateExpenses &&
-                  validateFormat &&
-                  validateClient &&
-                  validateDate)
-                showInfoSnackBar(
-                    context: context,
-                    info: 'Сохранено!',
-                    icon: Icons.done_all_outlined);
-              else if (!validateFormat)
-                showInfoSnackBar(
-                    context: context,
-                    info: 'Неверный формат числа',
-                    icon: Icons.warning_amber_outlined);
-              else if (!validateClient)
-                showInfoSnackBar(
-                    context: context,
-                    info: 'Выберите клиента',
-                    icon: Icons.warning_amber_outlined);
-              else
-                showInfoSnackBar(
-                    context: context,
-                    info: 'Заполните поля со звездочкой',
-                    icon: Icons.warning_amber_outlined);
-            },
-          ),
+                  priceController.text = widget.order.price.toString();
+                  expensesController.text = widget.order.expenses.toString();
+                  Bloc.bloc.orderBloc.loadAllOrders();
+                  setState(() {
+                    _title = 'Заказ';
+                  });
+                }
+                if (validatePrice &&
+                    validateExpenses &&
+                    validateFormat &&
+                    validateClient &&
+                    validateDate)
+                  showInfoSnackBar(
+                      context: context,
+                      info: 'Сохранено!',
+                      icon: Icons.done_all_outlined);
+                else if (!validateFormat)
+                  showInfoSnackBar(
+                      context: context,
+                      info: 'Неверный формат числа',
+                      icon: Icons.warning_amber_outlined);
+                else if (!validateClient)
+                  showInfoSnackBar(
+                      context: context,
+                      info: 'Выберите клиента',
+                      icon: Icons.warning_amber_outlined);
+                else
+                  showInfoSnackBar(
+                      context: context,
+                      info: 'Заполните поля со звездочкой',
+                      icon: Icons.warning_amber_outlined);
+              },
+            ),
         ],
       ),
       body: _Body(
+        readMode: widget.readMode,
         changes: changes,
         priceController: priceController,
         expensesController: expensesController,
@@ -231,12 +236,14 @@ class _OrderInfoScreenState extends State<OrderInfoScreen> {
 class _Body extends StatefulWidget {
   const _Body({
     Key key,
+    @required this.readMode,
     @required this.changes,
     @required this.priceController,
     @required this.expensesController,
     @required this.commentController,
   }) : super(key: key);
 
+  final bool readMode;
   final Map<String, dynamic> changes;
   final TextEditingController priceController;
   final TextEditingController expensesController;
@@ -320,11 +327,13 @@ class __BodyState extends State<_Body> {
             child: Column(
               children: [
                 _ClientCard(
+                  readMode: widget.readMode,
                   changes: widget.changes,
                 ),
                 TextField(
                   controller: widget.priceController,
                   style: Theme.of(context).textTheme.bodyText1,
+                  enabled: !widget.readMode,
                   keyboardType: TextInputType.number,
                   decoration: InputDecoration(
                     labelText: 'Стоимость',
@@ -338,6 +347,7 @@ class __BodyState extends State<_Body> {
                 TextField(
                   controller: widget.expensesController,
                   style: Theme.of(context).textTheme.bodyText1,
+                  enabled: !widget.readMode,
                   keyboardType: TextInputType.number,
                   decoration: InputDecoration(
                     labelText: 'Затраты',
@@ -394,7 +404,6 @@ class __BodyState extends State<_Body> {
                             while (year.length < 4) year = '0' + year;
                             date = '$day.$month.$year';
                           }
-
                           return Text(
                             date,
                             style: Theme.of(context).textTheme.bodyText1,
@@ -407,16 +416,18 @@ class __BodyState extends State<_Body> {
                           Icons.calendar_today_outlined,
                           color: Theme.of(context).focusColor,
                         ),
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            NextPageRoute(
-                              nextPage: CalendarScreen(
-                                updateDate: _updateDateTime,
-                              ),
-                            ),
-                          );
-                        },
+                        onPressed: (widget.readMode)
+                            ? () {}
+                            : () {
+                                Navigator.push(
+                                  context,
+                                  NextPageRoute(
+                                    nextPage: CalendarScreen(
+                                      updateDate: _updateDateTime,
+                                    ),
+                                  ),
+                                );
+                              },
                       ),
                     ],
                   ),
@@ -436,16 +447,18 @@ class __BodyState extends State<_Body> {
                           Icons.add,
                           color: Theme.of(context).focusColor,
                         ),
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            NextPageRoute(
-                              nextPage: FabricsScreen(
-                                addFabric: _addFabric,
-                              ),
-                            ),
-                          );
-                        },
+                        onPressed: (widget.readMode)
+                            ? () {}
+                            : () {
+                                Navigator.push(
+                                  context,
+                                  NextPageRoute(
+                                    nextPage: FabricsScreen(
+                                      addFabric: _addFabric,
+                                    ),
+                                  ),
+                                );
+                              },
                       ),
                     ],
                   ),
@@ -480,6 +493,7 @@ class __BodyState extends State<_Body> {
                               widget.changes['fabrics'].length,
                               (index) {
                                 return _FabricCard(
+                                  readMode: widget.readMode,
                                   fabric: widget.changes['fabrics'][index],
                                   removeFabric: _removeFabric,
                                 );
@@ -508,6 +522,7 @@ class __BodyState extends State<_Body> {
                         children: <Widget>[
                           TextField(
                             controller: widget.commentController,
+                            enabled: !widget.readMode,
                             decoration: InputDecoration(
                               hintText: "Ваш комментарий",
                               hintStyle: Theme.of(context).textTheme.headline3,
@@ -529,10 +544,12 @@ class __BodyState extends State<_Body> {
                   builder: (BuildContext context, bool done, Widget child) {
                     return RectButton(
                       text: (widget.changes['done']) ? 'Заново' : 'Завершить',
-                      onPressed: () {
-                        _doneNotifier.value = !_doneNotifier.value;
-                        widget.changes['done'] = _doneNotifier.value;
-                      },
+                      onPressed: (widget.readMode)
+                          ? () {}
+                          : () {
+                              _doneNotifier.value = !_doneNotifier.value;
+                              widget.changes['done'] = _doneNotifier.value;
+                            },
                     );
                   },
                 ),
@@ -549,9 +566,11 @@ class __BodyState extends State<_Body> {
 class _ClientCard extends StatefulWidget {
   const _ClientCard({
     Key key,
+    @required this.readMode,
     @required this.changes,
   }) : super(key: key);
 
+  final bool readMode;
   final Map<String, dynamic> changes;
 
   @override
@@ -567,18 +586,6 @@ class __ClientCardState extends State<_ClientCard> {
     if (client.id != null) {
       _clientNotifier.value = Client.from(client);
       widget.changes['client'] = Client.from(client);
-      // widget.changes['client'].id = client.id;
-      // widget.changes['client'].avatar = client.avatar;
-      // widget.changes['client'].name = client.name;
-      // widget.changes['client'].surname = client.surname;
-      // widget.changes['client'].middleName = client.middleName;
-      // widget.changes['client'].city = client.city;
-      // widget.changes['client'].address = client.address;
-      // widget.changes['client'].phone = client.phone;
-      // widget.changes['client'].volume = client.volume;
-      // widget.changes['client'].previousDate = client.previousDate;
-      // widget.changes['client'].nextDate = client.nextDate;
-      // widget.changes['client'].images = client.images;
       if (widget.changes['client'].avatar != null)
         bytes = File(widget.changes['client'].avatar).readAsBytesSync();
     }
@@ -682,15 +689,17 @@ class __ClientCardState extends State<_ClientCard> {
                     Icons.edit,
                     color: Theme.of(context).focusColor,
                   ),
-                  onPressed: () async {
-                    Navigator.push(
-                      context,
-                      NextPageRoute(
-                          nextPage: ClientsScreen(
-                        updateClient: _updateClient,
-                      )),
-                    );
-                  },
+                  onPressed: (widget.readMode)
+                      ? () {}
+                      : () async {
+                          Navigator.push(
+                            context,
+                            NextPageRoute(
+                                nextPage: ClientsScreen(
+                              updateClient: _updateClient,
+                            )),
+                          );
+                        },
                 ),
               ],
             ),
@@ -704,10 +713,12 @@ class __ClientCardState extends State<_ClientCard> {
 class _FabricCard extends StatelessWidget {
   const _FabricCard({
     Key key,
+    @required this.readMode,
     @required this.fabric,
     @required this.removeFabric,
   }) : super(key: key);
 
+  final bool readMode;
   final Fabric fabric;
   final Function removeFabric;
 
@@ -732,9 +743,11 @@ class _FabricCard extends StatelessWidget {
               Icons.close,
               color: Theme.of(context).focusColor,
             ),
-            onPressed: () {
-              removeFabric(fabric.id);
-            },
+            onPressed: (readMode)
+                ? () {}
+                : () {
+                    removeFabric(fabric.id);
+                  },
           ),
         ],
       ),

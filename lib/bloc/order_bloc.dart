@@ -10,15 +10,12 @@ class OrderBloc {
   static StreamController _orderStreamController;
 
   Stream<OrderState> get order {
-    if (_orderStreamController == null || _orderStreamController.isClosed) {
-      print('order create');
+    if (_orderStreamController == null || _orderStreamController.isClosed)
       _orderStreamController = StreamController<OrderState>.broadcast();
-    }
     return _orderStreamController.stream;
   }
 
   void dispose() {
-    print('order dispose');
     _orderStreamController.close();
   }
 
