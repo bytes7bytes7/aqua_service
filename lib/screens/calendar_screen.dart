@@ -138,6 +138,12 @@ class _CalendarContentState extends State<CalendarContent> {
   }
 
   @override
+  void didUpdateWidget(covariant CalendarContent oldWidget) {
+    // TODO: implement didUpdateWidget
+    super.didUpdateWidget(oldWidget);
+  }
+
+  @override
   Widget build(BuildContext context) {
     EventList<Event> _markedDateMap = EventList<Event>(
       events: Map<DateTime, List<Event>>.fromIterables(
@@ -277,28 +283,29 @@ class _CalendarContentState extends State<CalendarContent> {
                       itemCount: _selectedOrders.length + 1,
                       itemBuilder: (BuildContext context, int index) {
                         String appDocPath;
-                        Iterable<int> bytes;
-                        Future init() async {
-                          if (appDocPath == null && index != 0) {
-                            getApplicationDirectoryPath().then((value) {
-                              if (_selectedOrders[index - 1].client.avatar !=
-                                  null) {
-                                var hasLocalImage = File(
-                                        _selectedOrders[index - 1]
-                                            .client
-                                            .avatar)
-                                    .existsSync();
-                                if (hasLocalImage) {
-                                  bytes = File(_selectedOrders[index - 1]
-                                          .client
-                                          .avatar)
-                                      .readAsBytesSync();
-                                }
-                              }
-                            });
-                          }
+                        Future<void> getApplicationDirectoryPath() async {
+                          Directory appDocDir =
+                              await getApplicationDocumentsDirectory();
+                          appDocPath = appDocDir.path;
                         }
-                        init();
+
+                        Future<Iterable<int>> _getImage() async {
+                          Iterable<int> bytes;
+                          if (appDocPath == null)
+                            await getApplicationDirectoryPath();
+                          if (widget.orders[index - 1] != null) {
+                            var hasLocalImage =
+                                File(widget.orders[index - 1].client.avatar)
+                                    .existsSync();
+                            if (hasLocalImage) {
+                              bytes =
+                                  File(widget.orders[index - 1].client.avatar)
+                                      .readAsBytesSync();
+                            }
+                          }
+                          return bytes;
+                        }
+
                         if (index == 0) {
                           return Center(
                             child: Column(
@@ -323,6 +330,7 @@ class _CalendarContentState extends State<CalendarContent> {
                             ),
                           );
                         } else {
+                          Iterable<int> bytes;
                           return Container(
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 20.0, vertical: 10.0),
@@ -355,21 +363,40 @@ class _CalendarContentState extends State<CalendarContent> {
                                           radius: 24.0,
                                           backgroundColor:
                                               Theme.of(context).focusColor,
-                                          child: (bytes != null)
-                                              ? Container(
-                                                  decoration: BoxDecoration(
-                                                    shape: BoxShape.circle,
-                                                    image: DecorationImage(
-                                                      image: MemoryImage(bytes),
-                                                      fit: BoxFit.cover,
+                                          child: FutureBuilder<Iterable<int>>(
+                                            future: _getImage(),
+                                            builder: (BuildContext context,
+                                                AsyncSnapshot<Iterable<int>>
+                                                    snapshot) {
+                                              if (snapshot.hasData) {
+                                                bytes = snapshot.data;
+                                                if (bytes != null) {
+                                                  return Container(
+                                                    decoration: BoxDecoration(
+                                                      shape: BoxShape.circle,
+                                                      image: DecorationImage(
+                                                        image:
+                                                            MemoryImage(bytes),
+                                                        fit: BoxFit.cover,
+                                                      ),
                                                     ),
-                                                  ),
-                                                )
-                                              : Icon(
+                                                  );
+                                                } else {
+                                                  return Icon(
+                                                    Icons.person,
+                                                    color: Theme.of(context)
+                                                        .cardColor,
+                                                  );
+                                                }
+                                              } else {
+                                                return Icon(
                                                   Icons.person,
                                                   color: Theme.of(context)
                                                       .cardColor,
-                                                ),
+                                                );
+                                              }
+                                            },
+                                          ),
                                         ),
                                         SizedBox(width: 14.0),
                                         Column(

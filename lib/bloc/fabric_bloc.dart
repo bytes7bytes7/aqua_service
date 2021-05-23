@@ -19,7 +19,7 @@ class FabricBloc{
     _fabricStreamController.close();
   }
 
-  void loadAllFabrics(){
+  void loadAllFabrics() async{
     _fabricStreamController.sink.add(FabricState._fabricLoading());
     _repository.getAllFabrics().then((fabricList) {
       fabricList.sort((a,b) => a.title.toLowerCase().compareTo(b.title.toLowerCase()));
@@ -28,14 +28,14 @@ class FabricBloc{
     });
   }
 
-  void deleteFabric(int id) {
+  void deleteFabric(int id)async {
     _fabricStreamController.sink.add(FabricState._fabricLoading());
     _repository.deleteFabric(id).then((value) {
       loadAllFabrics();
     });
   }
 
-  void updateFabric(Fabric fabric){
+  void updateFabric(Fabric fabric)async{
     _fabricStreamController.sink.add(FabricState._fabricLoading());
     _repository.updateFabric(fabric).then((value) {
       loadAllFabrics();

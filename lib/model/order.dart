@@ -22,7 +22,7 @@ class Order {
   bool done;
   String comment;
 
-  Order.from(Order other) {
+  Order.from(Order other){
     id = other.id;
     client = Client.from(other.client);
     price = other.price;

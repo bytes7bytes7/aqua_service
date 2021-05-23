@@ -1,7 +1,8 @@
-import '../model/report.dart';
+import '../database/database_helper.dart';
+import '../model/order.dart';
 
 class ReportRepository {
-  Future<List<Report>> getAllReports()async{
-    return [];
+  Future<List<Order>> getAllReports()async{
+    return await DatabaseHelper.db.getAllOrders();
   }
 }

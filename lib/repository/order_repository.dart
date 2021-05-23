@@ -3,7 +3,7 @@ import '../model/order.dart';
 
 class OrderRepository {
   Future<List<Order>> getAllOrders() async {
-    return DatabaseHelper.db.getAllOrders();
+    return await DatabaseHelper.db.getAllOrders();
   }
 
   Future deleteOrder(int id) async{

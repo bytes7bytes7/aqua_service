@@ -28,7 +28,6 @@ class _Body extends StatefulWidget {
 }
 
 class __BodyState extends State<_Body> {
-
   @override
   void dispose() {
     Bloc.bloc.reportBloc.dispose();
@@ -42,28 +41,30 @@ class __BodyState extends State<_Body> {
       onTap: () {
         FocusScope.of(context).requestFocus(FocusNode());
       },
-      child: Column(
-        children: [
-          Expanded(
-            child: StreamBuilder(
-              stream: Bloc.bloc.reportBloc.report,
-              initialData: ReportInitState(),
-              builder: (context, snapshot) {
-                if (snapshot.data is ReportInitState) {
-                  Bloc.bloc.reportBloc.loadAllReports();
-                  return SizedBox.shrink();
-                } else if (snapshot.data is ReportLoadingState) {
-                  return _buildLoading();
-                } else if (snapshot.data is ReportDataState) {
-                  ReportDataState state = snapshot.data;
-                  return _buildContent(state.reports);
-                } else {
-                  return _buildError();
-                }
-              },
-            ),
-          ),
-        ],
+      child: StreamBuilder(
+        stream: Bloc.bloc.reportBloc.report,
+        initialData: ReportInitState(),
+        builder: (context, snapshot) {
+          if (snapshot.data is ReportInitState) {
+            Bloc.bloc.reportBloc.loadAllReports();
+            return SizedBox.shrink();
+          } else if (snapshot.data is ReportLoadingState) {
+            return _buildLoading();
+          } else if (snapshot.data is ReportDataState) {
+            ReportDataState state = snapshot.data;
+            if (state.reports.length > 0)
+              return _ReportList(reports: state.reports);
+            else
+              return Center(
+                child: Text(
+                  'Пусто',
+                  style: Theme.of(context).textTheme.headline2,
+                ),
+              );
+          } else {
+            return _buildError();
+          }
+        },
       ),
     );
   }
@@ -71,17 +72,6 @@ class __BodyState extends State<_Body> {
   Widget _buildLoading() {
     return Center(
       child: LoadingCircle(),
-    );
-  }
-
-  Widget _buildContent(List<Report> reports) {
-    return ListView.builder(
-      itemCount: reports.length,
-      itemBuilder: (context, i) {
-        return _ReportCard(
-          report: reports[i],
-        );
-      },
     );
   }
 
@@ -96,12 +86,34 @@ class __BodyState extends State<_Body> {
           ),
           SizedBox(height: 20),
           RectButton(
-              text: 'Обновить',
-              onPressed: () {
-                Bloc.bloc.reportBloc.loadAllReports();
-              }),
+            text: 'Обновить',
+            onPressed: () {
+              Bloc.bloc.reportBloc.loadAllReports();
+            },
+          ),
         ],
       ),
+    );
+  }
+}
+
+class _ReportList extends StatelessWidget {
+  const _ReportList({
+    Key key,
+    @required this.reports,
+  }) : super(key: key);
+
+  final List<Report> reports;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      itemCount: reports.length,
+      itemBuilder: (context, i) {
+        return _ReportCard(
+          report: reports[i],
+        );
+      },
     );
   }
 }
@@ -127,10 +139,30 @@ class _ReportCard extends StatelessWidget {
             padding:
                 const EdgeInsets.symmetric(horizontal: 10.0, vertical: 12.0),
             width: double.infinity,
-            child: Text(
-              '${report.timePeriod} : ${report.profit}',
-              style: Theme.of(context).textTheme.bodyText1,
-              overflow: TextOverflow.ellipsis,
+            child: Row(
+              children: [
+                Text(
+                  report.timePeriod,
+                  style: Theme.of(context).textTheme.bodyText1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                Spacer(),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      '+${report.profit}',
+                      style: Theme.of(context).textTheme.bodyText1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    Text(
+                      '-${report.expenses}',
+                      style: Theme.of(context).textTheme.bodyText1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
         ),

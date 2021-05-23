@@ -43,6 +43,11 @@ class _OrderInfoScreenState extends State<OrderInfoScreen> {
   TextEditingController commentController;
   Map<String, dynamic> changes = {};
   String _title;
+  bool validateClient = false,
+      validateDate = false,
+      validatePrice = false,
+      validateExpenses = false,
+      validateFormat = false;
 
   @override
   void initState() {
@@ -84,13 +89,68 @@ class _OrderInfoScreenState extends State<OrderInfoScreen> {
     super.dispose();
   }
 
+  save() async {
+    FocusScope.of(context).requestFocus(FocusNode());
+    validateFormat = true;
+    validateClient = changes['client'].id != null;
+    validateDate = changes['date'] != null;
+    validatePrice = priceController.text.length > 0;
+    validateExpenses = expensesController.text.length > 0;
+    validateFormat = priceValidation(priceController.text) &&
+        priceValidation(expensesController.text);
+    if (validatePrice &&
+        validateExpenses &&
+        validateFormat &&
+        validateClient &&
+        validateDate) {
+      widget.order
+        ..client = changes['client']
+        ..price = double.parse(priceController.text)
+        ..fabrics =
+            changes['fabrics'].map<Fabric>((e) => Fabric.from(e)).toList()
+        ..expenses = double.parse(expensesController.text)
+        ..date = changes['date']
+        ..done = changes['done']
+        ..comment = commentController.text;
+      if (widget.order.id == null) {
+        await Bloc.bloc.orderBloc.addOrder(widget.order);
+        print(widget.order.id);
+        setState(() {
+          _title = 'Заказ';
+        });
+      } else {
+        Bloc.bloc.orderBloc.updateOrder(widget.order);
+      }
+      priceController.text = widget.order.price.toString();
+      expensesController.text = widget.order.expenses.toString();
+      Bloc.bloc.orderBloc.loadAllOrders();
+    }
+    if (validatePrice &&
+        validateExpenses &&
+        validateFormat &&
+        validateClient &&
+        validateDate)
+      showInfoSnackBar(
+          context: context, info: 'Сохранено!', icon: Icons.done_all_outlined);
+    else if (!validateFormat)
+      showInfoSnackBar(
+          context: context,
+          info: 'Неверный формат числа',
+          icon: Icons.warning_amber_outlined);
+    else if (!validateClient)
+      showInfoSnackBar(
+          context: context,
+          info: 'Выберите клиента',
+          icon: Icons.warning_amber_outlined);
+    else
+      showInfoSnackBar(
+          context: context,
+          info: 'Заполните поля со звездочкой',
+          icon: Icons.warning_amber_outlined);
+  }
+
   @override
   Widget build(BuildContext context) {
-    bool validateClient = false,
-        validateDate = false,
-        validatePrice = false,
-        validateExpenses = false,
-        validateFormat = false;
     return Scaffold(
       appBar: AppHeader(
         title: _title,
@@ -99,7 +159,7 @@ class _OrderInfoScreenState extends State<OrderInfoScreen> {
             Icons.arrow_back_ios_outlined,
             color: Theme.of(context).focusColor,
           ),
-          onPressed: () {
+          onPressed: () async {
             if (!widget.readMode &&
                     !ListEquality()
                         .equals([changes['client']], [widget.order.client]) ||
@@ -159,69 +219,14 @@ class _OrderInfoScreenState extends State<OrderInfoScreen> {
                 Icons.done,
                 color: Theme.of(context).focusColor,
               ),
-              onPressed: () async {
-                FocusScope.of(context).requestFocus(FocusNode());
-                validateFormat = true;
-                validateClient = changes['client'].id != null;
-                validateDate = changes['date'] != null;
-                validatePrice = priceController.text.length > 0;
-                validateExpenses = expensesController.text.length > 0;
-                validateFormat = priceValidation(priceController.text) &&
-                    priceValidation(expensesController.text);
-                if (validatePrice &&
-                    validateExpenses &&
-                    validateFormat &&
-                    validateClient &&
-                    validateDate) {
-                  widget.order
-                    ..client = changes['client']
-                    ..price = double.parse(priceController.text)
-                    ..fabrics = changes['fabrics']
-                        .map<Fabric>((e) => Fabric.from(e))
-                        .toList()
-                    ..expenses = double.parse(expensesController.text)
-                    ..date = changes['date']
-                    ..done = changes['done']
-                    ..comment = commentController.text;
-                  (widget.order.id == null)
-                      ? await Bloc.bloc.orderBloc.addOrder(widget.order)
-                      : Bloc.bloc.orderBloc.updateOrder(widget.order);
-                  priceController.text = widget.order.price.toString();
-                  expensesController.text = widget.order.expenses.toString();
-                  Bloc.bloc.orderBloc.loadAllOrders();
-                  setState(() {
-                    _title = 'Заказ';
-                  });
-                }
-                if (validatePrice &&
-                    validateExpenses &&
-                    validateFormat &&
-                    validateClient &&
-                    validateDate)
-                  showInfoSnackBar(
-                      context: context,
-                      info: 'Сохранено!',
-                      icon: Icons.done_all_outlined);
-                else if (!validateFormat)
-                  showInfoSnackBar(
-                      context: context,
-                      info: 'Неверный формат числа',
-                      icon: Icons.warning_amber_outlined);
-                else if (!validateClient)
-                  showInfoSnackBar(
-                      context: context,
-                      info: 'Выберите клиента',
-                      icon: Icons.warning_amber_outlined);
-                else
-                  showInfoSnackBar(
-                      context: context,
-                      info: 'Заполните поля со звездочкой',
-                      icon: Icons.warning_amber_outlined);
+              onPressed: () {
+                save();
               },
             ),
         ],
       ),
       body: _Body(
+        save: save,
         readMode: widget.readMode,
         changes: changes,
         priceController: priceController,
@@ -235,6 +240,7 @@ class _OrderInfoScreenState extends State<OrderInfoScreen> {
 class _Body extends StatefulWidget {
   const _Body({
     Key key,
+    @required this.save,
     @required this.readMode,
     @required this.changes,
     @required this.priceController,
@@ -242,6 +248,7 @@ class _Body extends StatefulWidget {
     @required this.commentController,
   }) : super(key: key);
 
+  final Function save;
   final bool readMode;
   final Map<String, dynamic> changes;
   final TextEditingController priceController;
@@ -254,7 +261,7 @@ class _Body extends StatefulWidget {
 
 class __BodyState extends State<_Body> {
   final DateFormat dateTimeFormat = DateFormat("dd.MM.yyyy");
-  ValueNotifier<Fabric> _fabricsNotifier = ValueNotifier(Fabric());
+  ValueNotifier<bool> _fabricsNotifier = ValueNotifier(true);
   ValueNotifier<DateTime> _dateTimeNotifier;
   ValueNotifier<bool> _doneNotifier;
   String appDocPath;
@@ -262,7 +269,6 @@ class __BodyState extends State<_Body> {
 
   _addFabric(Fabric fabric) {
     if (fabric.id != null) {
-      _fabricsNotifier.value = Fabric.from(fabric);
       for (int i = 0; i < widget.changes['fabrics'].length; i++) {
         if (widget.changes['fabrics'][i].id == fabric.id) {
           showInfoSnackBar(
@@ -273,6 +279,7 @@ class __BodyState extends State<_Body> {
         }
       }
       widget.changes['fabrics'].add(Fabric.from(fabric));
+      _fabricsNotifier.value = !_fabricsNotifier.value;
     }
   }
 
@@ -282,7 +289,7 @@ class __BodyState extends State<_Body> {
         widget.changes['fabrics'].removeAt(i);
         break;
       }
-    _fabricsNotifier.notifyListeners();
+    _fabricsNotifier.value = !_fabricsNotifier.value;
   }
 
   Future<void> getApplicationDirectoryPath() async {
@@ -335,7 +342,7 @@ class __BodyState extends State<_Body> {
                   enabled: !widget.readMode,
                   keyboardType: TextInputType.number,
                   decoration: InputDecoration(
-                    labelText: 'Стоимость',
+                    labelText: 'Стоимость *',
                     labelStyle: Theme.of(context).textTheme.headline3,
                     enabledBorder: UnderlineInputBorder(
                       borderSide:
@@ -349,7 +356,7 @@ class __BodyState extends State<_Body> {
                   enabled: !widget.readMode,
                   keyboardType: TextInputType.number,
                   decoration: InputDecoration(
-                    labelText: 'Затраты',
+                    labelText: 'Затраты *',
                     labelStyle: Theme.of(context).textTheme.headline3,
                     enabledBorder: UnderlineInputBorder(
                       borderSide:
@@ -477,7 +484,7 @@ class __BodyState extends State<_Body> {
                     child: ValueListenableBuilder(
                       valueListenable: _fabricsNotifier,
                       builder:
-                          (BuildContext context, Fabric fabric, Widget child) {
+                          (BuildContext context, bool updated, Widget child) {
                         if (widget.changes['fabrics'].length == 0) {
                           return Center(
                             child: Text(
@@ -548,6 +555,7 @@ class __BodyState extends State<_Body> {
                           : () {
                               _doneNotifier.value = !_doneNotifier.value;
                               widget.changes['done'] = _doneNotifier.value;
+                              widget.save();
                             },
                     );
                   },

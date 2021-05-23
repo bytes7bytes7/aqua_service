@@ -5,11 +5,11 @@ class Report {
     this.id,
     @required this.timePeriod,
     @required this.profit,
-    @required this.date,
+    @required this.expenses,
   });
 
   int id;
   String timePeriod;
   double profit;
-  String date;
+  double expenses;
 }

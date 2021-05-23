@@ -54,7 +54,6 @@ class _Body extends StatefulWidget {
 }
 
 class __BodyState extends State<_Body> {
-
   @override
   void dispose() {
     Bloc.bloc.orderBloc.dispose();
@@ -80,7 +79,7 @@ class __BodyState extends State<_Body> {
           } else if (snapshot.data is OrderDataState) {
             OrderDataState state = snapshot.data;
             if (state.orders.length > 0)
-              return _buildContent(state.orders);
+              return _OrderList(orders: state.orders);
             else
               return Center(
                 child: Text(
@@ -102,17 +101,6 @@ class __BodyState extends State<_Body> {
     );
   }
 
-  Widget _buildContent(List<Order> orders) {
-    return ListView.builder(
-      itemCount: orders.length,
-      itemBuilder: (context, i) {
-        return _OrderCard(
-          order: orders[i],
-        );
-      },
-    );
-  }
-
   Widget _buildError() {
     return Center(
       child: Column(
@@ -131,6 +119,110 @@ class __BodyState extends State<_Body> {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _OrderList extends StatelessWidget {
+  const _OrderList({Key key, this.orders}) : super(key: key);
+
+  final List<Order> orders;
+
+  @override
+  Widget build(BuildContext context) {
+    List<Order> lstDone = [];
+    List<Order> lstNotDone = [];
+    orders.forEach((element) {
+      if (element.done)
+        lstDone.add(element);
+      else
+        lstNotDone.add(element);
+    });
+    return Column(
+      children: [
+        SizedBox(height: 20),
+        Expanded(
+          child: ListView.builder(
+            itemCount: orders.length + 2,
+            itemBuilder: (context, i) {
+              if (i == 0) {
+                if (lstNotDone.length > 0) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 30),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Divider(
+                            thickness: 1,
+                            color: Theme.of(context).focusColor,
+                          ),
+                        ),
+                        Padding(
+                          padding:
+                              const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                          child: Text(
+                            'Не выполнено',
+                            style: Theme.of(context).textTheme.bodyText1,
+                          ),
+                        ),
+                        Expanded(
+                          child: Divider(
+                            thickness: 1,
+                            color: Theme.of(context).focusColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                } else {
+                  return SizedBox.shrink();
+                }
+              } else if (i < lstNotDone.length + 1) {
+                return _OrderCard(
+                  order: lstNotDone[i - 1],
+                );
+              } else if (i == lstNotDone.length + 1) {
+                if (lstDone.length > 0) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 30),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Divider(
+                            thickness: 1,
+                            color: Theme.of(context).focusColor,
+                          ),
+                        ),
+                        Padding(
+                          padding:
+                              const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                          child: Text(
+                            'Выполнено',
+                            style: Theme.of(context).textTheme.bodyText1,
+                          ),
+                        ),
+                        Expanded(
+                          child: Divider(
+                            thickness: 1,
+                            color: Theme.of(context).focusColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                } else {
+                  return SizedBox.shrink();
+                }
+              } else {
+                int index = i - lstNotDone.length - 2;
+                return _OrderCard(
+                  order: lstDone[index],
+                );
+              }
+            },
+          ),
+        ),
+      ],
     );
   }
 }

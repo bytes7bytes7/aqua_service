@@ -19,7 +19,7 @@ class ClientBloc {
     _clientStreamController.close();
   }
 
-  void loadAllClients() {
+  void loadAllClients() async {
     _clientStreamController.sink.add(ClientState._clientLoading());
     _repository.getAllClients().then((clientList) {
       clientList
@@ -29,14 +29,14 @@ class ClientBloc {
     });
   }
 
-  void deleteClient(int id) {
+  void deleteClient(int id) async{
     _clientStreamController.sink.add(ClientState._clientLoading());
     _repository.deleteClient(id).then((value) {
       loadAllClients();
     });
   }
 
-  void updateClient(Client client) {
+  void updateClient(Client client) async{
     _clientStreamController.sink.add(ClientState._clientLoading());
     _repository.updateClient(client).then((value) {
       loadAllClients();
