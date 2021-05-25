@@ -435,6 +435,7 @@ class __BodyState extends State<_Body> {
                   valueListenable: orders,
                   builder: (context, snapshot, child) {
                     if (orders.value != null) {
+                      if(orders.value[0] != null)
                       widget.client.previousDate = orders.value[0].date;
                     }
                     return Container(
@@ -451,7 +452,8 @@ class __BodyState extends State<_Body> {
                   valueListenable: orders,
                   builder: (context, snapshot, child) {
                     if (orders.value != null) {
-                      widget.client.nextDate = orders.value[1].date;
+                      if(orders.value[1] != null)
+                        widget.client.nextDate = orders.value[1].date;
                     }
                     return Container(
                       padding: const EdgeInsets.symmetric(vertical: 10.0),

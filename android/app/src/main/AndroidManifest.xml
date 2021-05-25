@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="tolik.aqua_service">
    <application
-        android:label="aqua_service"
+        android:label="Аквариумистика"
         android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"

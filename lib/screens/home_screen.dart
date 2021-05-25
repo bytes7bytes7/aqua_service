@@ -29,10 +29,16 @@ class HomeScreen extends StatelessWidget {
               //   },
               //   child: Text('Drop DB'),
               // ),
-              Flexible(
-                flex: 4,
-                child: SvgPicture.asset('assets/svg/label.svg'),
+              SizedBox(height: 10),
+              Text(
+                'Аквариумистика',
+                style: Theme.of(context).textTheme.headline1.copyWith(fontSize: 35),
               ),
+              SizedBox(height: 20),
+              // Flexible(
+              //   flex: 4,
+              //   child: SvgPicture.asset('assets/svg/label.svg'),
+              // ),
               SizedBox(height: 30.0),
               Expanded(
                 flex: 4,
