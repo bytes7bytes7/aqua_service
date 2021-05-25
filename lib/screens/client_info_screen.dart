@@ -267,7 +267,7 @@ class __BodyState extends State<_Body> {
 
   Future<ValueNotifier> getDates() async {
     if (widget.client.id == null) return ValueNotifier(null);
-    if (orders.value == null) orders.value = await widget.client.getDates();
+    if (orders.value == null) orders.value = await widget.client.getDates(widget.client.id);
     return orders;
   }
 

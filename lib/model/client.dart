@@ -103,15 +103,15 @@ class Client {
     };
   }
 
-  Future<List<Order>> getDates() async {
+  Future<List<Order>> getDates(int id) async {
     List<Order> orders = await Repository.orderRepository.getAllOrders();
     Order last, next;
     orders.forEach((element) {
-      if(element.done){
+      if(element.done && element.id == id){
        if (last==null || last.date.compareTo(element.date) < 0){
          last=Order.from(element);
        }
-      }else if(!element.done){
+      }else if(!element.done  && element.id == id){
         if(next==null || next.date.compareTo(element.date)>0){
           next=Order.from(element);
         }
