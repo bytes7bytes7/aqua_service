@@ -20,21 +20,20 @@ class HomeScreen extends StatelessWidget {
             children: [
               SizedBox(height: 20.0),
               Flexible(
-                flex: 3,
+                flex: 4,
                 child: SvgPicture.asset('assets/svg/logo.svg'),
               ),
-              TextButton(
-                onPressed: () {
-                  DatabaseHelper.db.dropBD();
-                },
-                child: Text('Drop DB'),
+              // TextButton(
+              //   onPressed: () {
+              //     DatabaseHelper.db.dropBD();
+              //   },
+              //   child: Text('Drop DB'),
+              // ),
+              Flexible(
+                flex: 4,
+                child: SvgPicture.asset('assets/svg/label.svg'),
               ),
-              SizedBox(height: 20.0),
-              Text(
-                'Aqua Service',
-                style: Theme.of(context).textTheme.headline1,
-              ),
-              SizedBox(height: 60.0),
+              SizedBox(height: 30.0),
               Expanded(
                 flex: 4,
                 child: Row(

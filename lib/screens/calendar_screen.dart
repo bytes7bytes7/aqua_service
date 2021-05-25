@@ -260,33 +260,33 @@ class _CalendarContentState extends State<CalendarContent> {
               ],
             ),
           ),
-          // SizedBox.expand(
-          //   child: OrderBottomSheet(
-          //     calendarNotifier: _calendarNotifier,
-          //     selectedOrders: _selectedOrders,
-          //     orders: widget.orders,
-          //   ),
-          // ),
+          SizedBox.expand(
+            child: OrderBottomSheet(
+              calendarNotifier: _calendarNotifier,
+              selectedOrders: _selectedOrders,
+              orders: widget.orders,
+            ),
+          ),
         ],
       ),
-      bottomSheet: BottomSheet(
-        elevation: 10,
-        onClosing: () {},
-        builder: (context) {
-          return Container(
-            width: double.infinity,
-            height: 250,
-            alignment: Alignment.center,
-            child: ElevatedButton(
-              child: Text(
-                'Close this bottom sheet',
-                style: TextStyle(color: Colors.white),
-              ),
-              onPressed: () {},
-            ),
-          );
-        },
-      ),
+      // bottomSheet: BottomSheet(
+      //   elevation: 10,
+      //   onClosing: () {},
+      //   builder: (context) {
+      //     return Container(
+      //       width: double.infinity,
+      //       height: 250,
+      //       alignment: Alignment.center,
+      //       child: ElevatedButton(
+      //         child: Text(
+      //           'Close this bottom sheet',
+      //           style: TextStyle(color: Colors.white),
+      //         ),
+      //         onPressed: () {},
+      //       ),
+      //     );
+      //   },
+      // ),
     );
   }
 }

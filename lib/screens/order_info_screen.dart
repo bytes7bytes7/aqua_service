@@ -423,7 +423,12 @@ class __BodyState extends State<_Body> {
                           color: Theme.of(context).focusColor,
                         ),
                         onPressed: (widget.readMode)
-                            ? () {}
+                            ? () {
+                                showInfoSnackBar(
+                                    context: context,
+                                    info: 'Режим чтения',
+                                    icon: Icons.warning_amber_outlined);
+                              }
                             : () {
                                 Navigator.push(
                                   context,
@@ -454,7 +459,12 @@ class __BodyState extends State<_Body> {
                           color: Theme.of(context).focusColor,
                         ),
                         onPressed: (widget.readMode)
-                            ? () {}
+                            ? () {
+                          showInfoSnackBar(
+                              context: context,
+                              info: 'Режим чтения',
+                              icon: Icons.warning_amber_outlined);
+                        }
                             : () {
                                 Navigator.push(
                                   context,
@@ -551,7 +561,12 @@ class __BodyState extends State<_Body> {
                     return RectButton(
                       text: (widget.changes['done']) ? 'Заново' : 'Завершить',
                       onPressed: (widget.readMode)
-                          ? () {}
+                          ? () {
+                        showInfoSnackBar(
+                            context: context,
+                            info: 'Режим чтения',
+                            icon: Icons.warning_amber_outlined);
+                      }
                           : () {
                               _doneNotifier.value = !_doneNotifier.value;
                               widget.changes['done'] = _doneNotifier.value;
@@ -697,7 +712,12 @@ class __ClientCardState extends State<_ClientCard> {
                     color: Theme.of(context).focusColor,
                   ),
                   onPressed: (widget.readMode)
-                      ? () {}
+                      ? () {
+                    showInfoSnackBar(
+                        context: context,
+                        info: 'Режим чтения',
+                        icon: Icons.warning_amber_outlined);
+                  }
                       : () async {
                           Navigator.push(
                             context,
@@ -751,7 +771,12 @@ class _FabricCard extends StatelessWidget {
               color: Theme.of(context).focusColor,
             ),
             onPressed: (readMode)
-                ? () {}
+                ? () {
+              showInfoSnackBar(
+                  context: context,
+                  info: 'Режим чтения',
+                  icon: Icons.warning_amber_outlined);
+            }
                 : () {
                     removeFabric(fabric.id);
                   },
