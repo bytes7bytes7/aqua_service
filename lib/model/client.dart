@@ -1,4 +1,7 @@
+import 'package:aqua_service/repository/repository.dart';
 import 'package:collection/collection.dart';
+
+import 'order.dart';
 
 class Client {
   Client({
@@ -50,7 +53,7 @@ class Client {
         other.volume == volume &&
         other.previousDate == previousDate &&
         other.nextDate == nextDate &&
-        ListEquality().equals(other.images,images));
+        ListEquality().equals(other.images, images));
   }
 
   Client.from(Client other) {
@@ -98,5 +101,30 @@ class Client {
       'nextDate': nextDate,
       'images': images,
     };
+  }
+
+  Future<List<Order>> getDates() async {
+    List<Order> orders = await Repository.orderRepository.getAllOrders();
+    Order last, next;
+    orders.forEach((element) {
+      if(element.done){
+       if (last==null || last.date.compareTo(element.date) < 0){
+         last=Order.from(element);
+       }
+      }else if(!element.done){
+        if(next==null || next.date.compareTo(element.date)>0){
+          next=Order.from(element);
+        }
+      }
+    });
+    if(last!=null){
+      List<String> tmp = last.date.split('.');
+      last.date = '${tmp[2]}.${tmp[1]}.${tmp[0]}';
+    }
+    if(next!=null){
+      List<String> tmp = next.date.split('.');
+      next.date = '${tmp[2]}.${tmp[1]}.${tmp[0]}';
+    }
+    return [last,next];
   }
 }

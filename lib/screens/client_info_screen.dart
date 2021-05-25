@@ -1,5 +1,7 @@
+import 'package:intl/intl.dart';
 import 'dart:io';
 
+import 'package:aqua_service/model/order.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -240,8 +242,10 @@ class _Body extends StatefulWidget {
 }
 
 class __BodyState extends State<_Body> {
+  final DateFormat dateTimeFormat = DateFormat("dd.MM.yyyy");
   String appDocPath;
   Iterable<int> bytes;
+  ValueNotifier<List<Order>> orders = ValueNotifier(null);
 
   Future<void> getApplicationDirectoryPath() async {
     Directory appDocDir = await getApplicationDocumentsDirectory();
@@ -250,6 +254,7 @@ class __BodyState extends State<_Body> {
 
   @override
   void initState() {
+    getDates();
     if (appDocPath == null) getApplicationDirectoryPath();
     if (widget.changes['avatarPath'] != null) {
       var hasLocalImage = File(widget.changes['avatarPath']).existsSync();
@@ -258,6 +263,22 @@ class __BodyState extends State<_Body> {
       }
     }
     super.initState();
+  }
+
+  Future<ValueNotifier> getDates() async {
+    if (widget.client.id == null) return ValueNotifier(null);
+    if (orders.value == null) orders.value = await widget.client.getDates();
+    return orders;
+  }
+
+  _updateDateTime(DateTime dateTime) async {
+    Order last = orders.value[0];
+    Order next = orders.value[1];
+    next.date = dateTimeFormat.format(dateTime);
+    orders.value = [];
+    orders.value = [last,next];
+    Navigator.pop(context);
+    Bloc.bloc.orderBloc.updateOrder(orders.value[1]);
   }
 
   @override
@@ -410,47 +431,64 @@ class __BodyState extends State<_Body> {
                   ),
                 ),
                 SizedBox(height: 30.0),
-                Container(
-                  padding: const EdgeInsets.symmetric(vertical: 10.0),
-                  width: double.infinity,
-                  child: Text(
-                    'Посл. чистка : ${(widget.client.previousDate != null) ? widget.client.previousDate : '-- -- --'}',
-                    style: Theme.of(context).textTheme.bodyText1,
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(vertical: 10.0),
-                  width: double.infinity,
-                  child: Row(
-                    children: [
-                      Text(
-                        'След. чистка : ${(widget.client.nextDate != null) ? widget.client.nextDate : '-- -- --'}',
+                ValueListenableBuilder(
+                  valueListenable: orders,
+                  builder: (context, snapshot, child) {
+                    if (orders.value != null) {
+                      widget.client.previousDate = orders.value[0].date;
+                    }
+                    return Container(
+                      padding: const EdgeInsets.symmetric(vertical: 10.0),
+                      width: double.infinity,
+                      child: Text(
+                        'Посл. чистка : ${(widget.client.previousDate != null) ? widget.client.previousDate : '-- -- --'}',
                         style: Theme.of(context).textTheme.bodyText1,
                       ),
-                      Spacer(),
-                      IconButton(
-                        icon: Icon(
-                          Icons.calendar_today_outlined,
-                          color: Theme.of(context).focusColor,
-                        ),
-                        onPressed: () {
-                          if (!widget.readMode) {
-                            Navigator.push(
-                              context,
-                              NextPageRoute(
-                                nextPage: CalendarScreen(),
-                              ),
-                            );
-                          } else {
-                            showInfoSnackBar(
-                                context: context,
-                                info: 'Режим чтения',
-                                icon: Icons.warning_amber_outlined);
-                          }
-                        },
+                    );
+                  },
+                ),
+                ValueListenableBuilder(
+                  valueListenable: orders,
+                  builder: (context, snapshot, child) {
+                    if (orders.value != null) {
+                      widget.client.nextDate = orders.value[1].date;
+                    }
+                    return Container(
+                      padding: const EdgeInsets.symmetric(vertical: 10.0),
+                      width: double.infinity,
+                      child: Row(
+                        children: [
+                          Text(
+                            'След. чистка : ${(widget.client.nextDate != null) ? widget.client.nextDate : '-- -- --'}',
+                            style: Theme.of(context).textTheme.bodyText1,
+                          ),
+                          Spacer(),
+                          IconButton(
+                            icon: Icon(
+                              Icons.calendar_today_outlined,
+                              color: Theme.of(context).focusColor,
+                            ),
+                            onPressed: () {
+                              if (!widget.readMode) {
+                                Navigator.push(
+                                  context,
+                                  NextPageRoute(
+                                    nextPage: CalendarScreen(
+                                        updateDate: _updateDateTime),
+                                  ),
+                                );
+                              } else {
+                                showInfoSnackBar(
+                                    context: context,
+                                    info: 'Режим чтения',
+                                    icon: Icons.warning_amber_outlined);
+                              }
+                            },
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                    );
+                  },
                 ),
                 SizedBox(height: 10.0),
               ],

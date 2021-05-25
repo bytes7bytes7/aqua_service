@@ -49,6 +49,7 @@ class ClientBloc {
       loadAllClients();
     });
   }
+
 }
 
 class ClientState {

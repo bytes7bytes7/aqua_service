@@ -10,6 +10,8 @@ class NextPageRoute extends CupertinoPageRoute {
   @override
   Widget buildPage(BuildContext context, Animation<double> animation,
       Animation<double> secondaryAnimation) {
-    return FadeTransition(opacity: animation, child: nextPage);
+    final Animation<double> curve =
+        CurvedAnimation(parent: controller, curve: Curves.linear);
+    return FadeTransition(opacity: curve, child: nextPage);
   }
 }
