@@ -106,7 +106,7 @@ class _CalendarContentState extends State<CalendarContent> {
   final ValueNotifier<String> _currentMonthNotifier =
       ValueNotifier(DateFormat.yMMM().format(DateTime.now()));
   final ValueNotifier<DateTime> _targetDateTimeNotifier =
-      ValueNotifier(DateTime(2021, 5, 6));
+      ValueNotifier(DateTime.now());
 
   @override
   void dispose() {
@@ -145,6 +145,10 @@ class _CalendarContentState extends State<CalendarContent> {
 
   @override
   Widget build(BuildContext context) {
+    for(int i =widget.orders.length-1;i>=0;i--){
+      if(widget.orders[i].done)
+        widget.orders.removeAt(i);
+    }
     EventList<Event> _markedDateMap = EventList<Event>(
       events: Map<DateTime, List<Event>>.fromIterables(
         widget.orders.map((e) => DateFormat("dd.MM.yyyy").parse(e.date)),
@@ -235,7 +239,7 @@ class _CalendarContentState extends State<CalendarContent> {
                             .copyWith(color: Theme.of(context).disabledColor),
                         onDayPressed: (date, events) {
                           _updateCurrentDate2(date);
-                          _selectedOrders.value = [];
+                          _selectedOrders.value.clear();
                           events.forEach((ev) => _selectedOrders.value.addAll(
                               widget
                                   .orders
@@ -339,7 +343,7 @@ class OrderBottomSheet extends StatelessWidget {
                   Future<Iterable<int>> _getImage() async {
                     Iterable<int> bytes;
                     if (appDocPath == null) await getApplicationDirectoryPath();
-                    if (orders[index - 1] != null) {
+                    if (orders[index - 1] != null && orders[index-1].client.avatar!=null) {
                       var hasLocalImage =
                           File(orders[index - 1].client.avatar).existsSync();
                       if (hasLocalImage) {

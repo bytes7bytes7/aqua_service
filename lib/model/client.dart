@@ -105,26 +105,56 @@ class Client {
 
   Future<List<Order>> getDates(int id) async {
     List<Order> orders = await Repository.orderRepository.getAllOrders();
-    Order last, next;
+    Order last = Order(), next = Order();
+    DateTime today = DateTime.now();
+    String thisDay =
+        today.year.toString() +'.'+ today.month.toString()+'.' + today.day.toString();
+    List<String> tmp = thisDay.split('.');
+    while (tmp[0].length<4){
+      tmp[0]='0'+tmp[0];
+    }
+    while (tmp[1].length<2){
+      tmp[1]='0'+tmp[1];
+    }
+    while (tmp[2].length<2){
+      tmp[2]='0'+tmp[2];
+    }
+    thisDay = tmp.join('.');
     orders.forEach((element) {
-      if(element.done && element.id == id){
-       if (last==null || last.date.compareTo(element.date) < 0){
-         last=Order.from(element);
-       }
-      }else if(!element.done  && element.id == id){
-        if(next==null || next.date.compareTo(element.date)>0){
-          next=Order.from(element);
+      if (element.client.id == id) {
+        if (element.done) {
+          if (last.id == null && thisDay.compareTo(element.date) >= 0) {
+            last = Order.from(element);
+          } else if (last.id != null &&
+              last.date.compareTo(element.date) >= 0) {
+            last = Order.from(element);
+          }
+        } else if (!element.done) {
+          print('not');
+          print(next.id);
+          print(thisDay);
+          print(element.date);
+          print(thisDay.compareTo(element.date));
+
+          if (next.id == null && thisDay.compareTo(element.date) <= 0) {
+            print('a');
+            next = Order.from(element);
+          } else if (next.id != null &&
+              next.date.compareTo(element.date) <= 0) {
+            print('b');
+            next = Order.from(element);
+          }
         }
       }
     });
-    if(last!=null){
+    if (last.id != null) {
       List<String> tmp = last.date.split('.');
       last.date = '${tmp[2]}.${tmp[1]}.${tmp[0]}';
     }
-    if(next!=null){
+    if (next.id != null) {
       List<String> tmp = next.date.split('.');
       next.date = '${tmp[2]}.${tmp[1]}.${tmp[0]}';
     }
-    return [last,next];
+    return [last, next];
   }
 }

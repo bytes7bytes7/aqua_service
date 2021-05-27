@@ -267,7 +267,8 @@ class __BodyState extends State<_Body> {
 
   Future<ValueNotifier> getDates() async {
     if (widget.client.id == null) return ValueNotifier(null);
-    if (orders.value == null) orders.value = await widget.client.getDates(widget.client.id);
+    if (orders.value == null)
+      orders.value = await widget.client.getDates(widget.client.id);
     return orders;
   }
 
@@ -276,7 +277,7 @@ class __BodyState extends State<_Body> {
     Order next = orders.value[1];
     next.date = dateTimeFormat.format(dateTime);
     orders.value = [];
-    orders.value = [last,next];
+    orders.value = [last, next];
     Navigator.pop(context);
     Bloc.bloc.orderBloc.updateOrder(orders.value[1]);
   }
@@ -435,7 +436,6 @@ class __BodyState extends State<_Body> {
                   valueListenable: orders,
                   builder: (context, snapshot, child) {
                     if (orders.value != null) {
-                      if(orders.value[0] != null)
                       widget.client.previousDate = orders.value[0].date;
                     }
                     return Container(
@@ -452,8 +452,7 @@ class __BodyState extends State<_Body> {
                   valueListenable: orders,
                   builder: (context, snapshot, child) {
                     if (orders.value != null) {
-                      if(orders.value[1] != null)
-                        widget.client.nextDate = orders.value[1].date;
+                      widget.client.nextDate = orders.value[1].date;
                     }
                     return Container(
                       padding: const EdgeInsets.symmetric(vertical: 10.0),
@@ -465,28 +464,30 @@ class __BodyState extends State<_Body> {
                             style: Theme.of(context).textTheme.bodyText1,
                           ),
                           Spacer(),
-                          IconButton(
-                            icon: Icon(
-                              Icons.calendar_today_outlined,
-                              color: Theme.of(context).focusColor,
-                            ),
-                            onPressed: () {
-                              if (!widget.readMode) {
-                                Navigator.push(
-                                  context,
-                                  NextPageRoute(
-                                    nextPage: CalendarScreen(
-                                        updateDate: _updateDateTime),
+                          (orders.value != null && orders.value[1].id != null)
+                              ? IconButton(
+                                  icon: Icon(
+                                    Icons.calendar_today_outlined,
+                                    color: Theme.of(context).focusColor,
                                   ),
-                                );
-                              } else {
-                                showInfoSnackBar(
-                                    context: context,
-                                    info: 'Режим чтения',
-                                    icon: Icons.warning_amber_outlined);
-                              }
-                            },
-                          ),
+                                  onPressed: () {
+                                    if (!widget.readMode) {
+                                      Navigator.push(
+                                        context,
+                                        NextPageRoute(
+                                          nextPage: CalendarScreen(
+                                              updateDate: _updateDateTime),
+                                        ),
+                                      );
+                                    } else {
+                                      showInfoSnackBar(
+                                          context: context,
+                                          info: 'Режим чтения',
+                                          icon: Icons.warning_amber_outlined);
+                                    }
+                                  },
+                                )
+                              : SizedBox.shrink(),
                         ],
                       ),
                     );
