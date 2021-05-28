@@ -1,11 +1,28 @@
+import 'package:aqua_service/constants.dart';
+import 'package:aqua_service/model/settings.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
 
-import '../database/database_helper.dart';
+import 'package:aqua_service/bloc/bloc.dart';
+import 'package:aqua_service/bloc/settings_bloc.dart';
 import 'global/next_page_route.dart';
 import 'screens.dart';
+import 'settings_screen.dart';
+import 'widgets/loading_circle.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
+  @override
+  _HomeScreenState createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  Iterable<int> bytes;
+
+  @override
+  void dispose() {
+    Bloc.bloc.settingsBloc.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -16,79 +33,120 @@ class HomeScreen extends StatelessWidget {
         body: Container(
           padding: const EdgeInsets.symmetric(horizontal: 40.0, vertical: 40.0),
           alignment: Alignment.center,
-          child: Column(
-            children: [
-              SizedBox(height: 20.0),
-              Flexible(
-                flex: 4,
-                child: SvgPicture.asset('assets/svg/logo.svg'),
-              ),
-              // TextButton(
-              //   onPressed: () {
-              //     DatabaseHelper.db.dropBD();
-              //   },
-              //   child: Text('Drop DB'),
-              // ),
-              SizedBox(height: 10),
-              Text(
-                'Аквариумистика',
-                style: Theme.of(context).textTheme.headline1.copyWith(fontSize: 35),
-              ),
-              SizedBox(height: 20),
-              // Flexible(
-              //   flex: 4,
-              //   child: SvgPicture.asset('assets/svg/label.svg'),
-              // ),
-              SizedBox(height: 30.0),
-              Expanded(
-                flex: 4,
-                child: Row(
-                  children: [
-                    _CardButton(
-                      title: 'Клиенты',
-                      route: '/clients',
+          child: StreamBuilder(
+              stream: Bloc.bloc.settingsBloc.settings,
+              initialData: SettingsInitState(),
+              builder: (context, snapshot) {
+                if (snapshot.data is SettingsInitState) {
+                  Bloc.bloc.settingsBloc.loadAllSettings();
+                  return SizedBox.shrink();
+                } else if (snapshot.data is SettingsLoadingState) {
+                  return _buildLoading();
+                } else if (snapshot.data is SettingsDataState) {
+                  SettingsDataState state = snapshot.data;
+                  Settings settings = state.settings;
+                  bytes= state.bytes;
+                  if (state.settings != null) {
+                    return Column(
+                      children: [
+                        SizedBox(height: 20.0),
+                        Flexible(
+                          flex: 4,
+                          child: Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  NextPageRoute(
+                                    nextPage: SettingsScreen(settings: settings),
+                                  ),
+                                );
+                              },
+                              child: Container(
+                                child: (settings.icon != null && bytes != null)
+                                    ? Image.memory(bytes)
+                                    : Image.asset('assets/png/logo.png'),
+                              ),
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: 10),
+                        Text(
+                          settings.appTitle ?? ConstData.appTitle,
+                          style: Theme.of(context)
+                              .textTheme
+                              .headline1
+                              .copyWith(fontSize: 35),
+                        ),
+                        SizedBox(height: 50),
+                        Expanded(
+                          flex: 4,
+                          child: Row(
+                            children: [
+                              _CardButton(
+                                title: 'Клиенты',
+                                route: '/clients',
+                              ),
+                              SizedBox(width: 20.0),
+                              _CardButton(
+                                title: 'Работа',
+                                route: '/work',
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(height: 20.0),
+                        Expanded(
+                          flex: 4,
+                          child: Row(
+                            children: [
+                              _CardButton(
+                                title: 'Материалы',
+                                route: '/material',
+                              ),
+                              SizedBox(width: 20.0),
+                              _CardButton(
+                                title: 'Календарь',
+                                route: '/calendar',
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(height: 20.0),
+                        Expanded(
+                          flex: 2,
+                          child: Row(
+                            children: [
+                              _CardButton(
+                                title: 'Отчеты',
+                                route: '/reports',
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    );
+                  } else {
+                    return SizedBox.shrink();
+                  }
+                } else {
+                  return Center(
+                    child: Text(
+                      'Пусто',
+                      style: Theme.of(context).textTheme.headline2,
                     ),
-                    SizedBox(width: 20.0),
-                    _CardButton(
-                      title: 'Работа',
-                      route: '/work',
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(height: 20.0),
-              Expanded(
-                flex: 4,
-                child: Row(
-                  children: [
-                    _CardButton(
-                      title: 'Материалы',
-                      route: '/material',
-                    ),
-                    SizedBox(width: 20.0),
-                    _CardButton(
-                      title: 'Календарь',
-                      route: '/calendar',
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(height: 20.0),
-              Expanded(
-                flex: 2,
-                child: Row(
-                  children: [
-                    _CardButton(
-                      title: 'Отчеты',
-                      route: '/reports',
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
+                  );
+                }
+              }),
         ),
       ),
+    );
+  }
+
+  Widget _buildLoading() {
+    return Center(
+      child: LoadingCircle(),
     );
   }
 }

@@ -1,6 +1,5 @@
-import 'package:intl/intl.dart';
 import 'dart:io';
-
+import 'package:intl/intl.dart';
 import 'package:aqua_service/model/order.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../bloc/bloc.dart';
 import 'calendar_screen.dart';
@@ -403,19 +403,42 @@ class __BodyState extends State<_Body> {
                     ),
                   ),
                 ),
-                TextField(
-                  controller: widget.phoneController,
-                  style: Theme.of(context).textTheme.bodyText1,
-                  enabled: !widget.readMode,
-                  keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
-                    labelText: 'Телефон',
-                    labelStyle: Theme.of(context).textTheme.headline3,
-                    enabledBorder: UnderlineInputBorder(
-                      borderSide:
-                          BorderSide(color: Theme.of(context).disabledColor),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: widget.phoneController,
+                        style: Theme.of(context).textTheme.bodyText1,
+                        enabled: !widget.readMode,
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(
+                          labelText: 'Телефон',
+                          labelStyle: Theme.of(context).textTheme.headline3,
+                          enabledBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(
+                                color: Theme.of(context).disabledColor),
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
+                    IconButton(
+                      icon: Icon(
+                        Icons.phone,
+                        color: Theme.of(context).focusColor,
+                      ),
+                      onPressed: () {
+                        FocusScope.of(context).requestFocus(FocusNode());
+                        if (widget.phoneController.text != '')
+                          launch("tel:${widget.phoneController.text}");
+                        else
+                          showInfoSnackBar(
+                            context: context,
+                            info: 'Заполните поле',
+                            icon: Icons.warning_amber_outlined,
+                          );
+                      },
+                    ),
+                  ],
                 ),
                 TextField(
                   controller: widget.volumeController,

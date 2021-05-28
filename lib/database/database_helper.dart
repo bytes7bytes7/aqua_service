@@ -1,4 +1,7 @@
 import 'dart:io';
+import 'package:aqua_service/constants.dart';
+import 'package:aqua_service/constants.dart';
+import 'package:aqua_service/model/settings.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart';
@@ -20,6 +23,7 @@ class DatabaseHelper {
   static const String _clientTableName = 'clients';
   static const String _orderTableName = 'orders';
   static const String _fabricTableName = 'fabrics';
+  static const String _settingsTableName = 'settings';
 
   // Special columns for clients
   static const String _id = 'id';
@@ -48,6 +52,10 @@ class DatabaseHelper {
   static const String _date = 'date';
   static const String _done = 'done';
   static const String _comment = 'comment';
+
+  // Special for settings
+  static const String _appTitle = 'appTitle';
+  static const String _icon = 'icon';
 
   static Database _database;
 
@@ -102,6 +110,13 @@ class DatabaseHelper {
         $_purchasePrice REAL
       )
     ''');
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS  $_settingsTableName (
+        $_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        $_appTitle TEXT,
+        $_icon TEXT
+      )
+    ''');
   }
 
   Future dropBD() async {
@@ -109,7 +124,8 @@ class DatabaseHelper {
     await db.execute('DROP TABLE IF EXISTS $_clientTableName;');
     await db.execute('DROP TABLE IF EXISTS $_orderTableName;');
     await db.execute('DROP TABLE IF EXISTS $_fabricTableName;');
-    _createDB(db, _databaseVersion);
+    await db.execute('DROP TABLE IF EXISTS $_settingsTableName;');
+    await _createDB(db, _databaseVersion);
   }
 
   Future<int> _getMaxId(Database db, String tableName) async {
@@ -276,18 +292,18 @@ class DatabaseHelper {
       for (int i = 0; i < data.length; i++) {
         Map<String, dynamic> m = Map<String, dynamic>.from(data[i]);
         m[_client] = await getClient(m[_client]);
-        if (m[_client].id==null){
+        if (m[_client].id == null) {
           await deleteOrder(m[_id]);
           continue;
         }
         if (m[_fabrics].length > 0) {
           List<String> ids = m[_fabrics].split(';');
           m[_fabrics] = List<Fabric>.from([]).toList();
-          for (int j = 0; j < ids.length; j++){
+          for (int j = 0; j < ids.length; j++) {
             Fabric f = await getFabric(int.parse(ids[j]));
-            if(f.id==null){
+            if (f.id == null) {
               await deleteFabric(int.parse(ids[j]));
-            }else{
+            } else {
               await m[_fabrics].add(f);
             }
           }
@@ -309,5 +325,60 @@ class DatabaseHelper {
   Future deleteAllOrders() async {
     final db = await database;
     db.rawDelete("DELETE * FROM $_orderTableName");
+  }
+
+  // Settings methods
+  Future addSettings(Settings settings) async {
+    final db = await database;
+    await db.rawInsert(
+      "INSERT INTO $_settingsTableName ($_id, $_appTitle, $_icon) VALUES (?,?,?)",
+      [
+        1,
+        settings.appTitle,
+        settings.icon,
+      ],
+    );
+  }
+
+  Future updateSettings(Settings settings) async {
+    final db = await database;
+    var map = settings.toMap();
+    try {
+      await db.update("$_settingsTableName", map,
+          where: "$_id = ?", whereArgs: [settings.id]);
+    } catch (error) {
+      await addSettings(Settings(
+        id: 1,
+        appTitle: map['appTitle'],
+        icon: map['icon'],
+      ));
+    }
+  }
+
+  Future<Settings> getSettings() async {
+    final db = await database;
+    List<Map<String, dynamic>> res;
+    try {
+      res = await db.query("$_settingsTableName");
+      if (res.length == 0) {
+        await addSettings(Settings(
+          id: 1,
+          appTitle: ConstData.appTitle,
+          icon: null,
+        ));
+        res = await db.query("$_settingsTableName");
+      }
+    } catch (error) {
+      await _createDB(db, _databaseVersion);
+      addSettings(Settings(
+        id: 1,
+        appTitle: ConstData.appTitle,
+        icon: null,
+      ));
+      res = await db.query("$_settingsTableName");
+    }
+    return res.isNotEmpty
+        ? Settings.fromMap(res.first)
+        : Settings(appTitle: null, icon: null);
   }
 }

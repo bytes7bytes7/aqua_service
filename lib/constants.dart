@@ -14,6 +14,7 @@ abstract class ConstSize {
 }
 
 abstract class ConstData {
+  static const String appTitle = 'Аквариумистика';
   static const Map<String, String> monthsNames = {
     '01': 'Январь',
     '02': 'Февраль',
