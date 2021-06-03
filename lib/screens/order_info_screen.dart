@@ -46,7 +46,6 @@ class _OrderInfoScreenState extends State<OrderInfoScreen> {
   bool validateClient = false,
       validateDate = false,
       validatePrice = false,
-      validateExpenses = false,
       validateFormat = false;
 
   @override
@@ -57,26 +56,22 @@ class _OrderInfoScreenState extends State<OrderInfoScreen> {
     commentController = TextEditingController();
 
     widget.order.client = widget.order.client ?? Client();
-    // widget.order.price = widget.order.price;
-    // widget.order.expenses = widget.order.expenses;
+    widget.order.price = widget.order.price ?? 0.0;
+    widget.order.expenses = widget.order.expenses ?? 0.0;
     widget.order.fabrics = widget.order.fabrics ?? [];
-    // widget.order.date = widget.order.date;
+    widget.order.date =
+        widget.order.date ?? DateFormat('dd.MM.yyyy').format(DateTime.now());
     widget.order.done = widget.order.done ?? false;
     widget.order.comment = widget.order.comment ?? '';
 
     changes['client'] = Client.from(widget.order.client);
     changes['fabrics'] =
         widget.order.fabrics.map<Fabric>((e) => Fabric.from(e)).toList();
-    if (widget.order.date == null || widget.order.date == '') {
-      DateTime now = DateTime.now();
-      changes['date'] = DateFormat('dd.MM.yyyy').format(now);
-    } else {
-      changes['date'] = widget.order.date;
-    }
+    changes['date'] = widget.order.date;
     changes['done'] = widget.order.done;
 
-    priceController.text = widget.order.price?.toString();
-    expensesController.text = widget.order.expenses?.toString();
+    priceController.text = widget.order.price.toString();
+    expensesController.text = widget.order.expenses.toString();
     commentController.text = widget.order.comment;
     super.initState();
   }
@@ -95,20 +90,16 @@ class _OrderInfoScreenState extends State<OrderInfoScreen> {
     validateClient = changes['client'].id != null;
     validateDate = changes['date'] != null;
     validatePrice = priceController.text.length > 0;
-    validateExpenses = expensesController.text.length > 0;
     validateFormat = priceValidation(priceController.text) &&
         priceValidation(expensesController.text);
-    if (validatePrice &&
-        validateExpenses &&
-        validateFormat &&
-        validateClient &&
-        validateDate) {
+    if (validatePrice && validateFormat && validateClient && validateDate) {
       widget.order
         ..client = changes['client']
         ..price = double.parse(priceController.text)
         ..fabrics =
             changes['fabrics'].map<Fabric>((e) => Fabric.from(e)).toList()
-        ..expenses = double.parse(expensesController.text)
+        ..expenses = double.parse(
+            expensesController.text.isNotEmpty ? expensesController.text : '0')
         ..date = changes['date']
         ..done = changes['done']
         ..comment = commentController.text;
@@ -125,11 +116,7 @@ class _OrderInfoScreenState extends State<OrderInfoScreen> {
       expensesController.text = widget.order.expenses.toString();
       Bloc.bloc.orderBloc.loadAllOrders();
     }
-    if (validatePrice &&
-        validateExpenses &&
-        validateFormat &&
-        validateClient &&
-        validateDate)
+    if (validatePrice && validateFormat && validateClient && validateDate)
       showInfoSnackBar(
           context: context, info: 'Сохранено!', icon: Icons.done_all_outlined);
     else if (!validateFormat)
@@ -160,15 +147,20 @@ class _OrderInfoScreenState extends State<OrderInfoScreen> {
             color: Theme.of(context).focusColor,
           ),
           onPressed: () async {
+            print(!widget.readMode &&
+                !ListEquality()
+                    .equals([changes['client']], [widget.order.client]));
+            print(priceController.text != widget.order.price.toString());
+            print(expensesController.text != widget.order.expenses.toString());
+            print(changes['date'] != widget.order.date);
+            print(!ListEquality()
+                .equals(changes['fabrics'], widget.order.fabrics));
+            print(commentController.text != widget.order.comment);
             if (!widget.readMode &&
                     !ListEquality()
                         .equals([changes['client']], [widget.order.client]) ||
-                priceController.text != widget.order.price.toString() &&
-                    !(!(priceController.text != '') &&
-                        !(widget.order.price != null)) ||
-                expensesController.text != widget.order.expenses.toString() &&
-                    !(!(expensesController.text != '') &&
-                        !(widget.order.expenses != null)) ||
+                priceController.text != widget.order.price.toString() ||
+                expensesController.text != widget.order.expenses.toString() ||
                 changes['date'] != widget.order.date ||
                 !ListEquality()
                     .equals(changes['fabrics'], widget.order.fabrics) ||
@@ -347,7 +339,7 @@ class __BodyState extends State<_Body> {
                   enabled: !widget.readMode,
                   keyboardType: TextInputType.number,
                   decoration: InputDecoration(
-                    labelText: 'Затраты *',
+                    labelText: 'Затраты',
                     labelStyle: Theme.of(context).textTheme.headline3,
                     enabledBorder: UnderlineInputBorder(
                       borderSide:
@@ -365,13 +357,15 @@ class __BodyState extends State<_Body> {
                         style: Theme.of(context).textTheme.bodyText1,
                       ),
                       Text(
-                        (widget.priceController.text != '' &&
-                                widget.expensesController.text != '')
+                        (widget.priceController.text.isNotEmpty &&
+                                widget.expensesController.text.isNotEmpty)
                             ? (double.parse(widget.priceController.text) -
                                     double.parse(
                                         widget.expensesController.text))
                                 .toString()
-                            : '0.0',
+                            : (widget.priceController.text.isNotEmpty)
+                                ? widget.priceController.text.toString()
+                                : '0.0',
                         style: Theme.of(context).textTheme.bodyText1,
                       ),
                     ],
@@ -494,9 +488,13 @@ class __BodyState extends State<_Body> {
                             ),
                           );
                         } else {
-                          List<Fabric> fabricSet=[];
-                          for(int i =0;i<widget.changes['fabrics'].length;i++){
-                            if(i == widget.changes['fabrics'].indexWhere((e) => e.id == widget.changes['fabrics'][i].id)){
+                          List<Fabric> fabricSet = [];
+                          for (int i = 0;
+                              i < widget.changes['fabrics'].length;
+                              i++) {
+                            if (i ==
+                                widget.changes['fabrics'].indexWhere((e) =>
+                                    e.id == widget.changes['fabrics'][i].id)) {
                               fabricSet.add(widget.changes['fabrics'][i]);
                             }
                           }
@@ -754,10 +752,10 @@ class _FabricCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Size size = MediaQuery.of(context).size;
     return Container(
       width: double.infinity,
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Flexible(
             child: Text(
@@ -810,7 +808,9 @@ class _FabricCard extends StatelessWidget {
           SizedBox(width: 8),
           Text(
             ((fabric.retailPrice - fabric.purchasePrice) *
-                    changes['fabrics'].where((e) => e.id == fabric.id).length)
+                    changes['fabrics']
+                        .where((e) => e.id == fabric.id)
+                        .length)
                 .toString(),
             style: Theme.of(context).textTheme.bodyText1,
           ),
