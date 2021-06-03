@@ -269,15 +269,6 @@ class __BodyState extends State<_Body> {
 
   _addFabric(Fabric fabric) {
     if (fabric.id != null) {
-      for (int i = 0; i < widget.changes['fabrics'].length; i++) {
-        if (widget.changes['fabrics'][i].id == fabric.id) {
-          showInfoSnackBar(
-              context: context,
-              info: 'Материал уже выбран',
-              icon: Icons.warning_amber_outlined);
-          return;
-        }
-      }
       widget.changes['fabrics'].add(Fabric.from(fabric));
       _fabricsNotifier.value = !_fabricsNotifier.value;
     }
@@ -460,11 +451,11 @@ class __BodyState extends State<_Body> {
                         ),
                         onPressed: (widget.readMode)
                             ? () {
-                          showInfoSnackBar(
-                              context: context,
-                              info: 'Режим чтения',
-                              icon: Icons.warning_amber_outlined);
-                        }
+                                showInfoSnackBar(
+                                    context: context,
+                                    info: 'Режим чтения',
+                                    icon: Icons.warning_amber_outlined);
+                              }
                             : () {
                                 Navigator.push(
                                   context,
@@ -503,15 +494,23 @@ class __BodyState extends State<_Body> {
                             ),
                           );
                         } else {
+                          List<Fabric> fabricSet=[];
+                          for(int i =0;i<widget.changes['fabrics'].length;i++){
+                            if(i == widget.changes['fabrics'].indexWhere((e) => e.id == widget.changes['fabrics'][i].id)){
+                              fabricSet.add(widget.changes['fabrics'][i]);
+                            }
+                          }
                           return ListView(
                             controller: ScrollController(),
                             children: List.generate(
-                              widget.changes['fabrics'].length,
+                              fabricSet.length,
                               (index) {
                                 return _FabricCard(
+                                  changes: widget.changes,
                                   readMode: widget.readMode,
-                                  fabric: widget.changes['fabrics'][index],
+                                  fabric: fabricSet[index],
                                   removeFabric: _removeFabric,
+                                  addFabric: _addFabric,
                                 );
                               },
                             ),
@@ -562,11 +561,11 @@ class __BodyState extends State<_Body> {
                       text: (widget.changes['done']) ? 'Заново' : 'Завершить',
                       onPressed: (widget.readMode)
                           ? () {
-                        showInfoSnackBar(
-                            context: context,
-                            info: 'Режим чтения',
-                            icon: Icons.warning_amber_outlined);
-                      }
+                              showInfoSnackBar(
+                                  context: context,
+                                  info: 'Режим чтения',
+                                  icon: Icons.warning_amber_outlined);
+                            }
                           : () {
                               _doneNotifier.value = !_doneNotifier.value;
                               widget.changes['done'] = _doneNotifier.value;
@@ -713,11 +712,11 @@ class __ClientCardState extends State<_ClientCard> {
                   ),
                   onPressed: (widget.readMode)
                       ? () {
-                    showInfoSnackBar(
-                        context: context,
-                        info: 'Режим чтения',
-                        icon: Icons.warning_amber_outlined);
-                  }
+                          showInfoSnackBar(
+                              context: context,
+                              info: 'Режим чтения',
+                              icon: Icons.warning_amber_outlined);
+                        }
                       : () async {
                           Navigator.push(
                             context,
@@ -740,46 +739,80 @@ class __ClientCardState extends State<_ClientCard> {
 class _FabricCard extends StatelessWidget {
   const _FabricCard({
     Key key,
+    @required this.changes,
     @required this.readMode,
     @required this.fabric,
     @required this.removeFabric,
+    @required this.addFabric,
   }) : super(key: key);
 
+  final Map<String, dynamic> changes;
   final bool readMode;
   final Fabric fabric;
   final Function removeFabric;
+  final Function addFabric;
 
   @override
   Widget build(BuildContext context) {
+    Size size = MediaQuery.of(context).size;
     return Container(
+      width: double.infinity,
       child: Row(
         children: [
-          Text(
-            fabric.title,
-            style: Theme.of(context).textTheme.bodyText1,
-            overflow: TextOverflow.ellipsis,
+          Flexible(
+            child: Text(
+              fabric.title,
+              style: Theme.of(context).textTheme.bodyText1,
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
-          Spacer(),
+          IconButton(
+            padding: const EdgeInsets.all(0),
+            icon: Icon(
+              Icons.remove,
+              color: Theme.of(context).focusColor,
+            ),
+            onPressed: (readMode)
+                ? () {
+                    showInfoSnackBar(
+                        context: context,
+                        info: 'Режим чтения',
+                        icon: Icons.warning_amber_outlined);
+                  }
+                : () {
+                    removeFabric(fabric.id);
+                  },
+          ),
           Text(
-            (fabric.retailPrice - fabric.purchasePrice).toString(),
+            changes['fabrics']
+                .where((e) => e.id == fabric.id)
+                .length
+                .toString(),
             style: Theme.of(context).textTheme.bodyText1,
           ),
           IconButton(
             padding: const EdgeInsets.all(0),
             icon: Icon(
-              Icons.close,
+              Icons.add,
               color: Theme.of(context).focusColor,
             ),
             onPressed: (readMode)
                 ? () {
-              showInfoSnackBar(
-                  context: context,
-                  info: 'Режим чтения',
-                  icon: Icons.warning_amber_outlined);
-            }
+                    showInfoSnackBar(
+                        context: context,
+                        info: 'Режим чтения',
+                        icon: Icons.warning_amber_outlined);
+                  }
                 : () {
-                    removeFabric(fabric.id);
+                    addFabric(fabric);
                   },
+          ),
+          SizedBox(width: 8),
+          Text(
+            ((fabric.retailPrice - fabric.purchasePrice) *
+                    changes['fabrics'].where((e) => e.id == fabric.id).length)
+                .toString(),
+            style: Theme.of(context).textTheme.bodyText1,
           ),
         ],
       ),

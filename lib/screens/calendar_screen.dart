@@ -139,7 +139,6 @@ class _CalendarContentState extends State<CalendarContent> {
 
   @override
   void didUpdateWidget(covariant CalendarContent oldWidget) {
-    // TODO: implement didUpdateWidget
     super.didUpdateWidget(oldWidget);
   }
 

@@ -229,8 +229,8 @@ class __BodyState extends State<_Body> {
               onPressed: () {
                 showNoYesDialog(
                   context: context,
-                  title: 'Сброс базы данных',
-                  subtitle: 'Удалить все данные?',
+                  title: 'Иконка и название',
+                  subtitle: 'Поставить иконку и название по умолчанию?',
                   yesAnswer: () {
                     Bloc.bloc.settingsBloc.clearDatabase([ConstDBData.settingsTableName]);
                     widget.settings.icon = null;
