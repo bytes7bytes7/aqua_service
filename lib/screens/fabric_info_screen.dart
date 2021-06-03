@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'widgets/show_no_yes_dialog.dart';
 import 'widgets/app_header.dart';
-import 'global/show_info_snack_bar.dart';
+import 'widgets/show_info_snack_bar.dart';
 import '../model/fabric.dart';
 import '../bloc/bloc.dart';
 

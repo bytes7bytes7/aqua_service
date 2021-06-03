@@ -2,14 +2,13 @@ import 'dart:io';
 
 import 'package:aqua_service/bloc/bloc.dart';
 import 'package:aqua_service/constants.dart';
-import 'package:aqua_service/constants.dart';
 import 'package:aqua_service/model/settings.dart';
 import 'package:aqua_service/screens/widgets/rect_button.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 
-import 'global/show_info_snack_bar.dart';
+import 'widgets/show_info_snack_bar.dart';
 import 'widgets/app_header.dart';
 import 'widgets/show_no_yes_dialog.dart';
 
@@ -44,6 +43,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppHeader(
         title: 'Настройки',
         leading: IconButton(
@@ -210,14 +210,34 @@ class __BodyState extends State<_Body> {
                   title: 'Сброс базы данных',
                   subtitle: 'Удалить все данные?',
                   yesAnswer: () {
-                    Bloc.bloc.settingsBloc.deleteAllData();
-                    widget.settings.icon=null;
+                    Bloc.bloc.settingsBloc.clearDatabase([
+                      ConstDBData.clientTableName,
+                      ConstDBData.fabricTableName,
+                      ConstDBData.orderTableName,
+                    ]);
+                    Navigator.pop(context);
+                  },
+                  noAnswer: () {
+                    Navigator.pop(context);
+                  },
+                );
+              },
+            ),
+            SizedBox(height: 5),
+            RectButton(
+              text: 'Сбросить иконку и название',
+              onPressed: () {
+                showNoYesDialog(
+                  context: context,
+                  title: 'Сброс базы данных',
+                  subtitle: 'Удалить все данные?',
+                  yesAnswer: () {
+                    Bloc.bloc.settingsBloc.clearDatabase([ConstDBData.settingsTableName]);
+                    widget.settings.icon = null;
                     widget.settings.appTitle = ConstData.appTitle;
                     bytes = null;
-                    widget.titleController.text=ConstData.appTitle;
-                    setState(() {
-
-                    });
+                    widget.titleController.text = ConstData.appTitle;
+                    setState(() {});
                     Navigator.pop(context);
                   },
                   noAnswer: () {

@@ -1,7 +1,4 @@
 import 'dart:io';
-import 'package:aqua_service/constants.dart';
-import 'package:aqua_service/constants.dart';
-import 'package:aqua_service/model/settings.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart';
@@ -9,56 +6,14 @@ import 'package:path_provider/path_provider.dart';
 import '../model/client.dart';
 import '../model/fabric.dart';
 import '../model/order.dart';
+import '../constants.dart';
+import '../model/settings.dart';
 
 class DatabaseHelper {
   DatabaseHelper._privateConstructor();
-
   static final DatabaseHelper db = DatabaseHelper._privateConstructor();
-  static final _databaseName = "data.db";
-
-  // Increment this version when you need to change the schema.
-  static final _databaseVersion = 1;
-
-  // Names of tables
-  static const String _clientTableName = 'clients';
-  static const String _orderTableName = 'orders';
-  static const String _fabricTableName = 'fabrics';
-  static const String _settingsTableName = 'settings';
-
-  // Special columns for clients
-  static const String _id = 'id';
-  static const String _avatar = 'avatar';
-  static const String _name = 'name';
-  static const String _surname = 'surname';
-  static const String _middleName = 'middleName';
-  static const String _city = 'city';
-  static const String _address = 'address';
-  static const String _phone = 'phone';
-  static const String _volume = 'volume';
-  static const String _previousDate = 'previousDate';
-  static const String _nextDate = 'nextDate';
-  static const String _images = 'images';
-
-  // Special columns for fabrics
-  static const String _title = 'title';
-  static const String _retailPrice = 'retailPrice';
-  static const String _purchasePrice = 'purchasePrice';
-
-  static const String _client = 'client'; // contains only client id (Exp: 1)
-  static const String _price = 'price';
-  static const String _fabrics =
-      'fabrics'; // contains only string of fabric ids (Exp: 1;2;3)
-  static const String _expenses = 'expenses';
-  static const String _date = 'date';
-  static const String _done = 'done';
-  static const String _comment = 'comment';
-
-  // Special for settings
-  static const String _appTitle = 'appTitle';
-  static const String _icon = 'icon';
 
   static Database _database;
-
   Future<Database> get database async {
     if (_database != null) return _database;
     _database = await _initDB();
@@ -68,77 +23,80 @@ class DatabaseHelper {
   Future<Database> _initDB() async {
     // The path_provider plugin gets the right directory for Android or iOS.
     Directory documentsDirectory = await getApplicationDocumentsDirectory();
-    String path = join(documentsDirectory.path, _databaseName);
+    String path = join(documentsDirectory.path, ConstDBData.databaseName);
     return await openDatabase(path,
-        version: _databaseVersion, onCreate: _createDB);
+        version: ConstDBData.databaseVersion, onCreate: _createDB);
   }
 
   Future _createDB(Database db, int version) async {
     await db.execute('''
-      CREATE TABLE IF NOT EXISTS $_clientTableName (
-        $_id INTEGER PRIMARY KEY AUTOINCREMENT,
-        $_avatar TEXT,
-        $_name TEXT,
-        $_surname TEXT,
-        $_middleName TEXT,
-        $_city TEXT,
-        $_address TEXT,
-        $_phone TEXT,
-        $_volume TEXT,
-        $_previousDate TEXT,
-        $_nextDate TEXT,
-        $_images TEXT
+      CREATE TABLE IF NOT EXISTS ${ConstDBData.clientTableName} (
+        ${ConstDBData.id} INTEGER PRIMARY KEY AUTOINCREMENT,
+        ${ConstDBData.avatar} TEXT,
+        ${ConstDBData.name} TEXT,
+        ${ConstDBData.surname} TEXT,
+        ${ConstDBData.middleName} TEXT,
+        ${ConstDBData.city} TEXT,
+        ${ConstDBData.address} TEXT,
+        ${ConstDBData.phone} TEXT,
+        ${ConstDBData.volume} TEXT,
+        ${ConstDBData.previousDate} TEXT,
+        ${ConstDBData.nextDate} TEXT,
+        ${ConstDBData.images} TEXT
       )
     ''');
     await db.execute('''
-      CREATE TABLE IF NOT EXISTS  $_orderTableName (
-        $_id INTEGER PRIMARY KEY AUTOINCREMENT,
-        $_client INTEGER,
-        $_price REAL,
-        $_fabrics TEXT,
-        $_expenses REAL,
-        $_date TEXT,
-        $_done BOOLEAN,
-        $_comment TEXT
+      CREATE TABLE IF NOT EXISTS  ${ConstDBData.orderTableName} (
+        ${ConstDBData.id} INTEGER PRIMARY KEY AUTOINCREMENT,
+        ${ConstDBData.client} INTEGER,
+        ${ConstDBData.price} REAL,
+        ${ConstDBData.fabrics} TEXT,
+        ${ConstDBData.expenses} REAL,
+        ${ConstDBData.date} TEXT,
+        ${ConstDBData.done} BOOLEAN,
+        ${ConstDBData.comment} TEXT
       )
     ''');
     await db.execute('''
-      CREATE TABLE IF NOT EXISTS  $_fabricTableName (
-        $_id INTEGER PRIMARY KEY AUTOINCREMENT,
-        $_title TEXT,
-        $_retailPrice REAL,
-        $_purchasePrice REAL
+      CREATE TABLE IF NOT EXISTS  ${ConstDBData.fabricTableName} (
+        ${ConstDBData.id} INTEGER PRIMARY KEY AUTOINCREMENT,
+        ${ConstDBData.title} TEXT,
+        ${ConstDBData.retailPrice} REAL,
+        ${ConstDBData.purchasePrice} REAL
       )
     ''');
     await db.execute('''
-      CREATE TABLE IF NOT EXISTS  $_settingsTableName (
-        $_id INTEGER PRIMARY KEY AUTOINCREMENT,
-        $_appTitle TEXT,
-        $_icon TEXT
+      CREATE TABLE IF NOT EXISTS  ${ConstDBData.settingsTableName} (
+        ${ConstDBData.id} INTEGER PRIMARY KEY AUTOINCREMENT,
+        ${ConstDBData.appTitle} TEXT,
+        ${ConstDBData.icon} TEXT
       )
     ''');
   }
 
-  Future dropBD() async {
+  Future dropBD(String dbName) async {
     final db = await database;
-    await db.execute('DROP TABLE IF EXISTS $_clientTableName;');
-    await db.execute('DROP TABLE IF EXISTS $_orderTableName;');
-    await db.execute('DROP TABLE IF EXISTS $_fabricTableName;');
-    await db.execute('DROP TABLE IF EXISTS $_settingsTableName;');
-    await _createDB(db, _databaseVersion);
+    if(dbName == ConstDBData.clientTableName)
+      await db.execute('DELETE FROM ${ConstDBData.clientTableName};');
+    else if(dbName == ConstDBData.orderTableName)
+      await db.execute('DELETE FROM ${ConstDBData.orderTableName};');
+    else if(dbName == ConstDBData.fabricTableName)
+      await db.execute('DELETE FROM ${ConstDBData.fabricTableName};');
+    else if(dbName == ConstDBData.settingsTableName)
+      await db.execute('DELETE FROM ${ConstDBData.settingsTableName};');
   }
 
   Future<int> _getMaxId(Database db, String tableName) async {
-    var table = await db.rawQuery("SELECT MAX($_id)+1 AS $_id FROM $tableName");
-    return table.first["$_id"] ?? 1;
+    var table = await db.rawQuery("SELECT MAX(${ConstDBData.id})+1 AS ${ConstDBData.id} FROM $tableName");
+    return table.first["${ConstDBData.id}"] ?? 1;
   }
 
   // Client methods
   Future addClient(Client client) async {
     final db = await database;
-    client.id = await _getMaxId(db, _clientTableName);
+    client.id = await _getMaxId(db, ConstDBData.clientTableName);
     await db.rawInsert(
-      "INSERT INTO $_clientTableName ($_avatar, $_name, $_surname, $_middleName, $_city, $_address, $_phone, $_volume, $_previousDate, $_nextDate, $_images) VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+      "INSERT INTO ${ConstDBData.clientTableName} (${ConstDBData.avatar}, ${ConstDBData.name}, ${ConstDBData.surname}, ${ConstDBData.middleName}, ${ConstDBData.city}, ${ConstDBData.address}, ${ConstDBData.phone}, ${ConstDBData.volume}, ${ConstDBData.previousDate}, ${ConstDBData.nextDate}, ${ConstDBData.images}) VALUES (?,?,?,?,?,?,?,?,?,?,?)",
       [
         client.avatar,
         client.name,
@@ -158,19 +116,19 @@ class DatabaseHelper {
   Future updateClient(Client client) async {
     final db = await database;
     var map = client.toMap();
-    map[_images] = map[_images]?.join(';');
-    await db.update("$_clientTableName", map,
-        where: "$_id = ?", whereArgs: [client.id]);
+    map[ConstDBData.images] = map[ConstDBData.images]?.join(';');
+    await db.update("${ConstDBData.clientTableName}", map,
+        where: "${ConstDBData.id} = ?", whereArgs: [client.id]);
   }
 
   Future<Client> getClient(int id) async {
     final db = await database;
     List<Map<String, dynamic>> data =
-        await db.query("$_clientTableName", where: "$_id = ?", whereArgs: [id]);
+        await db.query("${ConstDBData.clientTableName}", where: "${ConstDBData.id} = ?", whereArgs: [id]);
     if (data.isNotEmpty) {
       Map<String, dynamic> m = Map<String, dynamic>.from(data.first);
       List<String> a = [];
-      m[_images] = (m[_images].length > 0) ? m[_images].split(';') : a;
+      m[ConstDBData.images] = (m[ConstDBData.images].length > 0) ? m[ConstDBData.images].split(';') : a;
       return Client.fromMap(m);
     } else
       return Client();
@@ -178,13 +136,13 @@ class DatabaseHelper {
 
   Future<List<Client>> getAllClients() async {
     final db = await database;
-    List<Map<String, dynamic>> data = await db.query("$_clientTableName");
+    List<Map<String, dynamic>> data = await db.query("${ConstDBData.clientTableName}");
     List<Map<String, dynamic>> result = [];
     if (data.isNotEmpty) {
       for (int i = 0; i < data.length; i++) {
         Map<String, dynamic> m = Map<String, dynamic>.from(data[i]);
         List<String> a = [];
-        m[_images] = (m[_images].length > 0) ? m[_images].split(';') : a;
+        m[ConstDBData.images] = (m[ConstDBData.images].length > 0) ? m[ConstDBData.images].split(';') : a;
         result.add(m);
       }
       return result.map((e) => Client.fromMap(e)).toList();
@@ -194,20 +152,20 @@ class DatabaseHelper {
 
   Future deleteClient(int id) async {
     final db = await database;
-    db.delete("$_clientTableName", where: "$_id = ?", whereArgs: [id]);
+    db.delete("${ConstDBData.clientTableName}", where: "${ConstDBData.id} = ?", whereArgs: [id]);
   }
 
   Future deleteAllClients() async {
     final db = await database;
-    db.rawDelete("DELETE * FROM $_clientTableName");
+    db.rawDelete("DELETE * FROM ${ConstDBData.clientTableName}");
   }
 
   // Fabric methods
   Future addFabric(Fabric fabric) async {
     final db = await database;
-    fabric.id = await _getMaxId(db, _fabricTableName);
+    fabric.id = await _getMaxId(db, ConstDBData.fabricTableName);
     await db.rawInsert(
-        "INSERT INTO $_fabricTableName ($_id,$_title,$_retailPrice,$_purchasePrice) VALUES (?,?,?,?)",
+        "INSERT INTO ${ConstDBData.fabricTableName} (${ConstDBData.id},${ConstDBData.title},${ConstDBData.retailPrice},${ConstDBData.purchasePrice}) VALUES (?,?,?,?)",
         [
           fabric.id,
           fabric.title,
@@ -219,39 +177,39 @@ class DatabaseHelper {
   Future updateFabric(Fabric fabric) async {
     final db = await database;
     var map = fabric.toMap();
-    await db.update("$_fabricTableName", map,
-        where: "$_id = ?", whereArgs: [fabric.id]);
+    await db.update("${ConstDBData.fabricTableName}", map,
+        where: "${ConstDBData.id} = ?", whereArgs: [fabric.id]);
   }
 
   Future<Fabric> getFabric(int id) async {
     final db = await database;
     List<Map<String, dynamic>> res =
-        await db.query("$_fabricTableName", where: "$_id = ?", whereArgs: [id]);
+        await db.query("${ConstDBData.fabricTableName}", where: "${ConstDBData.id} = ?", whereArgs: [id]);
     return res.isNotEmpty ? Fabric.fromMap(res.first) : Fabric();
   }
 
   Future<List<Fabric>> getAllFabrics() async {
     final db = await database;
-    List<Map<String, dynamic>> res = await db.query("$_fabricTableName");
+    List<Map<String, dynamic>> res = await db.query("${ConstDBData.fabricTableName}");
     return res.isNotEmpty ? res.map((c) => Fabric.fromMap(c)).toList() : [];
   }
 
   Future deleteFabric(int id) async {
     final db = await database;
-    db.delete("$_fabricTableName", where: "$_id = ?", whereArgs: [id]);
+    db.delete("${ConstDBData.fabricTableName}", where: "${ConstDBData.id} = ?", whereArgs: [id]);
   }
 
   Future deleteAllFabrics() async {
     final db = await database;
-    db.rawDelete("DELETE * FROM $_fabricTableName");
+    db.rawDelete("DELETE * FROM ${ConstDBData.fabricTableName}");
   }
 
   // Order methods
   Future addOrder(Order order) async {
     final db = await database;
-    order.id = await _getMaxId(db, _orderTableName);
+    order.id = await _getMaxId(db, ConstDBData.orderTableName);
     await db.rawInsert(
-      "INSERT INTO $_orderTableName ($_id, $_client, $_price, $_fabrics, $_expenses, $_date, $_done, $_comment) VALUES (?,?,?,?,?,?,?,?)",
+      "INSERT INTO ${ConstDBData.orderTableName} (${ConstDBData.id}, ${ConstDBData.client}, ${ConstDBData.price}, ${ConstDBData.fabrics}, ${ConstDBData.expenses}, ${ConstDBData.date}, ${ConstDBData.done}, ${ConstDBData.comment}) VALUES (?,?,?,?,?,?,?,?)",
       [
         order.id,
         order.client.id,
@@ -268,47 +226,47 @@ class DatabaseHelper {
   Future updateOrder(Order order) async {
     final db = await database;
     var map = order.toMap();
-    map[_client] = map[_client].id;
-    map[_fabrics] = map[_fabrics].map((e) => e.id)?.join(';');
-    await db.update("$_orderTableName", map,
-        where: "$_id = ?", whereArgs: [order.id]);
+    map[ConstDBData.client] = map[ConstDBData.client].id;
+    map[ConstDBData.fabrics] = map[ConstDBData.fabrics].map((e) => e.id)?.join(';');
+    await db.update("${ConstDBData.orderTableName}", map,
+        where: "${ConstDBData.id} = ?", whereArgs: [order.id]);
   }
 
   Future<Order> getOrder(int id) async {
     final db = await database;
     List<Map<String, dynamic>> res =
-        await db.query("$_orderTableName", where: "$_id = ?", whereArgs: [id]);
-    res.first[_client] = getClient(res.first[_client]);
-    res.first[_fabrics] = List<int>.from(res.first[_fabrics]?.split(';'))
+        await db.query("${ConstDBData.orderTableName}", where: "${ConstDBData.id} = ?", whereArgs: [id]);
+    res.first[ConstDBData.client] = getClient(res.first[ConstDBData.client]);
+    res.first[ConstDBData.fabrics] = List<int>.from(res.first[ConstDBData.fabrics]?.split(';'))
         .map((id) => getFabric(id));
     return res.isNotEmpty ? Order.fromMap(res.first) : null;
   }
 
   Future<List<Order>> getAllOrders() async {
     final db = await database;
-    List<Map<String, dynamic>> data = await db.query("$_orderTableName");
+    List<Map<String, dynamic>> data = await db.query("${ConstDBData.orderTableName}");
     List<Map<String, dynamic>> result = [];
     if (data.isNotEmpty) {
       for (int i = 0; i < data.length; i++) {
         Map<String, dynamic> m = Map<String, dynamic>.from(data[i]);
-        m[_client] = await getClient(m[_client]);
-        if (m[_client].id == null) {
-          await deleteOrder(m[_id]);
+        m[ConstDBData.client] = await getClient(m[ConstDBData.client]);
+        if (m[ConstDBData.client].id == null) {
+          await deleteOrder(m[ConstDBData.id]);
           continue;
         }
-        if (m[_fabrics].length > 0) {
-          List<String> ids = m[_fabrics].split(';');
-          m[_fabrics] = List<Fabric>.from([]).toList();
+        if (m[ConstDBData.fabrics].length > 0) {
+          List<String> ids = m[ConstDBData.fabrics].split(';');
+          m[ConstDBData.fabrics] = List<Fabric>.from([]).toList();
           for (int j = 0; j < ids.length; j++) {
             Fabric f = await getFabric(int.parse(ids[j]));
             if (f.id == null) {
               await deleteFabric(int.parse(ids[j]));
             } else {
-              await m[_fabrics].add(f);
+              await m[ConstDBData.fabrics].add(f);
             }
           }
         } else
-          m[_fabrics] = List<Fabric>.from([]).toList();
+          m[ConstDBData.fabrics] = List<Fabric>.from([]).toList();
 
         result.add(m);
       }
@@ -319,19 +277,19 @@ class DatabaseHelper {
 
   Future deleteOrder(int id) async {
     final db = await database;
-    db.delete("$_orderTableName", where: "$_id = ?", whereArgs: [id]);
+    db.delete("${ConstDBData.orderTableName}", where: "${ConstDBData.id} = ?", whereArgs: [id]);
   }
 
   Future deleteAllOrders() async {
     final db = await database;
-    db.rawDelete("DELETE * FROM $_orderTableName");
+    db.rawDelete("DELETE * FROM ${ConstDBData.orderTableName}");
   }
 
   // Settings methods
   Future addSettings(Settings settings) async {
     final db = await database;
     await db.rawInsert(
-      "INSERT INTO $_settingsTableName ($_id, $_appTitle, $_icon) VALUES (?,?,?)",
+      "INSERT INTO ${ConstDBData.settingsTableName} (${ConstDBData.id}, ${ConstDBData.appTitle}, ${ConstDBData.icon}) VALUES (?,?,?)",
       [
         1,
         settings.appTitle,
@@ -344,8 +302,8 @@ class DatabaseHelper {
     final db = await database;
     var map = settings.toMap();
     try {
-      await db.update("$_settingsTableName", map,
-          where: "$_id = ?", whereArgs: [settings.id]);
+      await db.update("${ConstDBData.settingsTableName}", map,
+          where: "${ConstDBData.id} = ?", whereArgs: [settings.id]);
     } catch (error) {
       await addSettings(Settings(
         id: 1,
@@ -359,23 +317,23 @@ class DatabaseHelper {
     final db = await database;
     List<Map<String, dynamic>> res;
     try {
-      res = await db.query("$_settingsTableName");
+      res = await db.query("${ConstDBData.settingsTableName}");
       if (res.length == 0) {
         await addSettings(Settings(
           id: 1,
           appTitle: ConstData.appTitle,
           icon: null,
         ));
-        res = await db.query("$_settingsTableName");
+        res = await db.query("${ConstDBData.settingsTableName}");
       }
     } catch (error) {
-      await _createDB(db, _databaseVersion);
+      await _createDB(db, ConstDBData.databaseVersion);
       addSettings(Settings(
         id: 1,
         appTitle: ConstData.appTitle,
         icon: null,
       ));
-      res = await db.query("$_settingsTableName");
+      res = await db.query("${ConstDBData.settingsTableName}");
     }
     return res.isNotEmpty
         ? Settings.fromMap(res.first)

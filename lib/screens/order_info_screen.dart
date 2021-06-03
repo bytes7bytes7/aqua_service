@@ -9,7 +9,7 @@ import 'package:path_provider/path_provider.dart';
 import '../bloc/bloc.dart';
 import '../model/fabric.dart';
 import 'calendar_screen.dart';
-import 'global/show_info_snack_bar.dart';
+import 'widgets/show_info_snack_bar.dart';
 import '../model/client.dart';
 import '../model/order.dart';
 import 'client_info_screen.dart';

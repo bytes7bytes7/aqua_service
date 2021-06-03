@@ -42,9 +42,9 @@ class SettingsBloc{
     });
   }
 
-  void deleteAllData()async{
+  void clearDatabase(List<String> dbName)async{
     _settingsStreamController.sink.add(SettingsState._settingsLoading());
-    _repository.deleteAllData().then((value) {
+    _repository.clearDatabase(dbName).then((value) {
       loadAllSettings();
     });
   }

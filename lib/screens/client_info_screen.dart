@@ -11,7 +11,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../bloc/bloc.dart';
 import 'calendar_screen.dart';
-import 'global/show_info_snack_bar.dart';
+import 'widgets/show_info_snack_bar.dart';
 import '../screens/widgets/app_header.dart';
 import 'global/next_page_route.dart';
 import '../model/client.dart';

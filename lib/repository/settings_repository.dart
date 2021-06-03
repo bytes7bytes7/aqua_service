@@ -10,7 +10,8 @@ class SettingsRepository {
     await DatabaseHelper.db.updateSettings(settings);
   }
 
-  Future deleteAllData()async{
-    await DatabaseHelper.db.dropBD();
+  Future clearDatabase(List<String> dbName)async{
+    for (String name in dbName)
+      await DatabaseHelper.db.dropBD(name);
   }
 }
