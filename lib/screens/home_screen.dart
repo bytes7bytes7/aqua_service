@@ -1,6 +1,3 @@
-import 'package:aqua_service/constants.dart';
-import 'package:aqua_service/database/database_helper.dart';
-import 'package:aqua_service/model/settings.dart';
 import 'package:flutter/material.dart';
 
 import 'package:aqua_service/bloc/bloc.dart';
@@ -9,6 +6,8 @@ import 'global/next_page_route.dart';
 import 'screens.dart';
 import 'settings_screen.dart';
 import 'widgets/loading_circle.dart';
+import 'package:aqua_service/constants.dart';
+import 'package:aqua_service/model/settings.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -17,12 +16,6 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   Iterable<int> bytes;
-
-  @override
-  void dispose() {
-    Bloc.bloc.settingsBloc.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -51,12 +44,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     return Column(
                       children: [
                         SizedBox(height: 20.0),
-                        IconButton(
-                          icon: Icon(Icons.delete_forever_outlined),
-                          onPressed: () {
-                            DatabaseHelper.db.dropBD('');
-                          },
-                        ),
                         Flexible(
                           flex: 4,
                           child: Material(

@@ -1,16 +1,20 @@
 import 'dart:io';
-import 'package:aqua_service/bloc/bloc.dart';
-import 'package:aqua_service/constants.dart';
-import 'package:aqua_service/model/client.dart';
-import 'package:aqua_service/model/fabric.dart';
-import 'package:aqua_service/model/order.dart';
-import 'package:aqua_service/model/settings.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:flutter/services.dart' show ByteData, rootBundle;
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:excel/excel.dart';
 import 'package:mime/mime.dart';
 
+import 'package:aqua_service/bloc/bloc.dart';
+import 'package:aqua_service/database/database_helper.dart';
+import 'package:aqua_service/model/client.dart';
+import 'package:aqua_service/model/fabric.dart';
+import 'package:aqua_service/model/order.dart';
+import 'package:aqua_service/model/settings.dart';
 import 'package:aqua_service/screens/widgets/show_info_snack_bar.dart';
+import 'package:path_provider/path_provider.dart';
+import '../constants.dart';
 
 abstract class ExcelHelper {
   static readExcel(BuildContext context) async {
@@ -31,9 +35,6 @@ abstract class ExcelHelper {
         Map<String, dynamic> map;
         List<dynamic> headerRow, row;
         for (var table in excel.tables.keys) {
-          print('\n\nTABLE: $table');
-          print('MAX COLS: ${excel.tables[table].maxCols}');
-          print('MAX ROWS: ${excel.tables[table].maxRows}');
           if (table == ConstDBData.clientTableName ||
               table == ConstDBData.orderTableName ||
               table == ConstDBData.fabrics ||
@@ -88,6 +89,11 @@ abstract class ExcelHelper {
           }
         }
         Bloc.bloc.settingsBloc.importExcel(clients, fabrics, orders, settings);
+        showInfoSnackBar(
+          context: context,
+          info: 'Данные загружены',
+          icon: Icons.done_all_outlined,
+        );
       }
     } else {
       showInfoSnackBar(
@@ -96,5 +102,105 @@ abstract class ExcelHelper {
         icon: Icons.warning_amber_outlined,
       );
     }
+  }
+
+  static writeExcel(BuildContext context) async {
+    Directory directory = await _createAppDir(context);
+    DateTime today = DateTime.now();
+    String day = today.day.toString(), month = today.month.toString();
+    if (day.length < 2) day = '0' + day;
+    if (month.length < 2) month = '0' + month;
+    String filePath = '${directory.path}/$day-$month-${today.year}.xlsx';
+
+    ByteData data = await rootBundle.load("assets/xlsx/example.xlsx");
+    var bytes = data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
+    var excel = Excel.decodeBytes(bytes);
+
+    // write data
+    List<Client> clients = await DatabaseHelper.db.getAllClients();
+    List<Order> orders = await DatabaseHelper.db.getAllOrders();
+    List<Fabric> fabrics = await DatabaseHelper.db.getAllFabrics();
+    Settings settings = await DatabaseHelper.db.getSettings();
+    Map<String, dynamic> map;
+
+    for (var table in excel.tables.keys) {
+      for (var table in excel.tables.keys) {
+        for (var row in excel.tables[table].rows) {
+          print(row);
+        }
+      }
+      excel.tables[table].removeRow(1);
+      if (table == ConstDBData.clientTableName) {
+        print(excel.tables[table].maxRows);
+        for (int i = 0; i < clients.length; i++) {
+          map = clients[i].toMap();
+          map['images'] = map['images'].isNotEmpty? map['images'].join(';') : null;
+          excel.tables[table].appendRow([1, null, 'name1', 'surname1', 'md', 'city1', 'ad-s', '12312', 10, 'im/im/1.jpg']);
+          //excel.tables[table].insertRowIterables(['1','2','1','2','1','2'],1);
+        }
+
+        for (var table in excel.tables.keys) {
+          for (var row in excel.tables[table].rows) {
+            print(row);
+          }
+        }
+        // } else if (table == ConstDBData.fabricTableName) {
+        //   for (int i = 0; i < fabrics.length; i++) {
+        //     map = fabrics[i].toMap();
+        //     excel.tables[table].insertRowIterables(map.values.toList(), i + 1);
+        //   }
+        // } else if (table == ConstDBData.orderTableName) {
+        //   for (int i = 0; i < orders.length; i++) {
+        //     map = orders[i].toMap();
+        //     excel.tables[table].insertRowIterables(map.values.toList(), i + 1);
+        //   }
+        // } else if (table == ConstDBData.settingsTableName) {
+        //   map = settings.toMap();
+        //   excel.tables[table].insertRowIterables(map.values.toList(), 1);
+      }
+    }
+
+    excel.encode().then((onValue) {
+      File(filePath)
+        ..createSync(recursive: true)
+        ..writeAsBytesSync(onValue);
+    });
+  }
+
+  static Future<bool> _requestPermission(Permission permission) async {
+    if (await permission.isGranted) return true;
+    var result = await permission.request();
+    if (result == PermissionStatus.granted) return true;
+    return false;
+  }
+
+  static Future<Directory> _createAppDir(BuildContext context) async {
+    Directory directory;
+    try {
+      if (await _requestPermission(Permission.storage)) {
+        directory = await getExternalStorageDirectory();
+        String newPath = '';
+        for (String p in directory.path.split('/')) {
+          if (p == 'Android')
+            break;
+          else if (p.isNotEmpty) newPath += '/' + p;
+        }
+        newPath += '/AquaService';
+        directory = Directory(newPath);
+        if (!await directory.exists()) {
+          await directory.create(recursive: true);
+        }
+        if (await directory.exists()) {
+          return directory;
+        }
+      }
+    } catch (error) {
+      showInfoSnackBar(
+        context: context,
+        info: 'Ошибка',
+        icon: Icons.warning_amber_outlined,
+      );
+    }
+    return null;
   }
 }

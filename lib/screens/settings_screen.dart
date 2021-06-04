@@ -1,16 +1,13 @@
 import 'dart:io';
-
-import 'package:aqua_service/bloc/bloc.dart';
-import 'package:aqua_service/bloc/settings_bloc.dart';
-import 'package:aqua_service/constants.dart';
-import 'package:aqua_service/model/settings.dart';
-import 'package:aqua_service/screens/widgets/rect_button.dart';
-import 'package:aqua_service/services/excel_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 
-import 'widgets/loading_circle.dart';
+import 'package:aqua_service/bloc/bloc.dart';
+import 'package:aqua_service/constants.dart';
+import 'package:aqua_service/model/settings.dart';
+import 'package:aqua_service/screens/widgets/rect_button.dart';
+import 'package:aqua_service/services/excel_helper.dart';
 import 'widgets/show_info_snack_bar.dart';
 import 'widgets/app_header.dart';
 import 'widgets/show_no_yes_dialog.dart';
@@ -85,14 +82,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 widget.settings.appTitle = titleController.text;
                 Bloc.bloc.settingsBloc.updateSettings(widget.settings);
                 showInfoSnackBar(
-                    context: context,
-                    info: 'Сохранено!',
-                    icon: Icons.done_all_outlined);
+                  context: context,
+                  info: 'Сохранено!',
+                  icon: Icons.done_all_outlined,
+                );
               } else {
                 showInfoSnackBar(
-                    context: context,
-                    info: 'Введите название',
-                    icon: Icons.warning_amber_outlined);
+                  context: context,
+                  info: 'Введите название',
+                  icon: Icons.warning_amber_outlined,
+                );
               }
             },
           ),
@@ -121,84 +120,6 @@ class _Body extends StatefulWidget {
 }
 
 class __BodyState extends State<_Body> {
-  @override
-  void dispose() {
-    Bloc.bloc.settingsBloc.dispose();
-    super.dispose();
-  }
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      behavior: HitTestBehavior.translucent,
-      onTap: () {
-        FocusScope.of(context).requestFocus(FocusNode());
-      },
-      child: StreamBuilder(
-        stream: Bloc.bloc.settingsBloc.settings,
-        initialData: SettingsInitState(),
-        builder: (context, snapshot) {
-          if (snapshot.data is SettingsInitState) {
-            Bloc.bloc.settingsBloc.loadAllSettings();
-            return SizedBox.shrink();
-          } else if (snapshot.data is SettingsLoadingState) {
-            return _buildLoading();
-          } else if (snapshot.data is SettingsDataState) {
-            SettingsDataState state = snapshot.data;
-            return _ContentList(
-              settings: state.settings,
-              titleController: widget.titleController,
-            );
-          } else {
-            return _buildError();
-          }
-        },
-      ),
-    );
-  }
-
-  Widget _buildLoading() {
-    return Center(
-      child: LoadingCircle(),
-    );
-  }
-
-  Widget _buildError() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            'Ошибка',
-            style: Theme.of(context).textTheme.headline1,
-          ),
-          SizedBox(height: 20),
-          RectButton(
-            text: 'Обновить',
-            onPressed: () {
-              Bloc.bloc.settingsBloc.loadAllSettings();
-            },
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ContentList extends StatefulWidget {
-  const _ContentList({
-    Key key,
-    @required this.settings,
-    @required this.titleController,
-  }) : super(key: key);
-
-  final Settings settings;
-  final TextEditingController titleController;
-
-  @override
-  __ContentListState createState() => __ContentListState();
-}
-
-class __ContentListState extends State<_ContentList> {
   String appDocPath;
   Iterable<int> bytes;
 
@@ -290,7 +211,9 @@ class __ContentListState extends State<_ContentList> {
               Expanded(
                 child: RectButton(
                   text: 'Экспорт',
-                  onPressed: () {},
+                  onPressed: () {
+                    ExcelHelper.writeExcel(context);
+                  },
                 ),
               ),
             ],

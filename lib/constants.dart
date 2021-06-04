@@ -33,7 +33,6 @@ abstract class ConstData {
 
 abstract class ConstDBData {
   static final databaseName = "data.db";
-
   // Increment this version when you need to change the schema.
   static final databaseVersion = 1;
 
@@ -74,5 +73,4 @@ abstract class ConstDBData {
   // Special for settings
   static const String appTitle = 'appTitle';
   static const String icon = 'icon';
-
 }
