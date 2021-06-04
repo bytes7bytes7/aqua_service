@@ -1,4 +1,5 @@
 import 'package:aqua_service/constants.dart';
+import 'package:aqua_service/database/database_helper.dart';
 import 'package:aqua_service/model/settings.dart';
 import 'package:flutter/material.dart';
 
@@ -45,11 +46,17 @@ class _HomeScreenState extends State<HomeScreen> {
                 } else if (snapshot.data is SettingsDataState) {
                   SettingsDataState state = snapshot.data;
                   Settings settings = state.settings;
-                  bytes= state.bytes;
+                  bytes = state.bytes;
                   if (state.settings != null) {
                     return Column(
                       children: [
                         SizedBox(height: 20.0),
+                        IconButton(
+                          icon: Icon(Icons.delete_forever_outlined),
+                          onPressed: () {
+                            DatabaseHelper.db.dropBD('');
+                          },
+                        ),
                         Flexible(
                           flex: 4,
                           child: Material(
@@ -59,7 +66,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                 Navigator.push(
                                   context,
                                   NextPageRoute(
-                                    nextPage: SettingsScreen(settings: settings),
+                                    nextPage:
+                                        SettingsScreen(settings: settings),
                                   ),
                                 );
                               },

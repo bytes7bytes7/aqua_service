@@ -94,7 +94,10 @@ class __BodyState extends State<_Body> {
           } else if (snapshot.data is ClientDataState) {
             ClientDataState state = snapshot.data;
             if (state.clients.length > 0)
-              return _buildContent(state.clients);
+              return _ContentList(
+                clients: state.clients,
+                updateClient: widget.updateClient,
+              );
             else
               return Center(
                 child: Text(
@@ -116,18 +119,6 @@ class __BodyState extends State<_Body> {
     );
   }
 
-  Widget _buildContent(List<Client> clients) {
-    return ListView.builder(
-      itemCount: clients.length,
-      itemBuilder: (context, i) {
-        return _ClientCard(
-          client: clients[i],
-          updateClient: widget.updateClient,
-        );
-      },
-    );
-  }
-
   Widget _buildError() {
     return Center(
       child: Column(
@@ -146,6 +137,30 @@ class __BodyState extends State<_Body> {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _ContentList extends StatelessWidget {
+  const _ContentList({
+    Key key,
+    @required this.clients,
+    @required this.updateClient,
+  }) : super(key: key);
+
+  final List<Client> clients;
+  final Function updateClient;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      itemCount: clients.length,
+      itemBuilder: (context, i) {
+        return _ClientCard(
+          client: clients[i],
+          updateClient: updateClient,
+        );
+      },
     );
   }
 }

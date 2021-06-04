@@ -272,24 +272,6 @@ class _CalendarContentState extends State<CalendarContent> {
           ),
         ],
       ),
-      // bottomSheet: BottomSheet(
-      //   elevation: 10,
-      //   onClosing: () {},
-      //   builder: (context) {
-      //     return Container(
-      //       width: double.infinity,
-      //       height: 250,
-      //       alignment: Alignment.center,
-      //       child: ElevatedButton(
-      //         child: Text(
-      //           'Close this bottom sheet',
-      //           style: TextStyle(color: Colors.white),
-      //         ),
-      //         onPressed: () {},
-      //       ),
-      //     );
-      //   },
-      // ),
     );
   }
 }

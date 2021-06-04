@@ -32,7 +32,7 @@ class Client {
   String city;
   String address;
   String phone;
-  String volume;
+  double volume;
   String previousDate;
   String nextDate;
   List<String> images;
@@ -81,8 +81,6 @@ class Client {
     address = map['address'];
     phone = map['phone'];
     volume = map['volume'];
-    previousDate = map['previousDate'];
-    nextDate = map['nextDate'];
     images = map['images'];
   }
 
@@ -97,8 +95,6 @@ class Client {
       'address': address,
       'phone': phone,
       'volume': volume,
-      'previousDate': previousDate,
-      'nextDate': nextDate,
       'images': images,
     };
   }

@@ -60,7 +60,7 @@ class _ClientInfoScreenState extends State<ClientInfoScreen> {
     widget.client.city = widget.client.city ?? '';
     widget.client.address = widget.client.address ?? '';
     widget.client.phone = widget.client.phone ?? '';
-    widget.client.volume = widget.client.volume ?? '';
+    widget.client.volume = widget.client.volume ?? 0.0;
     widget.client.images = widget.client.images ?? [];
 
     changes['avatarPath'] = widget.client.avatar;
@@ -73,7 +73,7 @@ class _ClientInfoScreenState extends State<ClientInfoScreen> {
     cityController.text = widget.client.city;
     addressController.text = widget.client.address;
     phoneController.text = widget.client.phone;
-    volumeController.text = widget.client.volume;
+    volumeController.text = widget.client.volume.toString();
     super.initState();
   }
 
@@ -107,7 +107,7 @@ class _ClientInfoScreenState extends State<ClientInfoScreen> {
                 cityController.text != widget.client.city ||
                 addressController.text != widget.client.address ||
                 phoneController.text != widget.client.phone ||
-                volumeController.text != widget.client.volume ||
+                volumeController.text != widget.client.volume.toString() ||
                 changes['avatarPath'] != widget.client.avatar ||
                 !ListEquality()
                     .equals(changes['imagesPath'], widget.client.images)) {
@@ -170,7 +170,7 @@ class _ClientInfoScreenState extends State<ClientInfoScreen> {
                     ..city = cityController.text
                     ..address = addressController.text
                     ..phone = phoneController.text
-                    ..volume = volumeController.text
+                    ..volume = double.parse(volumeController.text)
                     ..images = changes['imagesPath'];
                   if (widget.client.id == null) {
                     await Bloc.bloc.clientBloc.addClient(widget.client);
@@ -550,11 +550,28 @@ class __BodyState extends State<_Body> {
                             child: Stack(
                               children: [
                                 Positioned.fill(
-                                  child: Image.memory(
-                                    File(widget.changes['imagesPath'][index])
-                                        .readAsBytesSync(),
-                                    fit: BoxFit.cover,
-                                  ),
+                                  child:
+                                      (File(widget.changes['imagesPath'][index])
+                                              .existsSync())
+                                          ? Image.memory(
+                                              File(widget.changes['imagesPath']
+                                                      [index])
+                                                  .readAsBytesSync(),
+                                              fit: BoxFit.cover,
+                                            )
+                                          : Container(
+                                              color: Theme.of(context)
+                                                  .errorColor
+                                                  .withOpacity(0.5),
+                                              child: Center(
+                                                child: Text(
+                                                  'Не найдено',
+                                                  style: Theme.of(context)
+                                                      .textTheme
+                                                      .bodyText1,
+                                                ),
+                                              ),
+                                            ),
                                 ),
                                 if (!widget.readMode)
                                   Positioned(
@@ -596,72 +613,80 @@ class __BodyState extends State<_Body> {
                         ),
                         onTap: () {
                           final Size size = MediaQuery.of(context).size;
-                          Navigator.push(
-                            context,
-                            NextPageRoute(
-                              nextPage: Scaffold(
-                                body: Stack(
-                                  children: [
-                                    Builder(
-                                      builder: (context) {
-                                        return CarouselSlider(
-                                          options: CarouselOptions(
-                                            initialPage: index,
-                                            height: size.height,
-                                            viewportFraction: 1.0,
-                                            enlargeCenterPage: false,
-                                            enableInfiniteScroll: false,
-                                            // autoPlay: false,
-                                          ),
-                                          items: widget.changes['imagesPath']
-                                              .map<Widget>(
-                                                (item) => Center(
-                                                  child: Image.memory(
-                                                    File(item)
-                                                        .readAsBytesSync(),
-                                                    fit: BoxFit.contain,
-                                                    height: size.height,
+                          if (File(widget.changes['imagesPath'][index])
+                              .existsSync()) {
+                            Navigator.push(
+                              context,
+                              NextPageRoute(
+                                nextPage: Scaffold(
+                                  body: Stack(
+                                    children: [
+                                      Builder(
+                                        builder: (context) {
+                                          return CarouselSlider(
+                                            options: CarouselOptions(
+                                              initialPage: index,
+                                              height: size.height,
+                                              viewportFraction: 1.0,
+                                              enlargeCenterPage: false,
+                                              enableInfiniteScroll: false,
+                                              // autoPlay: false,
+                                            ),
+                                            items: widget.changes['imagesPath']
+                                                .map<Widget>((item) {
+                                              return Center(
+                                                child: Image.memory(
+                                                  File(item).readAsBytesSync(),
+                                                  fit: BoxFit.contain,
+                                                  height: size.height,
+                                                ),
+                                              );
+                                            }).toList(),
+                                          );
+                                        },
+                                      ),
+                                      Positioned(
+                                        top: 0,
+                                        child: SafeArea(
+                                          child: Container(
+                                            alignment: Alignment.center,
+                                            height: 60,
+                                            width: size.width,
+                                            decoration: BoxDecoration(
+                                              color: Colors.black12
+                                                  .withOpacity(0.5),
+                                            ),
+                                            child: Row(
+                                              children: [
+                                                IconButton(
+                                                  icon: Icon(
+                                                    Icons
+                                                        .arrow_back_ios_outlined,
+                                                    color: Theme.of(context)
+                                                        .focusColor,
                                                   ),
+                                                  onPressed: () {
+                                                    Navigator.pop(context);
+                                                  },
                                                 ),
-                                              )
-                                              .toList(),
-                                        );
-                                      },
-                                    ),
-                                    Positioned(
-                                      top: 0,
-                                      child: SafeArea(
-                                        child: Container(
-                                          alignment: Alignment.center,
-                                          height: 60,
-                                          width: size.width,
-                                          decoration: BoxDecoration(
-                                            color:
-                                                Colors.black12.withOpacity(0.5),
-                                          ),
-                                          child: Row(
-                                            children: [
-                                              IconButton(
-                                                icon: Icon(
-                                                  Icons.arrow_back_ios_outlined,
-                                                  color: Theme.of(context)
-                                                      .focusColor,
-                                                ),
-                                                onPressed: () {
-                                                  Navigator.pop(context);
-                                                },
-                                              ),
-                                              Spacer(),
-                                            ],
+                                                Spacer(),
+                                              ],
+                                            ),
                                           ),
                                         ),
                                       ),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
                               ),
-                            ),
-                          );
+                            );
+                          } else {
+                            showInfoSnackBar(
+                              context: context,
+                              info: 'Фото не найдено',
+                              icon: Icons.warning_amber_outlined,
+                            );
+                          }
                         },
                       );
                     },

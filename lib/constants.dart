@@ -53,8 +53,8 @@ abstract class ConstDBData {
   static const String address = 'address';
   static const String phone = 'phone';
   static const String volume = 'volume';
-  static const String previousDate = 'previousDate';
-  static const String nextDate = 'nextDate';
+  // static const String previousDate = 'previousDate';
+  // static const String nextDate = 'nextDate';
   static const String images = 'images';
 
   // Special columns for fabrics

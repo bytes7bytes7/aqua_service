@@ -1,10 +1,14 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:aqua_service/model/client.dart';
+import 'package:aqua_service/model/fabric.dart';
+import 'package:aqua_service/model/order.dart';
+
 import '../model/settings.dart';
 import '../repository/settings_repository.dart';
 
-class SettingsBloc{
+class SettingsBloc {
   SettingsBloc(this._repository);
 
   final SettingsRepository _repository;
@@ -12,37 +16,46 @@ class SettingsBloc{
 
   Stream<SettingsState> get settings {
     if (_settingsStreamController == null || _settingsStreamController.isClosed)
-      _settingsStreamController = StreamController<SettingsState>();
+      _settingsStreamController = StreamController<SettingsState>.broadcast();
     return _settingsStreamController.stream;
   }
 
-  void dispose(){
-    _settingsStreamController.close();
+  void dispose() {
+    //_settingsStreamController.close();
   }
 
-  void loadAllSettings() async{
+  void loadAllSettings() async {
     _settingsStreamController.sink.add(SettingsState._settingsLoading());
     _repository.getSettings().then((settings) {
       Iterable<int> bytes;
-      if(settings.icon!=null) {
+      if (settings.icon != null) {
         var hasLocalImage = File(settings.icon).existsSync();
         if (hasLocalImage) {
           bytes = File(settings.icon).readAsBytesSync();
         }
       }
-      if(!_settingsStreamController.isClosed)
-        _settingsStreamController.sink.add(SettingsState._settingsData(settings,bytes));
+      if (!_settingsStreamController.isClosed)
+        _settingsStreamController.sink
+            .add(SettingsState._settingsData(settings, bytes));
     });
   }
 
-  Future updateSettings(Settings settings)async{
+  void importExcel(List<Client> clients,
+      List<Fabric> fabrics, List<Order> orders, Settings settings) async {
+    _settingsStreamController.sink.add(SettingsState._settingsLoading());
+    await _repository.importExcel(clients,fabrics,orders, settings).then((settings) {
+      loadAllSettings();
+    });
+  }
+
+  Future updateSettings(Settings settings) async {
     _settingsStreamController.sink.add(SettingsState._settingsLoading());
     await _repository.updateSettings(settings).then((value) {
       loadAllSettings();
     });
   }
 
-  void clearDatabase(List<String> dbName)async{
+  void clearDatabase(List<String> dbName) async {
     _settingsStreamController.sink.add(SettingsState._settingsLoading());
     _repository.clearDatabase(dbName).then((value) {
       loadAllSettings();
@@ -52,16 +65,20 @@ class SettingsBloc{
 
 class SettingsState {
   SettingsState();
-  factory SettingsState._settingsData(Settings settings, Iterable<int> bytes) = SettingsDataState;
+
+  factory SettingsState._settingsData(Settings settings, Iterable<int> bytes) =
+      SettingsDataState;
+
   factory SettingsState._settingsLoading() = SettingsLoadingState;
 }
 
-class SettingsInitState extends SettingsState{}
+class SettingsInitState extends SettingsState {}
 
 class SettingsLoadingState extends SettingsState {}
 
-class SettingsDataState extends SettingsState{
+class SettingsDataState extends SettingsState {
   SettingsDataState(this.settings, this.bytes);
+
   final Settings settings;
   final Iterable<int> bytes;
 }
