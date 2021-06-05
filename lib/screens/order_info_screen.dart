@@ -356,17 +356,25 @@ class __BodyState extends State<_Body> {
                         'Прибыль : ',
                         style: Theme.of(context).textTheme.bodyText1,
                       ),
-                      Text(
-                        (widget.priceController.text.isNotEmpty &&
-                                widget.expensesController.text.isNotEmpty)
-                            ? (double.parse(widget.priceController.text) -
-                                    double.parse(
-                                        widget.expensesController.text))
-                                .toString()
-                            : (widget.priceController.text.isNotEmpty)
-                                ? widget.priceController.text.toString()
-                                : '0.0',
-                        style: Theme.of(context).textTheme.bodyText1,
+                      ValueListenableBuilder(
+                        valueListenable: _fabricsNotifier,
+                        builder: (context, _, __) {
+                          double value = (widget
+                                      .priceController.text.isNotEmpty &&
+                                  widget.expensesController.text.isNotEmpty)
+                              ? double.parse(widget.priceController.text) -
+                                  double.parse(widget.expensesController.text)
+                              : (widget.priceController.text.isNotEmpty)
+                                  ? double.parse(widget.priceController.text)
+                                  : 0.0;
+                          for(int i=0;i<widget.changes['fabrics'].length;i++){
+                            value += widget.changes['fabrics'][i].retailPrice - widget.changes['fabrics'][i].purchasePrice;
+                          }
+                          return Text(
+                            value.toString(),
+                            style: Theme.of(context).textTheme.bodyText1,
+                          );
+                        },
                       ),
                     ],
                   ),
@@ -808,9 +816,7 @@ class _FabricCard extends StatelessWidget {
           SizedBox(width: 8),
           Text(
             ((fabric.retailPrice - fabric.purchasePrice) *
-                    changes['fabrics']
-                        .where((e) => e.id == fabric.id)
-                        .length)
+                    changes['fabrics'].where((e) => e.id == fabric.id).length)
                 .toString(),
             style: Theme.of(context).textTheme.bodyText1,
           ),

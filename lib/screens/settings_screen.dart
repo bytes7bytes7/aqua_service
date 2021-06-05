@@ -203,7 +203,12 @@ class __BodyState extends State<_Body> {
                 child: RectButton(
                   text: 'Импорт',
                   onPressed: () {
-                    ExcelHelper.readExcel(context);
+                    //ExcelHelper.readExcel(context);
+                    showInfoSnackBar(
+                      context: context,
+                      info: 'Не работает',
+                      icon: Icons.warning_amber_outlined,
+                    );
                   },
                 ),
               ),
@@ -212,7 +217,12 @@ class __BodyState extends State<_Body> {
                 child: RectButton(
                   text: 'Экспорт',
                   onPressed: () {
-                    ExcelHelper.writeExcel(context);
+                    //ExcelHelper.writeExcel(context);
+                    showInfoSnackBar(
+                      context: context,
+                      info: 'Не работает',
+                      icon: Icons.warning_amber_outlined,
+                    );
                   },
                 ),
               ),

@@ -129,14 +129,17 @@ abstract class ExcelHelper {
           print(row);
         }
       }
-      excel.tables[table].removeRow(1);
+      //excel.tables[table].removeRow(1);
+      excel.tables[table].clearRow(1);
       if (table == ConstDBData.clientTableName) {
-        print(excel.tables[table].maxRows);
+        //excel.tables[table].removeColumn(9);
         for (int i = 0; i < clients.length; i++) {
           map = clients[i].toMap();
           map['images'] = map['images'].isNotEmpty? map['images'].join(';') : null;
-          excel.tables[table].appendRow([1, null, 'name1', 'surname1', 'md', 'city1', 'ad-s', '12312', 10, 'im/im/1.jpg']);
-          //excel.tables[table].insertRowIterables(['1','2','1','2','1','2'],1);
+          //excel.tables[table].appendRow([1, null, 'name1', 'surname1', 'md', 'city1', 'ad-s', '12312', 10, 'im/im/1.jpg']);
+          //excel.tables[table].insertRowIterables(['1','2','3','4','5'], 1);
+          excel.tables[table].rows[1].clear();
+          excel.tables[table].rows[1].addAll([1, null, 'name1', 'surname1', 'md', 'city1', 'ad-s', '12312', 10, 'im/im/1.jpg']);
         }
 
         for (var table in excel.tables.keys) {
