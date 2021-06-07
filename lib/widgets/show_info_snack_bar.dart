@@ -9,18 +9,24 @@ void showInfoSnackBar({
     SnackBar(
       backgroundColor: Colors.black.withOpacity(0.5),
       duration: const Duration(seconds: 1),
-      content: Row(
-        children: [
-          Text(
-            info,
-            style: Theme.of(context).textTheme.bodyText1,
-          ),
-          Spacer(),
-          Icon(
-            icon,
-            color: Theme.of(context).cardColor,
-          ),
-        ],
+      content: Container(
+        width: double.infinity,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Flexible(
+              child: Text(
+                info,
+                style: Theme.of(context).textTheme.bodyText1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            Icon(
+              icon,
+              color: Theme.of(context).cardColor,
+            ),
+          ],
+        ),
       ),
     ),
   );

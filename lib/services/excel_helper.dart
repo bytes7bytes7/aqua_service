@@ -55,7 +55,7 @@ abstract class ExcelHelper {
     } catch (error) {
       showInfoSnackBar(
         context: context,
-        info: 'Ошибка',
+        info: error.toString(),
         icon: Icons.warning_amber_outlined,
       );
     }
