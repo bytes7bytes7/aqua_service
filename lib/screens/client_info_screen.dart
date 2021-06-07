@@ -60,7 +60,7 @@ class _ClientInfoScreenState extends State<ClientInfoScreen> {
     widget.client.city = widget.client.city ?? '';
     widget.client.address = widget.client.address ?? '';
     widget.client.phone = widget.client.phone ?? '';
-    widget.client.volume = widget.client.volume ?? 0.0;
+    widget.client.volume = widget.client.volume ?? '';
     widget.client.images = widget.client.images ?? [];
 
     changes['avatarPath'] = widget.client.avatar;
@@ -170,7 +170,7 @@ class _ClientInfoScreenState extends State<ClientInfoScreen> {
                     ..city = cityController.text
                     ..address = addressController.text
                     ..phone = phoneController.text
-                    ..volume = double.parse(volumeController.text)
+                    ..volume = volumeController.text
                     ..images = changes['imagesPath'];
                   if (widget.client.id == null) {
                     await Bloc.bloc.clientBloc.addClient(widget.client);
@@ -444,7 +444,6 @@ class __BodyState extends State<_Body> {
                   controller: widget.volumeController,
                   style: Theme.of(context).textTheme.bodyText1,
                   enabled: !widget.readMode,
-                  keyboardType: TextInputType.number,
                   decoration: InputDecoration(
                     labelText: 'Объем аквариума',
                     labelStyle: Theme.of(context).textTheme.headline3,

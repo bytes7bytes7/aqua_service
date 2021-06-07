@@ -32,7 +32,7 @@ class Client {
   String city;
   String address;
   String phone;
-  double volume;
+  String volume;
   String previousDate;
   String nextDate;
   List<String> images;
