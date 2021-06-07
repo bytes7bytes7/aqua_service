@@ -192,7 +192,9 @@ class __BodyState extends State<_Body> {
               labelText: 'Название *',
               labelStyle: Theme.of(context).textTheme.headline3,
               enabledBorder: UnderlineInputBorder(
-                borderSide: BorderSide(color: Theme.of(context).disabledColor),
+                borderSide: BorderSide(
+                  color: Theme.of(context).disabledColor,
+                ),
               ),
             ),
           ),
@@ -252,7 +254,7 @@ class __BodyState extends State<_Body> {
           ),
           SizedBox(height: 5),
           RectButton(
-            text: 'Сбросить иконку и название',
+            text: 'Сбросить настройки',
             onPressed: () {
               showNoYesDialog(
                 context: context,

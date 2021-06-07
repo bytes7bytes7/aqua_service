@@ -105,7 +105,6 @@ class _OrderInfoScreenState extends State<OrderInfoScreen> {
         ..comment = commentController.text;
       if (widget.order.id == null) {
         await Bloc.bloc.orderBloc.addOrder(widget.order);
-        print(widget.order.id);
         setState(() {
           _title = 'Заказ';
         });
@@ -147,15 +146,6 @@ class _OrderInfoScreenState extends State<OrderInfoScreen> {
             color: Theme.of(context).focusColor,
           ),
           onPressed: () async {
-            print(!widget.readMode &&
-                !ListEquality()
-                    .equals([changes['client']], [widget.order.client]));
-            print(priceController.text != widget.order.price.toString());
-            print(expensesController.text != widget.order.expenses.toString());
-            print(changes['date'] != widget.order.date);
-            print(!ListEquality()
-                .equals(changes['fabrics'], widget.order.fabrics));
-            print(commentController.text != widget.order.comment);
             if (!widget.readMode &&
                     !ListEquality()
                         .equals([changes['client']], [widget.order.client]) ||
@@ -367,8 +357,11 @@ class __BodyState extends State<_Body> {
                               : (widget.priceController.text.isNotEmpty)
                                   ? double.parse(widget.priceController.text)
                                   : 0.0;
-                          for(int i=0;i<widget.changes['fabrics'].length;i++){
-                            value += widget.changes['fabrics'][i].retailPrice - widget.changes['fabrics'][i].purchasePrice;
+                          for (int i = 0;
+                              i < widget.changes['fabrics'].length;
+                              i++) {
+                            value += widget.changes['fabrics'][i].retailPrice -
+                                widget.changes['fabrics'][i].purchasePrice;
                           }
                           return Text(
                             value.toString(),
@@ -719,17 +712,19 @@ class __ClientCardState extends State<_ClientCard> {
                   onPressed: (widget.readMode)
                       ? () {
                           showInfoSnackBar(
-                              context: context,
-                              info: 'Режим чтения',
-                              icon: Icons.warning_amber_outlined);
+                            context: context,
+                            info: 'Режим чтения',
+                            icon: Icons.warning_amber_outlined,
+                          );
                         }
                       : () async {
                           Navigator.push(
                             context,
                             NextPageRoute(
-                                nextPage: ClientsScreen(
-                              updateClient: _updateClient,
-                            )),
+                              nextPage: ClientsScreen(
+                                updateClient: _updateClient,
+                              ),
+                            ),
                           );
                         },
                 ),

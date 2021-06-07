@@ -163,7 +163,6 @@ class DatabaseHelper {
         "${ConstDBData.clientTableName}",
         where: "${ConstDBData.id} = ?",
         whereArgs: [id]);
-    data = await db.query("${ConstDBData.clientTableName}");
     if (data.isNotEmpty) {
       Map<String, dynamic> m = Map<String, dynamic>.from(data.first);
       List<String> a = [];
