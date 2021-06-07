@@ -8,9 +8,9 @@ import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import 'widgets/show_info_snack_bar.dart';
-import 'widgets/app_header.dart';
-import 'widgets/show_no_yes_dialog.dart';
+import '../widgets/show_info_snack_bar.dart';
+import '../widgets/app_header.dart';
+import '../widgets/show_no_yes_dialog.dart';
 import '../model/order.dart';
 import '../model/client.dart';
 import '../bloc/bloc.dart';

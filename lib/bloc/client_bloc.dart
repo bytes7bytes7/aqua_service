@@ -29,7 +29,7 @@ class ClientBloc {
     }).onError((error, stackTrace) {
       if (!_clientStreamController.isClosed)
         _clientStreamController.sink.add(ClientState._clientError());
-    });;
+    });
   }
 
   void deleteClient(int id) async{

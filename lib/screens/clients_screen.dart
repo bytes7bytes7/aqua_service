@@ -2,10 +2,10 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 
-import 'widgets/empty_label.dart';
-import 'widgets/error_label.dart';
-import 'widgets/app_header.dart';
-import 'widgets/loading_circle.dart';
+import '../widgets/empty_label.dart';
+import '../widgets/error_label.dart';
+import '../widgets/app_header.dart';
+import '../widgets/loading_circle.dart';
 import '../bloc/bloc.dart';
 import '../bloc/client_bloc.dart';
 import '../model/client.dart';

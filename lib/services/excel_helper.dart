@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:flutter/services.dart' show ByteData, rootBundle;
 import 'package:path_provider/path_provider.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:excel/excel.dart';
@@ -13,7 +12,7 @@ import '../model/order.dart';
 import '../model/settings.dart';
 import '../bloc/bloc.dart';
 import '../database/database_helper.dart';
-import '../screens/widgets/show_info_snack_bar.dart';
+import '../widgets/show_info_snack_bar.dart';
 import '../constants.dart';
 
 abstract class ExcelHelper {
@@ -101,70 +100,127 @@ abstract class ExcelHelper {
     }
   }
 
-  static writeExcel(BuildContext context) async {
+  static exportToExcel(BuildContext context, String filename) async {
     Directory directory = await _createAppDir(context);
-    DateTime today = DateTime.now();
-    String day = today.day.toString(), month = today.month.toString();
-    if (day.length < 2) day = '0' + day;
-    if (month.length < 2) month = '0' + month;
-    String filePath = '${directory.path}/$day-$month-${today.year}.xlsx';
+    String filePath = '${directory.path}/$filename.xlsx';
 
-    ByteData data = await rootBundle.load("assets/xlsx/example.xlsx");
-    var bytes = data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
-    var excel = Excel.decodeBytes(bytes);
+    // Init excel
+    Excel excel = Excel.createExcel();
+    excel.copy('Sheet1', ConstDBData.clientTableName);
+    excel.copy('Sheet1', ConstDBData.orderTableName);
+    excel.copy('Sheet1', ConstDBData.fabricTableName);
+    excel.copy('Sheet1', ConstDBData.settingsTableName);
+    excel.delete('Sheet1');
 
-    // write data
+    // Get data
     List<Client> clients = await DatabaseHelper.db.getAllClients();
     List<Order> orders = await DatabaseHelper.db.getAllOrders();
     List<Fabric> fabrics = await DatabaseHelper.db.getAllFabrics();
     Settings settings = await DatabaseHelper.db.getSettings();
-    Map<String, dynamic> map;
 
+    List<String> headerRow;
+
+    // Fill table with data
     for (var table in excel.tables.keys) {
-      for (var table in excel.tables.keys) {
-        for (var row in excel.tables[table].rows) {
-          print(row);
-        }
-      }
-      //excel.tables[table].removeRow(1);
-      excel.tables[table].clearRow(1);
+      var thisTable = excel.tables[table];
       if (table == ConstDBData.clientTableName) {
-        //excel.tables[table].removeColumn(9);
+        headerRow = [
+          ConstDBData.id,
+          ConstDBData.avatar,
+          ConstDBData.name,
+          ConstDBData.surname,
+          ConstDBData.middleName,
+          ConstDBData.city,
+          ConstDBData.address,
+          ConstDBData.phone,
+          ConstDBData.volume,
+          ConstDBData.images,
+        ];
+        thisTable.appendRow(headerRow);
         for (int i = 0; i < clients.length; i++) {
-          map = clients[i].toMap();
-          map['images'] = map['images'].isNotEmpty? map['images'].join(';') : null;
-          //excel.tables[table].appendRow([1, null, 'name1', 'surname1', 'md', 'city1', 'ad-s', '12312', 10, 'im/im/1.jpg']);
-          //excel.tables[table].insertRowIterables(['1','2','3','4','5'], 1);
-          excel.tables[table].rows[1].clear();
-          excel.tables[table].rows[1].addAll([1, null, 'name1', 'surname1', 'md', 'city1', 'ad-s', '12312', 10, 'im/im/1.jpg']);
+          if (clients[i].images.isEmpty) {
+            clients[i].images = null;
+          }
+          thisTable.appendRow(clients[i].toMap().values.toList());
         }
+      } else if (table == ConstDBData.orderTableName) {
+        headerRow = [
+          ConstDBData.id,
+          ConstDBData.client,
+          ConstDBData.price,
+          ConstDBData.fabrics,
+          ConstDBData.expenses,
+          ConstDBData.date,
+          ConstDBData.done,
+          ConstDBData.comment,
+        ];
+        thisTable.appendRow(headerRow);
+        for (int i = 0; i < orders.length; i++) {
+          if (orders[i].fabrics.isEmpty) {
+            orders[i].fabrics = null;
+          }
+          List<dynamic> values = orders[i].toMap().values.toList();
+          values[1] = values[1].id; // Client id
+          if (values[3] != null) {
+            values[3] = values[3].map((e) => e.id).join(';'); // Fabrics' ids
+          }
+          thisTable.appendRow(values);
+        }
+      } else if (table == ConstDBData.fabricTableName) {
+        headerRow = [
+          ConstDBData.id,
+          ConstDBData.title,
+          ConstDBData.retailPrice,
+          ConstDBData.purchasePrice,
+        ];
+        thisTable.appendRow(headerRow);
+        for (int i = 0; i < fabrics.length; i++) {
+          thisTable.appendRow(fabrics[i].toMap().values.toList());
+        }
+      } else if (table == ConstDBData.settingsTableName) {
+        headerRow = [
+          ConstDBData.id,
+          ConstDBData.appTitle,
+          ConstDBData.icon,
+        ];
+        thisTable.appendRow(headerRow);
+        thisTable.appendRow(settings.toMap().values.toList());
+      }
 
-        for (var table in excel.tables.keys) {
-          for (var row in excel.tables[table].rows) {
-            print(row);
+      // Correct quantity of columns
+      if (table == ConstDBData.clientTableName ||
+          table == ConstDBData.orderTableName ||
+          table == ConstDBData.fabrics ||
+          table == ConstDBData.settingsTableName) {
+        for (int i = 0; i < thisTable.rows.length; i++) {
+          while (thisTable.rows[i].length > headerRow.length) {
+            thisTable.removeColumn(thisTable.rows[i].length - 1);
           }
         }
-        // } else if (table == ConstDBData.fabricTableName) {
-        //   for (int i = 0; i < fabrics.length; i++) {
-        //     map = fabrics[i].toMap();
-        //     excel.tables[table].insertRowIterables(map.values.toList(), i + 1);
-        //   }
-        // } else if (table == ConstDBData.orderTableName) {
-        //   for (int i = 0; i < orders.length; i++) {
-        //     map = orders[i].toMap();
-        //     excel.tables[table].insertRowIterables(map.values.toList(), i + 1);
-        //   }
-        // } else if (table == ConstDBData.settingsTableName) {
-        //   map = settings.toMap();
-        //   excel.tables[table].insertRowIterables(map.values.toList(), 1);
       }
     }
 
-    excel.encode().then((onValue) {
-      File(filePath)
-        ..createSync(recursive: true)
-        ..writeAsBytesSync(onValue);
-    });
+    // Print result
+    for (var table in excel.tables.keys) {
+      for (var row in excel.tables[table].rows) {
+        print(row);
+      }
+    }
+
+    // Save excel
+    excel.encode().then(
+      (onValue) {
+        File(filePath)
+          ..createSync(recursive: true)
+          ..writeAsBytesSync(onValue);
+      },
+    );
+    showInfoSnackBar(
+      context: context,
+      info: 'Готово',
+      icon: Icons.done_all_outlined,
+    );
+    Navigator.pop(context);
   }
 
   static Future<bool> _requestPermission(Permission permission) async {

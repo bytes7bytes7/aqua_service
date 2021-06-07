@@ -6,9 +6,9 @@ import 'package:flutter_calendar_carousel/classes/event_list.dart';
 import 'package:intl/intl.dart' show DateFormat;
 import 'package:path_provider/path_provider.dart';
 
-import 'widgets/error_label.dart';
-import 'widgets/app_header.dart';
-import 'widgets/loading_circle.dart';
+import '../widgets/error_label.dart';
+import '../widgets/app_header.dart';
+import '../widgets/loading_circle.dart';
 import '../bloc/bloc.dart';
 import '../bloc/order_bloc.dart';
 import '../model/order.dart';

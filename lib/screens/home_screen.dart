@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import 'widgets/empty_label.dart';
-import 'widgets/error_label.dart';
-import 'widgets/loading_circle.dart';
+import '../widgets/empty_label.dart';
+import '../widgets/error_label.dart';
+import '../widgets/loading_circle.dart';
 import '../bloc/bloc.dart';
 import '../bloc/settings_bloc.dart';
 import '../constants.dart';
