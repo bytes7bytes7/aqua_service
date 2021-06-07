@@ -1,6 +1,8 @@
+import 'package:aqua_service/screens/widgets/error_label.dart';
 import 'package:flutter/material.dart';
 
 import 'widgets/app_header.dart';
+import 'widgets/empty_label.dart';
 import 'widgets/loading_circle.dart';
 import 'widgets/rect_button.dart';
 import '../model/fabric.dart';
@@ -67,7 +69,6 @@ class _Body extends StatefulWidget {
 }
 
 class __BodyState extends State<_Body> {
-
   @override
   void dispose() {
     Bloc.bloc.fabricBloc.dispose();
@@ -89,62 +90,50 @@ class __BodyState extends State<_Body> {
             Bloc.bloc.fabricBloc.loadAllFabrics();
             return SizedBox.shrink();
           } else if (snapshot.data is FabricLoadingState) {
-            return _buildLoading();
+            return LoadingCircle();
           } else if (snapshot.data is FabricDataState) {
             FabricDataState state = snapshot.data;
-            if (state.fabrics.length > 0)
-              return _buildContent(state.fabrics);
-            else
-              return Center(
-                child: Text(
-                  'Пусто',
-                  style: Theme.of(context).textTheme.headline2,
-                ),
+            if (state.fabrics.length > 0) {
+              return _ContentList(
+                fabrics: state.fabrics,
+                addFabric: widget.addFabric,
               );
+            } else {
+              return EmptyLabel();
+            }
           } else {
-            return _buildError();
+            return ErrorLabel(
+              onPressed: () {
+                Bloc.bloc.fabricBloc.loadAllFabrics();
+              },
+            );
           }
         },
       ),
     );
   }
+}
 
-  Widget _buildLoading() {
-    return Center(
-      child: LoadingCircle(),
-    );
-  }
+class _ContentList extends StatelessWidget {
+  const _ContentList({
+    Key key,
+    @required this.fabrics,
+    @required this.addFabric,
+  }) : super(key: key);
 
-  Widget _buildContent(List<Fabric> fabrics) {
+  final List<Fabric> fabrics;
+  final Function addFabric;
+
+  @override
+  Widget build(BuildContext context) {
     return ListView.builder(
       itemCount: fabrics.length,
       itemBuilder: (context, i) {
         return _FabricCard(
           fabric: fabrics[i],
-          addFabric: widget.addFabric,
+          addFabric: addFabric,
         );
       },
-    );
-  }
-
-  Widget _buildError() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            'Ошибка',
-            style: Theme.of(context).textTheme.headline1,
-          ),
-          SizedBox(height: 20),
-          RectButton(
-            text: 'Обновить',
-            onPressed: () {
-              Bloc.bloc.fabricBloc.loadAllFabrics();
-            },
-          ),
-        ],
-      ),
     );
   }
 }

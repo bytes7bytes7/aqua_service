@@ -19,7 +19,7 @@ class OrderBloc {
     _orderStreamController.close();
   }
 
-  void loadAllOrders() async{
+  void loadAllOrders() async {
     _orderStreamController.sink.add(OrderState._orderLoading());
     _repository.getAllOrders().then((orderList) async {
       orderList.sort((a, b) => a.date.compareTo(b.date));
@@ -30,17 +30,20 @@ class OrderBloc {
       }
       if (!_orderStreamController.isClosed)
         _orderStreamController.sink.add(OrderState._orderData(orderList));
+    }).onError((error, stackTrace) {
+      if (!_orderStreamController.isClosed)
+        _orderStreamController.sink.add(OrderState._orderError());
     });
   }
 
-  void deleteOrder(int id)async {
+  void deleteOrder(int id) async {
     _orderStreamController.sink.add(OrderState._orderLoading());
     _repository.deleteOrder(id).then((value) {
       loadAllOrders();
     });
   }
 
-  void updateOrder(Order order)async {
+  void updateOrder(Order order) async {
     _orderStreamController.sink.add(OrderState._orderLoading());
     Order newOrder = Order.from(order);
     List<String> date = newOrder.date.split('.');
@@ -70,11 +73,15 @@ class OrderState {
   factory OrderState._orderData(List<Order> orders) = OrderDataState;
 
   factory OrderState._orderLoading() = OrderLoadingState;
+
+  factory OrderState._orderError() = OrderErrorState;
 }
 
 class OrderInitState extends OrderState {}
 
 class OrderLoadingState extends OrderState {}
+
+class OrderErrorState extends OrderState {}
 
 class OrderDataState extends OrderState {
   OrderDataState(this.orders);

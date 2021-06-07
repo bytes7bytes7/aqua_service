@@ -65,6 +65,9 @@ class ReportBloc {
       });
       if (!_reportStreamController.isClosed)
         _reportStreamController.sink.add(ReportState._reportData(reportList));
+    }).onError((error, stackTrace) {
+      if (!_reportStreamController.isClosed)
+        _reportStreamController.sink.add(ReportState._reportError());
     });
   }
 }
@@ -75,11 +78,15 @@ class ReportState {
   factory ReportState._reportData(List<Report> reports) = ReportDataState;
 
   factory ReportState._reportLoading() = ReportLoadingState;
+
+  factory ReportState._reportError() = ReportErrorState;
 }
 
 class ReportInitState extends ReportState {}
 
 class ReportLoadingState extends ReportState {}
+
+class ReportErrorState extends ReportState {}
 
 class ReportDataState extends ReportState {
   ReportDataState(this.reports);

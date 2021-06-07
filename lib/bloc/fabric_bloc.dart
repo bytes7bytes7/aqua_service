@@ -25,6 +25,9 @@ class FabricBloc{
       fabricList.sort((a,b) => a.title.toLowerCase().compareTo(b.title.toLowerCase()));
       if(!_fabricStreamController.isClosed)
       _fabricStreamController.sink.add(FabricState._fabricData(fabricList));
+    }).onError((error, stackTrace) {
+      if (!_fabricStreamController.isClosed)
+        _fabricStreamController.sink.add(FabricState._fabricError());
     });
   }
 
@@ -53,12 +56,17 @@ class FabricBloc{
 class FabricState {
   FabricState();
   factory FabricState._fabricData(List<Fabric> fabrics) = FabricDataState;
+
   factory FabricState._fabricLoading() = FabricLoadingState;
+
+  factory FabricState._fabricError() = FabricErrorState;
 }
 
 class FabricInitState extends FabricState{}
 
 class FabricLoadingState extends FabricState {}
+
+class FabricErrorState extends FabricState {}
 
 class FabricDataState extends FabricState{
   FabricDataState(this.fabrics);

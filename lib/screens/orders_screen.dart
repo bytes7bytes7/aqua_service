@@ -1,8 +1,10 @@
 import 'dart:io';
+import 'package:aqua_service/screens/widgets/error_label.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'widgets/app_header.dart';
+import 'widgets/empty_label.dart';
 import 'widgets/rect_button.dart';
 import 'widgets/loading_circle.dart';
 import '../bloc/bloc.dart';
@@ -75,49 +77,22 @@ class __BodyState extends State<_Body> {
             Bloc.bloc.orderBloc.loadAllOrders();
             return SizedBox.shrink();
           } else if (snapshot.data is OrderLoadingState) {
-            return _buildLoading();
+            return LoadingCircle();
           } else if (snapshot.data is OrderDataState) {
             OrderDataState state = snapshot.data;
-            if (state.orders.length > 0)
+            if (state.orders.length > 0) {
               return _OrderList(orders: state.orders);
-            else
-              return Center(
-                child: Text(
-                  'Пусто',
-                  style: Theme.of(context).textTheme.headline2,
-                ),
-              );
+            } else {
+              return EmptyLabel();
+            }
           } else {
-            return _buildError();
+            return ErrorLabel(
+              onPressed: () {
+                Bloc.bloc.orderBloc.loadAllOrders();
+              },
+            );
           }
         },
-      ),
-    );
-  }
-
-  Widget _buildLoading() {
-    return Center(
-      child: LoadingCircle(),
-    );
-  }
-
-  Widget _buildError() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            'Ошибка',
-            style: Theme.of(context).textTheme.headline1,
-          ),
-          SizedBox(height: 20),
-          RectButton(
-            text: 'Обновить',
-            onPressed: () {
-              Bloc.bloc.orderBloc.loadAllOrders();
-            },
-          ),
-        ],
       ),
     );
   }

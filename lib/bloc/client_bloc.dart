@@ -26,7 +26,10 @@ class ClientBloc {
           .sort((a, b) => a.city.toLowerCase().compareTo(b.city.toLowerCase()));
       if (!_clientStreamController.isClosed)
         _clientStreamController.sink.add(ClientState._clientData(clientList));
-    });
+    }).onError((error, stackTrace) {
+      if (!_clientStreamController.isClosed)
+        _clientStreamController.sink.add(ClientState._clientError());
+    });;
   }
 
   void deleteClient(int id) async{
@@ -58,11 +61,15 @@ class ClientState {
   factory ClientState._clientData(List<Client> clients) = ClientDataState;
 
   factory ClientState._clientLoading() = ClientLoadingState;
+
+  factory ClientState._clientError() = ClientErrorState;
 }
 
 class ClientInitState extends ClientState {}
 
 class ClientLoadingState extends ClientState {}
+
+class ClientErrorState extends ClientState {}
 
 class ClientDataState extends ClientState {
   ClientDataState(this.clients);

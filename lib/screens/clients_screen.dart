@@ -1,4 +1,6 @@
 import 'dart:io';
+import 'package:aqua_service/screens/widgets/empty_label.dart';
+import 'package:aqua_service/screens/widgets/error_label.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -90,52 +92,25 @@ class __BodyState extends State<_Body> {
             Bloc.bloc.clientBloc.loadAllClients();
             return SizedBox.shrink();
           } else if (snapshot.data is ClientLoadingState) {
-            return _buildLoading();
+            return LoadingCircle();
           } else if (snapshot.data is ClientDataState) {
             ClientDataState state = snapshot.data;
-            if (state.clients.length > 0)
+            if (state.clients.length > 0) {
               return _ContentList(
                 clients: state.clients,
                 updateClient: widget.updateClient,
               );
-            else
-              return Center(
-                child: Text(
-                  'Пусто',
-                  style: Theme.of(context).textTheme.headline2,
-                ),
-              );
+            } else {
+              return EmptyLabel();
+            }
           } else {
-            return _buildError();
+            return ErrorLabel(
+              onPressed: () {
+                Bloc.bloc.clientBloc.loadAllClients();
+              },
+            );
           }
         },
-      ),
-    );
-  }
-
-  Widget _buildLoading() {
-    return Center(
-      child: LoadingCircle(),
-    );
-  }
-
-  Widget _buildError() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            'Ошибка',
-            style: Theme.of(context).textTheme.headline1,
-          ),
-          SizedBox(height: 20),
-          RectButton(
-            text: 'Обновить',
-            onPressed: () {
-              Bloc.bloc.clientBloc.loadAllClients();
-            },
-          ),
-        ],
       ),
     );
   }

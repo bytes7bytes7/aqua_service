@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:aqua_service/bloc/order_bloc.dart';
 import 'package:aqua_service/model/order.dart';
 import 'package:aqua_service/screens/order_info_screen.dart';
+import 'package:aqua_service/screens/widgets/error_label.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_calendar_carousel/flutter_calendar_carousel.dart'
     show CalendarCarousel;
@@ -43,7 +44,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
             Bloc.bloc.orderBloc.loadAllOrders();
             return SizedBox.shrink();
           } else if (snapshot.data is OrderLoadingState) {
-            return _buildLoading();
+            return LoadingCircle();
           } else if (snapshot.data is OrderDataState) {
             OrderDataState state = snapshot.data;
             return CalendarContent(
@@ -51,36 +52,13 @@ class _CalendarScreenState extends State<CalendarScreen> {
               updateDate: widget.updateDate,
             );
           } else {
-            return _buildError();
+            return ErrorLabel(
+              onPressed: () {
+                Bloc.bloc.orderBloc.loadAllOrders();
+              },
+            );
           }
         },
-      ),
-    );
-  }
-
-  Widget _buildLoading() {
-    return Center(
-      child: LoadingCircle(),
-    );
-  }
-
-  Widget _buildError() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            'Ошибка',
-            style: Theme.of(context).textTheme.headline1,
-          ),
-          SizedBox(height: 20),
-          RectButton(
-            text: 'Обновить',
-            onPressed: () {
-              Bloc.bloc.orderBloc.loadAllOrders();
-            },
-          ),
-        ],
       ),
     );
   }
@@ -144,9 +122,8 @@ class _CalendarContentState extends State<CalendarContent> {
 
   @override
   Widget build(BuildContext context) {
-    for(int i =widget.orders.length-1;i>=0;i--){
-      if(widget.orders[i].done)
-        widget.orders.removeAt(i);
+    for (int i = widget.orders.length - 1; i >= 0; i--) {
+      if (widget.orders[i].done) widget.orders.removeAt(i);
     }
     EventList<Event> _markedDateMap = EventList<Event>(
       events: Map<DateTime, List<Event>>.fromIterables(
@@ -324,7 +301,8 @@ class OrderBottomSheet extends StatelessWidget {
                   Future<Iterable<int>> _getImage() async {
                     Iterable<int> bytes;
                     if (appDocPath == null) await getApplicationDirectoryPath();
-                    if (orders[index - 1] != null && orders[index-1].client.avatar!=null) {
+                    if (orders[index - 1] != null &&
+                        orders[index - 1].client.avatar != null) {
                       var hasLocalImage =
                           File(orders[index - 1].client.avatar).existsSync();
                       if (hasLocalImage) {

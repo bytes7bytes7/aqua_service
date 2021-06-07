@@ -5,6 +5,8 @@ import 'package:aqua_service/bloc/settings_bloc.dart';
 import 'global/next_page_route.dart';
 import 'screens.dart';
 import 'settings_screen.dart';
+import 'widgets/empty_label.dart';
+import 'widgets/error_label.dart';
 import 'widgets/loading_circle.dart';
 import 'package:aqua_service/constants.dart';
 import 'package:aqua_service/model/settings.dart';
@@ -15,8 +17,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  Iterable<int> bytes;
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -28,120 +28,128 @@ class _HomeScreenState extends State<HomeScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 40.0, vertical: 40.0),
           alignment: Alignment.center,
           child: StreamBuilder(
-              stream: Bloc.bloc.settingsBloc.settings,
-              initialData: SettingsInitState(),
-              builder: (context, snapshot) {
-                if (snapshot.data is SettingsInitState) {
-                  Bloc.bloc.settingsBloc.loadAllSettings();
-                  return SizedBox.shrink();
-                } else if (snapshot.data is SettingsLoadingState) {
-                  return _buildLoading();
-                } else if (snapshot.data is SettingsDataState) {
-                  SettingsDataState state = snapshot.data;
-                  Settings settings = state.settings;
-                  bytes = state.bytes;
-                  if (state.settings != null) {
-                    return Column(
-                      children: [
-                        SizedBox(height: 20.0),
-                        Flexible(
-                          flex: 4,
-                          child: Material(
-                            color: Colors.transparent,
-                            child: InkWell(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  NextPageRoute(
-                                    nextPage:
-                                        SettingsScreen(settings: settings),
-                                  ),
-                                );
-                              },
-                              child: Container(
-                                child: (settings.icon != null && bytes != null)
-                                    ? Image.memory(bytes)
-                                    : Image.asset('assets/png/logo.png'),
-                              ),
-                            ),
-                          ),
-                        ),
-                        SizedBox(height: 10),
-                        Text(
-                          settings.appTitle ?? ConstData.appTitle,
-                          style: Theme.of(context)
-                              .textTheme
-                              .headline1
-                              .copyWith(fontSize: 35),
-                        ),
-                        SizedBox(height: 50),
-                        Expanded(
-                          flex: 4,
-                          child: Row(
-                            children: [
-                              _CardButton(
-                                title: 'Клиенты',
-                                route: '/clients',
-                              ),
-                              SizedBox(width: 20.0),
-                              _CardButton(
-                                title: 'Работа',
-                                route: '/work',
-                              ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(height: 20.0),
-                        Expanded(
-                          flex: 4,
-                          child: Row(
-                            children: [
-                              _CardButton(
-                                title: 'Материалы',
-                                route: '/material',
-                              ),
-                              SizedBox(width: 20.0),
-                              _CardButton(
-                                title: 'Календарь',
-                                route: '/calendar',
-                              ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(height: 20.0),
-                        Expanded(
-                          flex: 2,
-                          child: Row(
-                            children: [
-                              _CardButton(
-                                title: 'Отчеты',
-                                route: '/reports',
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    );
-                  } else {
-                    return SizedBox.shrink();
-                  }
-                } else {
-                  return Center(
-                    child: Text(
-                      'Пусто',
-                      style: Theme.of(context).textTheme.headline2,
-                    ),
+            stream: Bloc.bloc.settingsBloc.settings,
+            initialData: SettingsInitState(),
+            builder: (context, snapshot) {
+              if (snapshot.data is SettingsInitState) {
+                Bloc.bloc.settingsBloc.loadAllSettings();
+                return SizedBox.shrink();
+              } else if (snapshot.data is SettingsLoadingState) {
+                return LoadingCircle();
+              } else if (snapshot.data is SettingsDataState) {
+                SettingsDataState state = snapshot.data;
+                Settings settings = state.settings;
+                if (state.settings != null) {
+                  return _ContentList(
+                    settings: settings,
+                    bytes: state.bytes,
                   );
+                } else {
+                  return EmptyLabel();
                 }
-              }),
+              } else {
+                return ErrorLabel(
+                  onPressed: () {
+                    Bloc.bloc.settingsBloc.loadAllSettings();
+                  },
+                );
+              }
+            },
+          ),
         ),
       ),
     );
   }
+}
 
-  Widget _buildLoading() {
-    return Center(
-      child: LoadingCircle(),
+class _ContentList extends StatelessWidget {
+  const _ContentList({
+    Key key,
+    @required this.settings,
+    @required this.bytes,
+  }) : super(key: key);
+
+  final Settings settings;
+  final Iterable<int> bytes;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        SizedBox(height: 20.0),
+        Flexible(
+          flex: 4,
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  NextPageRoute(
+                    nextPage: SettingsScreen(settings: settings),
+                  ),
+                );
+              },
+              child: Container(
+                child: (settings.icon != null && bytes != null)
+                    ? Image.memory(bytes)
+                    : Image.asset('assets/png/logo.png'),
+              ),
+            ),
+          ),
+        ),
+        SizedBox(height: 10),
+        Text(
+          settings.appTitle ?? ConstData.appTitle,
+          style: Theme.of(context).textTheme.headline1.copyWith(fontSize: 35),
+        ),
+        SizedBox(height: 50),
+        Expanded(
+          flex: 4,
+          child: Row(
+            children: [
+              _CardButton(
+                title: 'Клиенты',
+                route: '/clients',
+              ),
+              SizedBox(width: 20.0),
+              _CardButton(
+                title: 'Работа',
+                route: '/work',
+              ),
+            ],
+          ),
+        ),
+        SizedBox(height: 20.0),
+        Expanded(
+          flex: 4,
+          child: Row(
+            children: [
+              _CardButton(
+                title: 'Материалы',
+                route: '/material',
+              ),
+              SizedBox(width: 20.0),
+              _CardButton(
+                title: 'Календарь',
+                route: '/calendar',
+              ),
+            ],
+          ),
+        ),
+        SizedBox(height: 20.0),
+        Expanded(
+          flex: 2,
+          child: Row(
+            children: [
+              _CardButton(
+                title: 'Отчеты',
+                route: '/reports',
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

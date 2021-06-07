@@ -50,9 +50,6 @@ abstract class ExcelHelper {
           }
           if (table == ConstDBData.clientTableName) {
             clients = [];
-            map['volume'] = map['volume'] != null
-                ? double.parse(map['volume'].toString())
-                : null;
             map['images'] = map['images'] != null
                 ? map['images'].toString().split(';')
                 : null;

@@ -37,6 +37,9 @@ class SettingsBloc {
       if (!_settingsStreamController.isClosed)
         _settingsStreamController.sink
             .add(SettingsState._settingsData(settings, bytes));
+    }).onError((error, stackTrace) {
+      if (!_settingsStreamController.isClosed)
+        _settingsStreamController.sink.add(SettingsState._settingsError());
     });
   }
 
@@ -70,11 +73,15 @@ class SettingsState {
       SettingsDataState;
 
   factory SettingsState._settingsLoading() = SettingsLoadingState;
+
+  factory SettingsState._settingsError() = SettingsErrorState;
 }
 
 class SettingsInitState extends SettingsState {}
 
 class SettingsLoadingState extends SettingsState {}
+
+class SettingsErrorState extends SettingsState {}
 
 class SettingsDataState extends SettingsState {
   SettingsDataState(this.settings, this.bytes);
