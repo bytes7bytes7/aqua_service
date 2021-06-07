@@ -1,7 +1,7 @@
-import 'package:aqua_service/repository/repository.dart';
 import 'package:collection/collection.dart';
 
 import 'order.dart';
+import '../repository/repository.dart';
 
 class Client {
   Client({

@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 
-import 'package:aqua_service/bloc/bloc.dart';
-import 'package:aqua_service/bloc/settings_bloc.dart';
-import 'global/next_page_route.dart';
-import 'screens.dart';
-import 'settings_screen.dart';
 import 'widgets/empty_label.dart';
 import 'widgets/error_label.dart';
 import 'widgets/loading_circle.dart';
-import 'package:aqua_service/constants.dart';
-import 'package:aqua_service/model/settings.dart';
+import '../bloc/bloc.dart';
+import '../bloc/settings_bloc.dart';
+import '../constants.dart';
+import '../model/settings.dart';
+import 'global/next_page_route.dart';
+import 'screens.dart';
 
 class HomeScreen extends StatefulWidget {
   @override

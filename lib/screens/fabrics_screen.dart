@@ -1,15 +1,14 @@
-import 'package:aqua_service/screens/widgets/error_label.dart';
 import 'package:flutter/material.dart';
 
+import 'widgets/error_label.dart';
 import 'widgets/app_header.dart';
 import 'widgets/empty_label.dart';
 import 'widgets/loading_circle.dart';
-import 'widgets/rect_button.dart';
-import '../model/fabric.dart';
-import 'fabric_info_screen.dart';
-import 'global/next_page_route.dart';
 import '../bloc/bloc.dart';
 import '../bloc/fabric_bloc.dart';
+import '../model/fabric.dart';
+import 'global/next_page_route.dart';
+import 'fabric_info_screen.dart';
 
 class FabricsScreen extends StatefulWidget {
   FabricsScreen({

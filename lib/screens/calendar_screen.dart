@@ -1,22 +1,19 @@
 import 'dart:io';
-
-import 'package:aqua_service/bloc/order_bloc.dart';
-import 'package:aqua_service/model/order.dart';
-import 'package:aqua_service/screens/order_info_screen.dart';
-import 'package:aqua_service/screens/widgets/error_label.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_calendar_carousel/flutter_calendar_carousel.dart'
-    show CalendarCarousel;
+import 'package:flutter_calendar_carousel/flutter_calendar_carousel.dart' show CalendarCarousel;
 import 'package:flutter_calendar_carousel/classes/event.dart';
 import 'package:flutter_calendar_carousel/classes/event_list.dart';
 import 'package:intl/intl.dart' show DateFormat;
 import 'package:path_provider/path_provider.dart';
 
-import '../bloc/bloc.dart';
-import 'global/next_page_route.dart';
+import 'widgets/error_label.dart';
 import 'widgets/app_header.dart';
 import 'widgets/loading_circle.dart';
-import 'widgets/rect_button.dart';
+import '../bloc/bloc.dart';
+import '../bloc/order_bloc.dart';
+import '../model/order.dart';
+import 'global/next_page_route.dart';
+import 'order_info_screen.dart';
 
 class CalendarScreen extends StatefulWidget {
   CalendarScreen({

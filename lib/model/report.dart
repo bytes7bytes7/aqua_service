@@ -1,11 +1,9 @@
-import 'package:meta/meta.dart';
-
 class Report {
   Report({
     this.id,
-    @required this.timePeriod,
-    @required this.profit,
-    @required this.expenses,
+    this.timePeriod,
+    this.profit,
+    this.expenses,
   });
 
   int id;

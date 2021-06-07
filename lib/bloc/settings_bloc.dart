@@ -1,10 +1,9 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:aqua_service/model/client.dart';
-import 'package:aqua_service/model/fabric.dart';
-import 'package:aqua_service/model/order.dart';
-
+import '../model/client.dart';
+import '../model/fabric.dart';
+import '../model/order.dart';
 import '../model/settings.dart';
 import '../repository/settings_repository.dart';
 

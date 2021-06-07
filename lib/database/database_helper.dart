@@ -6,8 +6,8 @@ import 'package:path_provider/path_provider.dart';
 import '../model/client.dart';
 import '../model/fabric.dart';
 import '../model/order.dart';
-import '../constants.dart';
 import '../model/settings.dart';
+import '../constants.dart';
 
 class DatabaseHelper {
   DatabaseHelper._privateConstructor();

@@ -1,7 +1,6 @@
 import 'dart:async';
 
-import 'package:aqua_service/constants.dart';
-
+import '../constants.dart';
 import '../model/report.dart';
 import '../repository/report_repository.dart';
 

@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:intl/intl.dart';
-import 'package:aqua_service/model/order.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -9,13 +8,14 @@ import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../bloc/bloc.dart';
-import 'calendar_screen.dart';
 import 'widgets/show_info_snack_bar.dart';
-import '../screens/widgets/app_header.dart';
-import 'global/next_page_route.dart';
-import '../model/client.dart';
+import 'widgets/app_header.dart';
 import 'widgets/show_no_yes_dialog.dart';
+import '../model/order.dart';
+import '../model/client.dart';
+import '../bloc/bloc.dart';
+import 'global/next_page_route.dart';
+import 'calendar_screen.dart';
 
 class ClientInfoScreen extends StatefulWidget {
   ClientInfoScreen({

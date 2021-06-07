@@ -1,17 +1,16 @@
 import 'dart:io';
-import 'package:aqua_service/screens/widgets/empty_label.dart';
-import 'package:aqua_service/screens/widgets/error_label.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 
+import 'widgets/empty_label.dart';
+import 'widgets/error_label.dart';
 import 'widgets/app_header.dart';
-import 'widgets/rect_button.dart';
 import 'widgets/loading_circle.dart';
-import 'global/next_page_route.dart';
-import '../model/client.dart';
-import 'client_info_screen.dart';
 import '../bloc/bloc.dart';
 import '../bloc/client_bloc.dart';
+import '../model/client.dart';
+import 'global/next_page_route.dart';
+import 'client_info_screen.dart';
 
 class ClientsScreen extends StatefulWidget {
   ClientsScreen({

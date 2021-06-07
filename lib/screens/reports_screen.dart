@@ -1,10 +1,9 @@
-import 'package:aqua_service/screens/widgets/error_label.dart';
 import 'package:flutter/material.dart';
 
+import 'widgets/error_label.dart';
 import 'widgets/app_header.dart';
 import 'widgets/empty_label.dart';
 import 'widgets/loading_circle.dart';
-import 'widgets/rect_button.dart';
 import '../bloc/bloc.dart';
 import '../bloc/report_bloc.dart';
 import '../model/report.dart';

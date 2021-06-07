@@ -1,25 +1,24 @@
 import 'dart:io';
-
 import 'package:intl/intl.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 
-import '../bloc/bloc.dart';
-import '../model/fabric.dart';
-import 'calendar_screen.dart';
 import 'widgets/show_info_snack_bar.dart';
-import '../model/client.dart';
-import '../model/order.dart';
-import 'client_info_screen.dart';
-import 'clients_screen.dart';
-import 'fabrics_screen.dart';
 import 'widgets/rect_button.dart';
 import 'widgets/app_header.dart';
 import 'widgets/show_no_yes_dialog.dart';
+import '../model/fabric.dart';
+import '../model/client.dart';
+import '../model/order.dart';
 import 'global/validate_price.dart';
 import 'global/next_page_route.dart';
+import '../bloc/bloc.dart';
+import 'fabrics_screen.dart';
+import 'calendar_screen.dart';
+import 'client_info_screen.dart';
+import 'clients_screen.dart';
 
 class OrderInfoScreen extends StatefulWidget {
   const OrderInfoScreen({
