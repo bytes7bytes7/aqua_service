@@ -1,9 +1,9 @@
 import 'dart:io';
+import 'package:aqua_service/services/excel_helper.dart';
 import 'package:intl/intl.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:path_provider/path_provider.dart';
 
 import '../widgets/show_info_snack_bar.dart';
 import '../widgets/rect_button.dart';
@@ -265,8 +265,8 @@ class __BodyState extends State<_Body> {
   }
 
   Future<void> getApplicationDirectoryPath() async {
-    Directory appDocDir = await getApplicationDocumentsDirectory();
-    appDocPath = appDocDir.path;
+    Directory appDir = await ExcelHelper.getPhotosDirectory(context);
+    appDocPath = appDir.path;
   }
 
   _updateDateTime(DateTime dateTime) {
@@ -611,8 +611,8 @@ class __ClientCardState extends State<_ClientCard> {
   }
 
   Future<void> getApplicationDirectoryPath() async {
-    Directory appDocDir = await getApplicationDocumentsDirectory();
-    appDocPath = appDocDir.path;
+    Directory appDir = await ExcelHelper.getPhotosDirectory(context);
+    appDocPath = appDir.path;
   }
 
   void init() {

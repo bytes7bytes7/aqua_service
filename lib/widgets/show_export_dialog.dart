@@ -9,7 +9,7 @@ Future<void> showExportDialog(
   String day = today.day.toString(), month = today.month.toString();
   if (day.length < 2) day = '0' + day;
   if (month.length < 2) month = '0' + month;
-  String name = '$day-$month-${today.year}';
+  String name = '${today.year}-$month-$day';
   final TextEditingController controller = TextEditingController(text: name);
   final ValueNotifier<String> errorNotifier = ValueNotifier(null);
   final _formKey = GlobalKey<FormState>();

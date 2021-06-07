@@ -1,11 +1,11 @@
 import 'dart:io';
+import 'package:aqua_service/services/excel_helper.dart';
 import 'package:intl/intl.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../widgets/show_info_snack_bar.dart';
@@ -248,8 +248,8 @@ class __BodyState extends State<_Body> {
   ValueNotifier<List<Order>> orders = ValueNotifier(null);
 
   Future<void> getApplicationDirectoryPath() async {
-    Directory appDocDir = await getApplicationDocumentsDirectory();
-    appDocPath = appDocDir.path;
+    Directory appDir = await ExcelHelper.getPhotosDirectory(context);
+    appDocPath = appDir.path;
   }
 
   @override

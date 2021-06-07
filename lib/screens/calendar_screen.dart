@@ -1,10 +1,11 @@
 import 'dart:io';
+import 'package:aqua_service/services/excel_helper.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_calendar_carousel/flutter_calendar_carousel.dart' show CalendarCarousel;
+import 'package:flutter_calendar_carousel/flutter_calendar_carousel.dart'
+    show CalendarCarousel;
 import 'package:flutter_calendar_carousel/classes/event.dart';
 import 'package:flutter_calendar_carousel/classes/event_list.dart';
 import 'package:intl/intl.dart' show DateFormat;
-import 'package:path_provider/path_provider.dart';
 
 import '../widgets/error_label.dart';
 import '../widgets/app_header.dart';
@@ -108,8 +109,8 @@ class _CalendarContentState extends State<CalendarContent> {
   }
 
   Future<String> getApplicationDirectoryPath() async {
-    Directory appDocDir = await getApplicationDocumentsDirectory();
-    return appDocDir.path;
+    Directory appDir = await ExcelHelper.getPhotosDirectory(context);
+    return appDir.path;
   }
 
   @override
@@ -290,9 +291,9 @@ class OrderBottomSheet extends StatelessWidget {
                 itemBuilder: (BuildContext context, int index) {
                   String appDocPath;
                   Future<void> getApplicationDirectoryPath() async {
-                    Directory appDocDir =
-                        await getApplicationDocumentsDirectory();
-                    appDocPath = appDocDir.path;
+                    Directory appDir =
+                        await ExcelHelper.getPhotosDirectory(context);
+                    appDocPath = appDir.path;
                   }
 
                   Future<Iterable<int>> _getImage() async {

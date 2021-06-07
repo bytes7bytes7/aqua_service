@@ -45,7 +45,7 @@ class SettingsBloc {
   void importExcel(List<Client> clients,
       List<Fabric> fabrics, List<Order> orders, Settings settings) async {
     _settingsStreamController.sink.add(SettingsState._settingsLoading());
-    await _repository.importExcel(clients,fabrics,orders, settings).then((settings) {
+    await _repository.importExcel(clients,fabrics,orders, settings).then((value) {
       loadAllSettings();
     });
   }

@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:path_provider/path_provider.dart';
 
 import '../widgets/show_export_dialog.dart';
 import '../widgets/rect_button.dart';
@@ -124,9 +123,9 @@ class __BodyState extends State<_Body> {
   String appDocPath;
   Iterable<int> bytes;
 
-  Future<void> getApplicationDirectoryPath() async {
-    Directory appDocDir = await getApplicationDocumentsDirectory();
-    appDocPath = appDocDir.path;
+  Future getApplicationDirectoryPath() async {
+    Directory appDir = await ExcelHelper.getPhotosDirectory(context);
+    appDocPath = appDir.path;
   }
 
   @override
@@ -151,124 +150,149 @@ class __BodyState extends State<_Body> {
         pickedFile.path.substring(pickedFile.path.lastIndexOf('/') + 1);
     await _image.copy('$appDocPath/$filename');
     String newPath = '$appDocPath/$filename';
-
     return newPath;
   }
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(30.0, 20.0, 30.0, 0),
-      child: Column(
-        children: [
-          ConstrainedBox(
-            constraints: BoxConstraints.tightFor(width: 100, height: 100),
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: () async {
-                  String path = await _getImage();
-                  if (path != null) {
-                    var hasLocalImage = File(path).existsSync();
-                    if (hasLocalImage) {
-                      bytes = File(path).readAsBytesSync();
-                      widget.settings.icon = path;
+    return GestureDetector(
+      behavior: HitTestBehavior.translucent,
+      onTap: () {
+        FocusScope.of(context).requestFocus(FocusNode());
+      },
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(30.0, 20.0, 30.0, 0),
+        child: Column(
+          children: [
+            ConstrainedBox(
+              constraints: BoxConstraints.tightFor(width: 100, height: 100),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () async {
+                    String path = await _getImage();
+                    if (path != null) {
+                      var hasLocalImage = File(path).existsSync();
+                      if (hasLocalImage) {
+                        bytes = File(path).readAsBytesSync();
+                        widget.settings.icon = path;
+                      }
+                      setState(() {});
                     }
+                  },
+                  child: Container(
+                    child: (widget.settings.icon != null && bytes != null)
+                        ? Image.memory(bytes)
+                        : Image.asset('assets/png/logo.png'),
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(height: 10),
+            TextField(
+              controller: widget.titleController,
+              style: Theme.of(context).textTheme.bodyText1,
+              decoration: InputDecoration(
+                labelText: 'Название *',
+                labelStyle: Theme.of(context).textTheme.headline3,
+                enabledBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(
+                    color: Theme.of(context).disabledColor,
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(height: 15),
+            FutureBuilder(
+              future: getApplicationDirectoryPath(),
+              builder: (context, snapshot) {
+                return TextField(
+                  controller: TextEditingController(text: appDocPath?.substring(0,appDocPath.lastIndexOf('/'))),
+                  style: Theme.of(context).textTheme.bodyText1,
+                  enabled: false,
+                  decoration: InputDecoration(
+                    labelText: 'Папка приложения',
+                    labelStyle: Theme.of(context).textTheme.headline3,
+                    enabledBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Theme.of(context).disabledColor,
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+            SizedBox(height: 15),
+            Row(
+              children: [
+                Expanded(
+                  child: RectButton(
+                    text: 'Импорт',
+                    onPressed: () {
+                      ExcelHelper.importFromExcel(context);
+                    },
+                  ),
+                ),
+                SizedBox(width: 10),
+                Expanded(
+                  child: RectButton(
+                    text: 'Экспорт',
+                    onPressed: () {
+                      showExportDialog(context: context);
+                    },
+                  ),
+                ),
+              ],
+            ),
+            Spacer(),
+            RectButton(
+              text: 'Сбросить базу данных',
+              onPressed: () {
+                showNoYesDialog(
+                  context: context,
+                  title: 'Сброс базы данных',
+                  subtitle: 'Удалить все данные?',
+                  yesAnswer: () {
+                    Bloc.bloc.settingsBloc.clearDatabase([
+                      ConstDBData.clientTableName,
+                      ConstDBData.fabricTableName,
+                      ConstDBData.orderTableName,
+                    ]);
+                    Navigator.pop(context);
+                  },
+                  noAnswer: () {
+                    Navigator.pop(context);
+                  },
+                );
+              },
+            ),
+            SizedBox(height: 5),
+            RectButton(
+              text: 'Сбросить настройки',
+              onPressed: () {
+                showNoYesDialog(
+                  context: context,
+                  title: 'Иконка и название',
+                  subtitle: 'Поставить иконку и название по умолчанию?',
+                  yesAnswer: () {
+                    Bloc.bloc.settingsBloc
+                        .clearDatabase([ConstDBData.settingsTableName]);
+                    widget.settings.icon = null;
+                    widget.settings.appTitle = ConstData.appTitle;
+                    bytes = null;
+                    widget.titleController.text = ConstData.appTitle;
                     setState(() {});
-                  }
-                },
-                child: Container(
-                  child: (widget.settings.icon != null && bytes != null)
-                      ? Image.memory(bytes)
-                      : Image.asset('assets/png/logo.png'),
-                ),
-              ),
-            ),
-          ),
-          SizedBox(height: 10),
-          TextField(
-            controller: widget.titleController,
-            style: Theme.of(context).textTheme.bodyText1,
-            decoration: InputDecoration(
-              labelText: 'Название *',
-              labelStyle: Theme.of(context).textTheme.headline3,
-              enabledBorder: UnderlineInputBorder(
-                borderSide: BorderSide(
-                  color: Theme.of(context).disabledColor,
-                ),
-              ),
-            ),
-          ),
-          SizedBox(height: 15),
-          Row(
-            children: [
-              Expanded(
-                child: RectButton(
-                  text: 'Импорт',
-                  onPressed: () {
-                    ExcelHelper.importFromExcel(context);
+                    Navigator.pop(context);
                   },
-                ),
-              ),
-              SizedBox(width: 10),
-              Expanded(
-                child: RectButton(
-                  text: 'Экспорт',
-                  onPressed: () {
-                    showExportDialog(context: context);
+                  noAnswer: () {
+                    Navigator.pop(context);
                   },
-                ),
-              ),
-            ],
-          ),
-          Spacer(),
-          RectButton(
-            text: 'Сбросить базу данных',
-            onPressed: () {
-              showNoYesDialog(
-                context: context,
-                title: 'Сброс базы данных',
-                subtitle: 'Удалить все данные?',
-                yesAnswer: () {
-                  Bloc.bloc.settingsBloc.clearDatabase([
-                    ConstDBData.clientTableName,
-                    ConstDBData.fabricTableName,
-                    ConstDBData.orderTableName,
-                  ]);
-                  Navigator.pop(context);
-                },
-                noAnswer: () {
-                  Navigator.pop(context);
-                },
-              );
-            },
-          ),
-          SizedBox(height: 5),
-          RectButton(
-            text: 'Сбросить настройки',
-            onPressed: () {
-              showNoYesDialog(
-                context: context,
-                title: 'Иконка и название',
-                subtitle: 'Поставить иконку и название по умолчанию?',
-                yesAnswer: () {
-                  Bloc.bloc.settingsBloc
-                      .clearDatabase([ConstDBData.settingsTableName]);
-                  widget.settings.icon = null;
-                  widget.settings.appTitle = ConstData.appTitle;
-                  bytes = null;
-                  widget.titleController.text = ConstData.appTitle;
-                  setState(() {});
-                  Navigator.pop(context);
-                },
-                noAnswer: () {
-                  Navigator.pop(context);
-                },
-              );
-            },
-          ),
-          SizedBox(height: 20),
-        ],
+                );
+              },
+            ),
+            SizedBox(height: 20),
+          ],
+        ),
       ),
     );
   }

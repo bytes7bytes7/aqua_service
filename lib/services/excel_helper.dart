@@ -22,7 +22,17 @@ abstract class ExcelHelper {
     return false;
   }
 
-  static Future<Directory> _createAppDir(BuildContext context) async {
+  static Future<Directory> getPhotosDirectory(BuildContext context) async {
+    Directory directory = await _getApplicationDirectory(context);
+    String photosPath = directory.path + '/Photos';
+    directory = Directory(photosPath);
+    if (!await directory.exists()) {
+      await directory.create(recursive: true);
+    }
+    return directory;
+  }
+
+  static Future<Directory> _getApplicationDirectory(BuildContext context) async {
     Directory directory;
     try {
       if (await _requestPermission(Permission.storage)) {
@@ -53,7 +63,7 @@ abstract class ExcelHelper {
   }
 
   static exportToExcel(BuildContext context, String filename) async {
-    Directory directory = await _createAppDir(context);
+    Directory directory = await _getApplicationDirectory(context);
     String filePath = '${directory.path}/$filename.xlsx';
 
     // Init excel
@@ -91,10 +101,7 @@ abstract class ExcelHelper {
         ];
         thisTable.appendRow(headerRow);
         for (int i = 0; i < clients.length; i++) {
-          values = clients[i]
-              .toMap()
-              .values
-              .toList();
+          values = clients[i].toMap().values.toList();
           // avatar
           if (values[1] == null) {
             values[1] = '';
@@ -120,10 +127,7 @@ abstract class ExcelHelper {
         ];
         thisTable.appendRow(headerRow);
         for (int i = 0; i < orders.length; i++) {
-          values = orders[i]
-              .toMap()
-              .values
-              .toList();
+          values = orders[i].toMap().values.toList();
           // Client id
           values[1] = values[1].id;
           // Fabrics' ids
@@ -146,10 +150,7 @@ abstract class ExcelHelper {
         ];
         thisTable.appendRow(headerRow);
         for (int i = 0; i < fabrics.length; i++) {
-          thisTable.appendRow(fabrics[i]
-              .toMap()
-              .values
-              .toList());
+          thisTable.appendRow(fabrics[i].toMap().values.toList());
         }
       } else if (table == ConstDBData.settingsTableName) {
         headerRow = [
@@ -157,10 +158,7 @@ abstract class ExcelHelper {
           ConstDBData.appTitle,
           ConstDBData.icon,
         ];
-        values = settings
-            .toMap()
-            .values
-            .toList();
+        values = settings.toMap().values.toList();
         if (values[2] == null) {
           values[2] = '';
         }
@@ -190,7 +188,7 @@ abstract class ExcelHelper {
 
     // Save excel
     excel.encode().then(
-          (onValue) {
+      (onValue) {
         File(filePath)
           ..createSync(recursive: true)
           ..writeAsBytesSync(onValue);
@@ -262,7 +260,7 @@ abstract class ExcelHelper {
               values[9] = values[9].split(';');
             }
             Map<String, dynamic> map =
-            Map<String, dynamic>.fromIterables(headerRow, values);
+                Map<String, dynamic>.fromIterables(headerRow, values);
             clients.add(Client.fromMap(map));
           }
         } else if (table == ConstDBData.fabricTableName) {
@@ -304,7 +302,7 @@ abstract class ExcelHelper {
               }
             }
             Map<String, dynamic> map =
-            Map<String, dynamic>.fromIterables(headerRow, values);
+                Map<String, dynamic>.fromIterables(headerRow, values);
             fabrics.add(Fabric.fromMap(map));
           }
         } else if (table == ConstDBData.orderTableName) {
@@ -382,7 +380,7 @@ abstract class ExcelHelper {
               continue;
             }
             Map<String, dynamic> map =
-            Map<String, dynamic>.fromIterables(headerRow, values);
+                Map<String, dynamic>.fromIterables(headerRow, values);
             orders.add(Order.fromMap(map));
           }
         } else if (table == ConstDBData.settingsTableName) {
@@ -409,7 +407,7 @@ abstract class ExcelHelper {
               values[2] = null;
             }
             Map<String, dynamic> map =
-            Map<String, dynamic>.fromIterables(headerRow, values);
+                Map<String, dynamic>.fromIterables(headerRow, values);
             settings = Settings.fromMap(map);
           }
         }

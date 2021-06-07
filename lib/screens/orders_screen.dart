@@ -1,6 +1,6 @@
 import 'dart:io';
+import 'package:aqua_service/services/excel_helper.dart';
 import 'package:flutter/material.dart';
-import 'package:path_provider/path_provider.dart';
 
 import '../widgets/error_label.dart';
 import '../widgets/app_header.dart';
@@ -218,8 +218,8 @@ class __OrderCardState extends State<_OrderCard> {
   Iterable<int> bytes;
 
   Future<void> getApplicationDirectoryPath() async {
-    Directory appDocDir = await getApplicationDocumentsDirectory();
-    appDocPath = appDocDir.path;
+    Directory appDir = await ExcelHelper.getPhotosDirectory(context);
+    appDocPath = appDir.path;
   }
 
   void init() {

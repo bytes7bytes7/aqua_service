@@ -31,5 +31,8 @@ class SettingsRepository {
     if (orders.length > 0) {
       await DatabaseHelper.db.addAllOrders(orders);
     }
+    if(settings.id != null){
+      await DatabaseHelper.db.updateSettings(settings);
+    }
   }
 }
