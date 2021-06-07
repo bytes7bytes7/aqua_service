@@ -171,6 +171,7 @@ class _CalendarContentState extends State<CalendarContent> {
                         showOnlyCurrentMonthDate: true,
                         showHeader: true,
                         weekFormat: false,
+                        pageSnapping: false,
                         iconColor: Theme.of(context).focusColor,
                         headerTextStyle: Theme.of(context).textTheme.headline2,
                         thisMonthDayBorderColor: Colors.transparent,
