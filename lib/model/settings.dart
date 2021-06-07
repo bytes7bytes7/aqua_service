@@ -1,10 +1,8 @@
-import 'package:meta/meta.dart';
-
 class Settings {
   Settings({
     this.id = 1,
-    @required this.appTitle,
-    @required this.icon,
+    this.appTitle,
+    this.icon,
   });
 
   int id;

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 
-import '../widgets/show_export_import_dialog.dart';
+import '../widgets/show_export_dialog.dart';
 import '../widgets/rect_button.dart';
 import '../widgets/show_info_snack_bar.dart';
 import '../widgets/app_header.dart';
@@ -11,6 +11,7 @@ import '../widgets/show_no_yes_dialog.dart';
 import '../bloc/bloc.dart';
 import '../constants.dart';
 import '../model/settings.dart';
+import '../services/excel_helper.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({
@@ -205,12 +206,7 @@ class __BodyState extends State<_Body> {
                 child: RectButton(
                   text: 'Импорт',
                   onPressed: () {
-                    //ExcelHelper.readExcel(context);
-                    showInfoSnackBar(
-                      context: context,
-                      info: 'Не работает',
-                      icon: Icons.warning_amber_outlined,
-                    );
+                    ExcelHelper.importFromExcel(context);
                   },
                 ),
               ),
@@ -219,7 +215,6 @@ class __BodyState extends State<_Body> {
                 child: RectButton(
                   text: 'Экспорт',
                   onPressed: () {
-                    //ExcelHelper.writeExcel(context);
                     showExportDialog(context: context);
                   },
                 ),

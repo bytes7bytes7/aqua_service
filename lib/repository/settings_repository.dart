@@ -22,8 +22,14 @@ class SettingsRepository {
     await DatabaseHelper.db.deleteAllClients();
     await DatabaseHelper.db.deleteAllOrders();
     await DatabaseHelper.db.deleteAllFabrics();
-    await DatabaseHelper.db.addAllClients(clients);
-    await DatabaseHelper.db.addAllFabrics(fabrics);
-    await DatabaseHelper.db.addAllOrders(orders);
+    if (clients.length > 0) {
+      await DatabaseHelper.db.addAllClients(clients);
+    }
+    if (fabrics.length > 0) {
+      await DatabaseHelper.db.addAllFabrics(fabrics);
+    }
+    if (orders.length > 0) {
+      await DatabaseHelper.db.addAllOrders(orders);
+    }
   }
 }

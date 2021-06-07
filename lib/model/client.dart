@@ -103,17 +103,20 @@ class Client {
     List<Order> orders = await Repository.orderRepository.getAllOrders();
     Order last = Order(), next = Order();
     DateTime today = DateTime.now();
-    String thisDay =
-        today.year.toString() +'.'+ today.month.toString()+'.' + today.day.toString();
+    String thisDay = today.year.toString() +
+        '.' +
+        today.month.toString() +
+        '.' +
+        today.day.toString();
     List<String> tmp = thisDay.split('.');
-    while (tmp[0].length<4){
-      tmp[0]='0'+tmp[0];
+    while (tmp[0].length < 4) {
+      tmp[0] = '0' + tmp[0];
     }
-    while (tmp[1].length<2){
-      tmp[1]='0'+tmp[1];
+    while (tmp[1].length < 2) {
+      tmp[1] = '0' + tmp[1];
     }
-    while (tmp[2].length<2){
-      tmp[2]='0'+tmp[2];
+    while (tmp[2].length < 2) {
+      tmp[2] = '0' + tmp[2];
     }
     thisDay = tmp.join('.');
     orders.forEach((element) {
@@ -126,18 +129,10 @@ class Client {
             last = Order.from(element);
           }
         } else if (!element.done) {
-          print('not');
-          print(next.id);
-          print(thisDay);
-          print(element.date);
-          print(thisDay.compareTo(element.date));
-
           if (next.id == null && thisDay.compareTo(element.date) <= 0) {
-            print('a');
             next = Order.from(element);
           } else if (next.id != null &&
               next.date.compareTo(element.date) <= 0) {
-            print('b');
             next = Order.from(element);
           }
         }

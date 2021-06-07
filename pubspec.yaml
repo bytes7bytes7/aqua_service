@@ -37,7 +37,6 @@ dependencies:
   url_launcher: ^6.0.4
   file_picker: ^3.0.2+2
   excel: ^1.1.5
-  mime: ^1.0.0
   permission_handler: ^8.0.1
 
 dev_dependencies:
