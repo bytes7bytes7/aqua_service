@@ -120,17 +120,17 @@ class _Body extends StatefulWidget {
 }
 
 class __BodyState extends State<_Body> {
-  String appDocPath;
+  final ValueNotifier<String> appDocPath = ValueNotifier(null);
   Iterable<int> bytes;
 
   Future getApplicationDirectoryPath() async {
     Directory appDir = await ExcelHelper.getPhotosDirectory(context);
-    appDocPath = appDir.path;
+    appDocPath.value = appDir.path;
   }
 
   @override
   void initState() {
-    if (appDocPath == null) getApplicationDirectoryPath();
+    if (appDocPath.value == null) getApplicationDirectoryPath();
     if (widget.settings.icon != null) {
       var hasLocalImage = File(widget.settings.icon).existsSync();
       if (hasLocalImage) {
@@ -203,11 +203,13 @@ class __BodyState extends State<_Body> {
               ),
             ),
             SizedBox(height: 15),
-            FutureBuilder(
-              future: getApplicationDirectoryPath(),
-              builder: (context, snapshot) {
+            ValueListenableBuilder(
+              valueListenable: appDocPath,
+              builder: (context, _, __) {
                 return TextField(
-                  controller: TextEditingController(text: appDocPath?.substring(0,appDocPath.lastIndexOf('/'))),
+                  controller: TextEditingController(
+                      text: appDocPath.value
+                          ?.substring(0, appDocPath.value.lastIndexOf('/'))),
                   style: Theme.of(context).textTheme.bodyText1,
                   enabled: false,
                   decoration: InputDecoration(
