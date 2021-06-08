@@ -28,7 +28,7 @@ class ClientBloc {
         _clientStreamController.sink.add(ClientState._clientData(clientList));
     }).onError((error, stackTrace) {
       if (!_clientStreamController.isClosed)
-        _clientStreamController.sink.add(ClientState._clientError(error));
+        _clientStreamController.sink.add(ClientState._clientError(error,stackTrace));
     });
   }
 
@@ -62,7 +62,7 @@ class ClientState {
 
   factory ClientState._clientLoading() = ClientLoadingState;
 
-  factory ClientState._clientError(Error error) = ClientErrorState;
+  factory ClientState._clientError(Error error, StackTrace stackTrace) = ClientErrorState;
 }
 
 class ClientInitState extends ClientState {}
@@ -70,9 +70,10 @@ class ClientInitState extends ClientState {}
 class ClientLoadingState extends ClientState {}
 
 class ClientErrorState extends ClientState {
-  ClientErrorState(this.error);
+  ClientErrorState(this.error, this.stackTrace);
 
   final Error error;
+  final StackTrace stackTrace;
 }
 
 class ClientDataState extends ClientState {

@@ -38,7 +38,7 @@ class SettingsBloc {
             .add(SettingsState._settingsData(settings, bytes));
     }).onError((error, stackTrace) {
       if (!_settingsStreamController.isClosed)
-        _settingsStreamController.sink.add(SettingsState._settingsError(error));
+        _settingsStreamController.sink.add(SettingsState._settingsError(error,stackTrace));
     });
   }
 
@@ -73,7 +73,7 @@ class SettingsState {
 
   factory SettingsState._settingsLoading() = SettingsLoadingState;
 
-  factory SettingsState._settingsError(Error error) = SettingsErrorState;
+  factory SettingsState._settingsError(Error error,StackTrace stackTrace) = SettingsErrorState;
 }
 
 class SettingsInitState extends SettingsState {}
@@ -81,9 +81,10 @@ class SettingsInitState extends SettingsState {}
 class SettingsLoadingState extends SettingsState {}
 
 class SettingsErrorState extends SettingsState {
-  SettingsErrorState(this.error);
+  SettingsErrorState(this.error,this.stackTrace);
 
   final Error error;
+  final StackTrace stackTrace;
 }
 
 class SettingsDataState extends SettingsState {

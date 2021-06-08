@@ -321,11 +321,31 @@ class __BodyState extends State<_Body> {
                             ? Container(
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
-                                  image: DecorationImage(
-                                    image: MemoryImage(bytes),
-                                    fit: BoxFit.cover,
-                                  ),
+                                  // image: DecorationImage(
+                                  //   image: Image.memory(bytes),
+                                  //   fit: BoxFit.cover,
+                                  // ),
                                 ),
+                                child: (File(widget.changes['avatarPath'])
+                                        .existsSync())
+                                    ? Image.memory(
+                                        File(widget.changes['avatarPath'])
+                                            .readAsBytesSync(),
+                                        fit: BoxFit.cover,
+                                      )
+                                    : Container(
+                                        color: Theme.of(context)
+                                            .errorColor
+                                            .withOpacity(0.5),
+                                        child: Center(
+                                          child: Text(
+                                            'Не найдено',
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodyText1,
+                                          ),
+                                        ),
+                                      ),
                               )
                             : Icon(
                                 Icons.image_search_outlined,

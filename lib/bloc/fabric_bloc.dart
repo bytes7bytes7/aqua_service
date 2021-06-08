@@ -27,7 +27,7 @@ class FabricBloc{
       _fabricStreamController.sink.add(FabricState._fabricData(fabricList));
     }).onError((error, stackTrace) {
       if (!_fabricStreamController.isClosed)
-        _fabricStreamController.sink.add(FabricState._fabricError(error));
+        _fabricStreamController.sink.add(FabricState._fabricError(error,stackTrace));
     });
   }
 
@@ -59,7 +59,7 @@ class FabricState {
 
   factory FabricState._fabricLoading() = FabricLoadingState;
 
-  factory FabricState._fabricError(Error error) = FabricErrorState;
+  factory FabricState._fabricError(Error error,StackTrace stackTrace) = FabricErrorState;
 }
 
 class FabricInitState extends FabricState{}
@@ -67,9 +67,10 @@ class FabricInitState extends FabricState{}
 class FabricLoadingState extends FabricState {}
 
 class FabricErrorState extends FabricState {
-  FabricErrorState(this.error);
+  FabricErrorState(this.error, this.stackTrace);
 
   final Error error;
+  final StackTrace stackTrace;
 }
 
 class FabricDataState extends FabricState{

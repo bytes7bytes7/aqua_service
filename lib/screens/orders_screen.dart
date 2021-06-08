@@ -87,6 +87,7 @@ class __BodyState extends State<_Body> {
           } else {
             return ErrorLabel(
               error: snapshot.data.error,
+              stackTrace: snapshot.data.stackTrace,
               onPressed: () {
                 Bloc.bloc.orderBloc.loadAllOrders();
               },

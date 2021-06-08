@@ -32,7 +32,7 @@ class OrderBloc {
         _orderStreamController.sink.add(OrderState._orderData(orderList));
     }).onError((error, stackTrace) {
       if (!_orderStreamController.isClosed)
-        _orderStreamController.sink.add(OrderState._orderError(error));
+        _orderStreamController.sink.add(OrderState._orderError(error, stackTrace));
     });
   }
 
@@ -74,7 +74,7 @@ class OrderState {
 
   factory OrderState._orderLoading() = OrderLoadingState;
 
-  factory OrderState._orderError(Error error) = OrderErrorState;
+  factory OrderState._orderError(Error error, StackTrace stackTrace) = OrderErrorState;
 }
 
 class OrderInitState extends OrderState {}
@@ -82,9 +82,10 @@ class OrderInitState extends OrderState {}
 class OrderLoadingState extends OrderState {}
 
 class OrderErrorState extends OrderState {
-  OrderErrorState(this.error);
+  OrderErrorState(this.error, this.stackTrace);
 
   final Error error;
+  final StackTrace stackTrace;
 }
 
 class OrderDataState extends OrderState {

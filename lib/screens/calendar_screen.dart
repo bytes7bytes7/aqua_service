@@ -52,6 +52,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
           } else {
             return ErrorLabel(
               error: snapshot.data.error,
+              stackTrace: snapshot.data.stackTrace,
               onPressed: () {
                 Bloc.bloc.orderBloc.loadAllOrders();
               },
