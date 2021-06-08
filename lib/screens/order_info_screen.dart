@@ -40,6 +40,7 @@ class _OrderInfoScreenState extends State<OrderInfoScreen> {
   TextEditingController priceController;
   TextEditingController expensesController;
   TextEditingController commentController;
+  ValueNotifier<bool> fabricsNotifier = ValueNotifier(true);
   Map<String, dynamic> changes = {};
   String _title;
   bool validateClient = false,
@@ -55,8 +56,8 @@ class _OrderInfoScreenState extends State<OrderInfoScreen> {
     commentController = TextEditingController();
 
     widget.order.client = widget.order.client ?? Client();
-    widget.order.price = widget.order.price ?? 0.0;
-    widget.order.expenses = widget.order.expenses ?? 0.0;
+    // widget.order.price = widget.order.price;
+    // widget.order.expenses = widget.order.expenses;
     widget.order.fabrics = widget.order.fabrics ?? [];
     widget.order.date =
         widget.order.date ?? DateFormat('dd.MM.yyyy').format(DateTime.now());
@@ -69,8 +70,8 @@ class _OrderInfoScreenState extends State<OrderInfoScreen> {
     changes['date'] = widget.order.date;
     changes['done'] = widget.order.done;
 
-    priceController.text = widget.order.price.toString();
-    expensesController.text = widget.order.expenses.toString();
+    priceController.text = widget.order.price?.toString();
+    expensesController.text = widget.order.expenses?.toString();
     commentController.text = widget.order.comment;
     super.initState();
   }
@@ -97,8 +98,9 @@ class _OrderInfoScreenState extends State<OrderInfoScreen> {
         ..price = double.parse(priceController.text)
         ..fabrics =
             changes['fabrics'].map<Fabric>((e) => Fabric.from(e)).toList()
-        ..expenses = double.parse(
-            expensesController.text.isNotEmpty ? expensesController.text : '0')
+        ..expenses = expensesController.text.isNotEmpty
+            ? double.parse(expensesController.text)
+            : null
         ..date = changes['date']
         ..done = changes['done']
         ..comment = commentController.text;
@@ -110,9 +112,10 @@ class _OrderInfoScreenState extends State<OrderInfoScreen> {
       } else {
         Bloc.bloc.orderBloc.updateOrder(widget.order);
       }
-      priceController.text = widget.order.price.toString();
-      expensesController.text = widget.order.expenses.toString();
+      priceController.text = widget.order.price?.toString();
+      expensesController.text = widget.order.expenses?.toString();
       Bloc.bloc.orderBloc.loadAllOrders();
+      fabricsNotifier.value = !fabricsNotifier.value;
     }
     if (validatePrice && validateFormat && validateClient && validateDate)
       showInfoSnackBar(
@@ -146,14 +149,19 @@ class _OrderInfoScreenState extends State<OrderInfoScreen> {
           ),
           onPressed: () async {
             if (!widget.readMode &&
-                    !ListEquality()
+                (!ListEquality()
                         .equals([changes['client']], [widget.order.client]) ||
-                priceController.text != widget.order.price.toString() ||
-                expensesController.text != widget.order.expenses.toString() ||
-                changes['date'] != widget.order.date ||
-                !ListEquality()
-                    .equals(changes['fabrics'], widget.order.fabrics) ||
-                commentController.text != widget.order.comment) {
+                    priceController.text != widget.order.price.toString() &&
+                        !(!(priceController.text != '') &&
+                            !(widget.order.price != null)) ||
+                    expensesController.text !=
+                            widget.order.expenses.toString() &&
+                        !(!(expensesController.text != '') &&
+                            !(widget.order.expenses != null)) ||
+                    changes['date'] != widget.order.date ||
+                    !ListEquality()
+                        .equals(changes['fabrics'], widget.order.fabrics) ||
+                    commentController.text != widget.order.comment)) {
               showNoYesDialog(
                 context: context,
                 title: 'Изменения будут утеряны',
@@ -210,6 +218,7 @@ class _OrderInfoScreenState extends State<OrderInfoScreen> {
         save: save,
         readMode: widget.readMode,
         changes: changes,
+        fabricsNotifier: fabricsNotifier,
         priceController: priceController,
         expensesController: expensesController,
         commentController: commentController,
@@ -224,6 +233,7 @@ class _Body extends StatefulWidget {
     @required this.save,
     @required this.readMode,
     @required this.changes,
+    @required this.fabricsNotifier,
     @required this.priceController,
     @required this.expensesController,
     @required this.commentController,
@@ -232,6 +242,7 @@ class _Body extends StatefulWidget {
   final Function save;
   final bool readMode;
   final Map<String, dynamic> changes;
+  final ValueNotifier<bool> fabricsNotifier;
   final TextEditingController priceController;
   final TextEditingController expensesController;
   final TextEditingController commentController;
@@ -242,7 +253,6 @@ class _Body extends StatefulWidget {
 
 class __BodyState extends State<_Body> {
   final DateFormat dateTimeFormat = DateFormat("dd.MM.yyyy");
-  ValueNotifier<bool> _fabricsNotifier = ValueNotifier(true);
   ValueNotifier<DateTime> _dateTimeNotifier;
   ValueNotifier<bool> _doneNotifier;
   String appDocPath;
@@ -251,7 +261,7 @@ class __BodyState extends State<_Body> {
   _addFabric(Fabric fabric) {
     if (fabric.id != null) {
       widget.changes['fabrics'].add(Fabric.from(fabric));
-      _fabricsNotifier.value = !_fabricsNotifier.value;
+      widget.fabricsNotifier.value = !widget.fabricsNotifier.value;
     }
   }
 
@@ -261,7 +271,7 @@ class __BodyState extends State<_Body> {
         widget.changes['fabrics'].removeAt(i);
         break;
       }
-    _fabricsNotifier.value = !_fabricsNotifier.value;
+    widget.fabricsNotifier.value = !widget.fabricsNotifier.value;
   }
 
   Future<void> getApplicationDirectoryPath() async {
@@ -346,7 +356,7 @@ class __BodyState extends State<_Body> {
                         style: Theme.of(context).textTheme.bodyText1,
                       ),
                       ValueListenableBuilder(
-                        valueListenable: _fabricsNotifier,
+                        valueListenable: widget.fabricsNotifier,
                         builder: (context, _, __) {
                           double value = (widget
                                       .priceController.text.isNotEmpty &&
@@ -477,7 +487,7 @@ class __BodyState extends State<_Body> {
                   child: Container(
                     height: 200,
                     child: ValueListenableBuilder(
-                      valueListenable: _fabricsNotifier,
+                      valueListenable: widget.fabricsNotifier,
                       builder:
                           (BuildContext context, bool updated, Widget child) {
                         if (widget.changes['fabrics'].length == 0) {

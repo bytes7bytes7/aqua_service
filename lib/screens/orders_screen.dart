@@ -237,13 +237,22 @@ class __OrderCardState extends State<_OrderCard> {
   @override
   Widget build(BuildContext context) {
     init();
-    double value = (widget.order.price - widget.order.expenses);
+    double value;
+    if (widget.order.expenses != null) {
+      value = widget.order.price - widget.order.expenses;
+    }else{
+      value = widget.order.price;
+    }
     for (int i = 0; i < widget.order.fabrics.length; i++) {
       value += widget.order.fabrics[i].retailPrice -
           widget.order.fabrics[i].purchasePrice;
     }
     String profit = value.toString().replaceAll(RegExp(r"([.]*0)(?!.*\d)"), "");
-    if (widget.order.price > widget.order.expenses) profit = '+' + profit;
+    if (widget.order.expenses == null) {
+      profit = '+' + profit;
+    } else if (widget.order.price > widget.order.expenses) {
+      profit = '+' + profit;
+    }
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 28.0),
       child: Material(
