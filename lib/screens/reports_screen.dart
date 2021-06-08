@@ -132,7 +132,9 @@ class _ReportCard extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                     Text(
-                      '-${report.expenses}',
+                      (report.expenses != 0)
+                          ? '-${report.expenses}'
+                          : report.expenses.toString(),
                       style: Theme.of(context).textTheme.bodyText1,
                       overflow: TextOverflow.ellipsis,
                     ),

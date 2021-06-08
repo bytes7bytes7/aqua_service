@@ -238,11 +238,9 @@ class __OrderCardState extends State<_OrderCard> {
   @override
   Widget build(BuildContext context) {
     init();
-    double value;
+    double value = widget.order.price;
     if (widget.order.expenses != null) {
-      value = widget.order.price - widget.order.expenses;
-    }else{
-      value = widget.order.price;
+      value-=widget.order.expenses;
     }
     for (int i = 0; i < widget.order.fabrics.length; i++) {
       value += widget.order.fabrics[i].retailPrice -

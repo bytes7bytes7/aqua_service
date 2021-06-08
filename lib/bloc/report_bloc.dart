@@ -23,22 +23,26 @@ class ReportBloc {
   void loadAllReports() async {
     _reportStreamController.sink.add(ReportState._reportLoading());
     _repository.getAllReports().then((orderList) async {
-      Map<String, List<double>> months={};
-      Map<String, List<double>> years={};
+      Map<String, List<double>> months = {};
+      Map<String, List<double>> years = {};
       DateTime today = DateTime.now();
       orderList.forEach((element) {
-        if(element.done) {
+        if (element.done) {
           List<String> date = element.date.split('.');
-          String year = date[0],
-              month = date[1];
-          double profit = element.price - element.expenses;
+          String year = date[0], month = date[1];
           years.putIfAbsent(year, () => [0.0, 0.0]);
+          double profit = element.price;
+          if (element.expenses != null) {
+            profit -= element.expenses;
+            years[year][1] += element.expenses;
+          }
           years[year][0] += profit;
-          years[year][1] += element.expenses;
           if (year == today.year.toString()) {
             months.putIfAbsent(month, () => [0.0, 0.0]);
             months[month][0] += profit;
-            months[month][1] += element.expenses;
+            if (element.expenses != null) {
+              months[month][1] += element.expenses;
+            }
           }
         }
       });
@@ -58,7 +62,7 @@ class ReportBloc {
           id: currentId,
           profit: value[0],
           expenses: value[1],
-          timePeriod: key+' год',
+          timePeriod: key + ' год',
         ));
         currentId++;
       });
@@ -66,7 +70,8 @@ class ReportBloc {
         _reportStreamController.sink.add(ReportState._reportData(reportList));
     }).onError((error, stackTrace) {
       if (!_reportStreamController.isClosed)
-        _reportStreamController.sink.add(ReportState._reportError(error, stackTrace));
+        _reportStreamController.sink
+            .add(ReportState._reportError(error, stackTrace));
     });
   }
 }
@@ -78,7 +83,8 @@ class ReportState {
 
   factory ReportState._reportLoading() = ReportLoadingState;
 
-  factory ReportState._reportError(Error error, StackTrace stackTrace) = ReportErrorState;
+  factory ReportState._reportError(Error error, StackTrace stackTrace) =
+      ReportErrorState;
 }
 
 class ReportInitState extends ReportState {}
