@@ -338,11 +338,10 @@ class __BodyState extends State<_Body> {
                                             .errorColor
                                             .withOpacity(0.5),
                                         child: Center(
-                                          child: Text(
-                                            'Не найдено',
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .bodyText1,
+                                          child: Icon(
+                                            Icons.error_outline_outlined,
+                                            color: Theme.of(context).errorColor,
+                                            size: 30,
                                           ),
                                         ),
                                       ),
