@@ -48,6 +48,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 }
               } else {
                 return ErrorLabel(
+                  error: snapshot.data.error,
                   onPressed: () {
                     Bloc.bloc.settingsBloc.loadAllSettings();
                   },

@@ -102,6 +102,7 @@ class __BodyState extends State<_Body> {
             }
           } else {
             return ErrorLabel(
+              error: snapshot.data.error,
               onPressed: () {
                 Bloc.bloc.fabricBloc.loadAllFabrics();
               },
