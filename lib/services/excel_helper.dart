@@ -134,6 +134,9 @@ abstract class ExcelHelper {
           if (values[3] != null) {
             values[3] = values[3].map((e) => e.id).join(';');
           } // done
+          if(values[4]==null){
+            values[4]='';
+          }
           if (values[6] == false) {
             values[6] = 'false';
           } else {
@@ -359,7 +362,7 @@ abstract class ExcelHelper {
               }
             }
             if (values[4].isEmpty) {
-              values[4] = 0.0;
+              values[4] = null;
             } else {
               try {
                 values[4] = double.parse(values[4]);
