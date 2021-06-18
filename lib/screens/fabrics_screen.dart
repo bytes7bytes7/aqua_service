@@ -176,17 +176,10 @@ class _FabricCard extends StatelessWidget {
           child: Container(
             padding:
                 const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
-            width: double.infinity,
-            child: Row(
-              children: [
-                SizedBox(width: 14.0),
-                Text(
-                  '${fabric.title}',
-                  style: Theme.of(context).textTheme.bodyText1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                Spacer(),
-              ],
+            child: Text(
+              '${fabric.title}',
+              style: Theme.of(context).textTheme.bodyText1,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ),

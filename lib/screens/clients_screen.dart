@@ -179,6 +179,7 @@ class __ClientCardState extends State<_ClientCard> {
   @override
   Widget build(BuildContext context) {
     init();
+    Size size = MediaQuery.of(context).size;
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 28.0),
       child: Material(
@@ -240,22 +241,25 @@ class __ClientCardState extends State<_ClientCard> {
                             backgroundColor: Theme.of(context).focusColor,
                           ),
                 SizedBox(width: 14.0),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '${(widget.client.name != '') ? (widget.client.name + ' ') : ''}' +
-                          '${widget.client.surname ?? ''}'
-                              .replaceAll(RegExp(r"\s+"), ""),
-                      style: Theme.of(context).textTheme.bodyText1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    Text(
-                      widget.client.city,
-                      style: Theme.of(context).textTheme.subtitle2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
+                Container(
+                  width: size.width*0.6,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '${(widget.client.name != '') ? (widget.client.name + ' ') : ''}' +
+                            '${widget.client.surname ?? ''}'
+                                .replaceAll(RegExp(r"\s+"), ""),
+                        style: Theme.of(context).textTheme.bodyText1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Text(
+                        widget.client.city,
+                        style: Theme.of(context).textTheme.subtitle2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),

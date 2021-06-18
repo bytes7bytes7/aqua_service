@@ -637,6 +637,7 @@ class __ClientCardState extends State<_ClientCard> {
   @override
   Widget build(BuildContext context) {
     init();
+    Size size = MediaQuery.of(context).size;
     return Container(
       child: Material(
         color: Colors.transparent,
@@ -705,12 +706,15 @@ class __ClientCardState extends State<_ClientCard> {
                   valueListenable: _clientNotifier,
                   builder: (BuildContext context, Client client, Widget child) {
                     if (widget.changes['client'].id != null) {
-                      return Text(
-                        '${(widget.changes['client'].name != '') ? (widget.changes['client'].name + ' ') : ''}' +
-                            '${widget.changes['client'].surname ?? ''}'
-                                .replaceAll(RegExp(r"\s+"), ""),
-                        style: Theme.of(context).textTheme.bodyText1,
-                        overflow: TextOverflow.ellipsis,
+                      return Container(
+                        width: size.width*0.5,
+                        child: Text(
+                          '${(widget.changes['client'].name != '') ? (widget.changes['client'].name + ' ') : ''}' +
+                              '${widget.changes['client'].surname ?? ''}'
+                                  .replaceAll(RegExp(r"\s+"), ""),
+                          style: Theme.of(context).textTheme.bodyText1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       );
                     } else {
                       return Text(

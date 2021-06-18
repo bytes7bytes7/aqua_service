@@ -274,64 +274,77 @@ class __OrderCardState extends State<_OrderCard> {
             padding:
                 const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
             width: double.infinity,
-            child: Row(
-              children: [
-                (widget.order.client.avatar != null && bytes != null)
-                    ? ConstrainedBox(
-                        constraints:
-                            BoxConstraints.tightFor(width: 50, height: 50),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            image: DecorationImage(
-                              image: MemoryImage(bytes),
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                        ),
-                      )
-                    : (widget.order.client.avatar != null)
-                        ? CircleAvatar(
-                            radius: 24.0,
-                            child: Icon(
-                              Icons.error_outline_outlined,
-                              color: Theme.of(context).errorColor,
-                            ),
-                            backgroundColor:
-                                Theme.of(context).errorColor.withOpacity(0.5),
-                          )
-                        : CircleAvatar(
-                            radius: 24.0,
-                            child: Icon(
-                              Icons.person,
-                              color: Theme.of(context).cardColor,
-                            ),
-                            backgroundColor: Theme.of(context).focusColor,
-                          ),
-                SizedBox(width: 14.0),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+            child: LayoutBuilder(
+              builder: (BuildContext context, BoxConstraints constraints) {
+                return Row(
                   children: [
-                    Text(
-                      '${(widget.order.client.name != '') ? (widget.order.client.name + ' ') : ''}' +
-                          '${widget.order.client.surname ?? ''}'
-                              .replaceAll(RegExp(r"\s+"), ""),
-                      style: Theme.of(context).textTheme.bodyText1,
-                      overflow: TextOverflow.ellipsis,
+                    (widget.order.client.avatar != null && bytes != null)
+                        ? ConstrainedBox(
+                            constraints:
+                                BoxConstraints.tightFor(width: 50, height: 50),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                image: DecorationImage(
+                                  image: MemoryImage(bytes),
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                            ),
+                          )
+                        : (widget.order.client.avatar != null)
+                            ? CircleAvatar(
+                                radius: 24.0,
+                                child: Icon(
+                                  Icons.error_outline_outlined,
+                                  color: Theme.of(context).errorColor,
+                                ),
+                                backgroundColor: Theme.of(context)
+                                    .errorColor
+                                    .withOpacity(0.5),
+                              )
+                            : CircleAvatar(
+                                radius: 24.0,
+                                child: Icon(
+                                  Icons.person,
+                                  color: Theme.of(context).cardColor,
+                                ),
+                                backgroundColor: Theme.of(context).focusColor,
+                              ),
+                    SizedBox(width: 14.0),
+                    Container(
+                      width: constraints.maxWidth * 0.5,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '${(widget.order.client.name != '') ? (widget.order.client.name + ' ') : ''}' +
+                                '${widget.order.client.surname ?? ''}'
+                                    .replaceAll(RegExp(r"\s+"), ""),
+                            style: Theme.of(context).textTheme.bodyText1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          Text(
+                            widget.order.date,
+                            style: Theme.of(context).textTheme.subtitle2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
                     ),
-                    Text(
-                      widget.order.date,
-                      style: Theme.of(context).textTheme.subtitle2,
-                      overflow: TextOverflow.ellipsis,
+                    Spacer(),
+                    Container(
+                      width: constraints.maxWidth * 0.25,
+                      child: Text(
+                        profit,
+                        textAlign: TextAlign.end,
+                        style: Theme.of(context).textTheme.bodyText1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
                   ],
-                ),
-                Spacer(),
-                Text(
-                  profit,
-                  style: Theme.of(context).textTheme.bodyText1,
-                ),
-              ],
+                );
+              },
             ),
           ),
         ),

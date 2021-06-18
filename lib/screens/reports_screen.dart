@@ -104,6 +104,7 @@ class _ReportCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Size size = MediaQuery.of(context).size;
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 28.0),
       child: Material(
@@ -117,28 +118,34 @@ class _ReportCard extends StatelessWidget {
             width: double.infinity,
             child: Row(
               children: [
-                Text(
-                  report.timePeriod,
-                  style: Theme.of(context).textTheme.bodyText1,
-                  overflow: TextOverflow.ellipsis,
+                Container(
+                  width: size.width*0.4,
+                  child: Text(
+                    report.timePeriod,
+                    style: Theme.of(context).textTheme.bodyText1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
                 Spacer(),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      '+${report.profit}',
-                      style: Theme.of(context).textTheme.bodyText1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    Text(
-                      (report.expenses != 0)
-                          ? '-${report.expenses}'
-                          : report.expenses.toString(),
-                      style: Theme.of(context).textTheme.bodyText1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
+                Container(
+                  width: size.width*0.35,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        '+${report.profit}',
+                        style: Theme.of(context).textTheme.bodyText1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Text(
+                        (report.expenses != 0)
+                            ? '-${report.expenses}'
+                            : report.expenses.toString(),
+                        style: Theme.of(context).textTheme.bodyText1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),

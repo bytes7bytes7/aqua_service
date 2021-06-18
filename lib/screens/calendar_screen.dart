@@ -268,6 +268,7 @@ class OrderBottomSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Size size = MediaQuery.of(context).size;
     return DraggableScrollableSheet(
       expand: true,
       initialChildSize: 0.2,
@@ -403,45 +404,60 @@ class OrderBottomSheet extends StatelessWidget {
                                     ),
                                   ),
                                   SizedBox(width: 14.0),
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        '${(selectedOrders.value[index - 1].client.name != '') ? (selectedOrders.value[index - 1].client.name + ' ') : ''}' +
-                                            '${selectedOrders.value[index - 1].client.surname ?? ''}'
-                                                .replaceAll(RegExp(r"\s+"), ""),
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodyText1,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                      Text(
-                                        selectedOrders
-                                            .value[index - 1].client.city,
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .subtitle2,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ],
+                                  Container(
+                                    width: size.width * 0.5,
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          '${(selectedOrders.value[index - 1].client.name != '') ? (selectedOrders.value[index - 1].client.name + ' ') : ''}' +
+                                              '${selectedOrders.value[index - 1].client.surname ?? ''}'
+                                                  .replaceAll(
+                                                      RegExp(r"\s+"), ""),
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodyText1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        Text(
+                                          selectedOrders
+                                              .value[index - 1].client.city,
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .subtitle2,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                   Spacer(),
-                                  Text(
-                                    (selectedOrders.value[index - 1].price !=
-                                                null &&
-                                            selectedOrders.value[index - 1]
-                                                    .expenses !=
-                                                null)
-                                        ? (selectedOrders
-                                                    .value[index - 1].price -
-                                                selectedOrders
-                                                    .value[index - 1].expenses)
-                                            .toString()
-                                        : '0.0',
-                                    style:
-                                        Theme.of(context).textTheme.bodyText1,
-                                    overflow: TextOverflow.ellipsis,
+                                  Container(
+                                    width: size.width * 0.2,
+                                    child: Text(
+                                      (selectedOrders.value[index - 1].price !=
+                                                  null &&
+                                              selectedOrders.value[index - 1]
+                                                      .expenses !=
+                                                  null)
+                                          ? (selectedOrders
+                                                      .value[index - 1].price -
+                                                  selectedOrders
+                                                      .value[index - 1]
+                                                      .expenses)
+                                              .toString()
+                                          : (selectedOrders
+                                                      .value[index - 1].price !=
+                                                  null)
+                                              ? selectedOrders
+                                                  .value[index - 1].price
+                                                  .toString()
+                                              : '0.0',
+                                      style:
+                                          Theme.of(context).textTheme.bodyText1,
+                                      textAlign: TextAlign.end,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
                                   ),
                                 ],
                               ),
