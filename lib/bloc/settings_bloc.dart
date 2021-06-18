@@ -20,7 +20,9 @@ class SettingsBloc {
   }
 
   void dispose() {
-    _settingsStreamController.close();
+    if(_settingsStreamController != null && !_settingsStreamController.isClosed) {
+      _settingsStreamController.close();
+    }
   }
 
   void loadAllSettings() async {

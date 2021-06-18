@@ -79,21 +79,27 @@ class DatabaseHelper {
     final db = await database;
     switch (dbName) {
       case ConstDBData.clientTableName:
-        await db.execute('DELETE FROM ${ConstDBData.clientTableName};');
+        await db
+            .execute('DROP TABLE IF EXISTS ${ConstDBData.clientTableName};');
         break;
       case ConstDBData.orderTableName:
-        await db.execute('DELETE FROM ${ConstDBData.orderTableName};');
+        await db
+            .execute('DROP TABLE IF EXISTS ${ConstDBData.orderTableName};');
         break;
       case ConstDBData.fabricTableName:
-        await db.execute('DELETE FROM ${ConstDBData.fabricTableName};');
+        await db
+            .execute('DROP TABLE IF EXISTS ${ConstDBData.fabricTableName};');
         break;
       case ConstDBData.settingsTableName:
-        await db.execute('DELETE FROM ${ConstDBData.settingsTableName};');
-        break;
+        throw Exception('Deletion of settingsTable can cause error');
       default:
-        await _database.close();
-        _database = null;
-        await _initDB();
+        await db
+            .execute('DROP TABLE IF EXISTS ${ConstDBData.clientTableName};');
+        await db
+            .execute('DROP TABLE IF EXISTS ${ConstDBData.orderTableName};');
+        await db
+            .execute('DROP TABLE IF EXISTS ${ConstDBData.fabricTableName};');
+        await _createDB(db, ConstDBData.databaseVersion);
     }
   }
 
@@ -435,5 +441,16 @@ class DatabaseHelper {
     return res.isNotEmpty
         ? Settings.fromMap(res.first)
         : Settings(appTitle: null, icon: null);
+  }
+
+  Future deleteSettings() async {
+    final db = await database;
+    db.delete("${ConstDBData.settingsTableName}",
+        where: "${ConstDBData.id} = ?", whereArgs: [1]);
+    await addSettings(Settings(
+      id: 1,
+      appTitle: ConstDBData.appTitle,
+      icon: null,
+    ));
   }
 }

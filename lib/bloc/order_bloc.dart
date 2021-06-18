@@ -16,7 +16,9 @@ class OrderBloc {
   }
 
   void dispose() {
-    _orderStreamController.close();
+    if(_orderStreamController!= null && !_orderStreamController.isClosed) {
+      _orderStreamController.close();
+    }
   }
 
   void loadAllOrders() async {

@@ -17,7 +17,9 @@ class ReportBloc {
   }
 
   void dispose() {
-    _reportStreamController.close();
+    if(_reportStreamController != null && !_reportStreamController.isClosed) {
+      _reportStreamController.close();
+    }
   }
 
   void loadAllReports() async {

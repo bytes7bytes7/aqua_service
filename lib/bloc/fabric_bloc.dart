@@ -16,7 +16,9 @@ class FabricBloc{
   }
 
   void dispose(){
-    _fabricStreamController.close();
+    if(_fabricStreamController != null && !_fabricStreamController.isClosed) {
+      _fabricStreamController.close();
+    }
   }
 
   void loadAllFabrics() async{

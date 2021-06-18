@@ -243,6 +243,9 @@ abstract class ExcelHelper {
           if (thisTable.rows.length > 0) {
             headerRow =
                 thisTable.rows[0].map<String>((e) => e.toString()).toList();
+            if(headerRow.length<11){
+              headerRow.add(ConstDBData.comment);
+            }
           }
           for (int i = 1; i < thisTable.rows.length; i++) {
             values =
@@ -269,6 +272,9 @@ abstract class ExcelHelper {
               values[9] = <String>[];
             } else {
               values[9] = values[9].split(';');
+            }
+            if(values.length<11){
+              values.add('');
             }
             Map<String, dynamic> map =
                 Map<String, dynamic>.fromIterables(headerRow, values);

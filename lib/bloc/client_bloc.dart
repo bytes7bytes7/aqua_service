@@ -16,7 +16,9 @@ class ClientBloc {
   }
 
   void dispose() {
-    _clientStreamController.close();
+    if(_clientStreamController != null  && !_clientStreamController.isClosed) {
+      _clientStreamController.close();
+    }
   }
 
   void loadAllClients() async {

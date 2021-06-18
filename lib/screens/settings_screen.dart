@@ -215,6 +215,7 @@ class __BodyState extends State<_Body> {
                             },
                             yesAnswer: () {
                               widget.settings.icon = null;
+                              Bloc.bloc.settingsBloc.updateSettings(widget.settings);
                               setState(() {});
                               Navigator.of(context).pop();
                             },

@@ -10,6 +10,14 @@ class Bloc {
 
   static final Bloc bloc = Bloc._privateConstructor();
 
+  dispose(){
+    _clientBloc = null;
+    _fabricBloc = null;
+    _orderBloc = null;
+    _reportBloc = null;
+    _settingsBloc = null;
+  }
+
   static ClientBloc _clientBloc;
   static FabricBloc _fabricBloc;
   static OrderBloc _orderBloc;
