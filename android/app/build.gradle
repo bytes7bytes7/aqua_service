@@ -33,7 +33,7 @@ android {
         minSdkVersion 16
         targetSdkVersion 28
         versionCode flutterVersionCode.toInteger()
-        versionName "1.1.91"
+        versionName "1.1.93"
         // versionName flutterVersionName
     }
 

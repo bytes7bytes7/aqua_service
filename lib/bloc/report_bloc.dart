@@ -1,7 +1,8 @@
 import 'dart:async';
 
-import '../constants.dart';
+import '../model/fabric.dart';
 import '../model/report.dart';
+import '../constants.dart';
 import '../repository/report_repository.dart';
 
 class ReportBloc {
@@ -26,12 +27,17 @@ class ReportBloc {
       Map<String, List<double>> months = {};
       Map<String, List<double>> years = {};
       DateTime today = DateTime.now();
-      orderList.forEach((element) {
+      orderList.forEach((element) async {
         if (element.done) {
           List<String> date = element.date.split('.');
           String year = date[0], month = date[1];
           years.putIfAbsent(year, () => [0.0, 0.0]);
           double profit = element.price;
+          if(element.fabrics != null && element.fabrics.length>0){
+            for(int i =0;i<element.fabrics.length;i++){
+              profit+=element.fabrics[i].retailPrice - element.fabrics[i].purchasePrice;
+            }
+          }
           if (element.expenses != null) {
             profit -= element.expenses;
             years[year][1] += element.expenses;
