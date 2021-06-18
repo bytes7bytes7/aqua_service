@@ -66,6 +66,16 @@ abstract class ExcelHelper {
     Directory directory = await _getApplicationDirectory(context);
     String filePath = '${directory.path}/$filename.xlsx';
 
+    // Create backup of DB
+    String today = DateTime.now().toLocal().toString();
+    today = today.substring(0,today.indexOf('.'));
+    today = today.replaceAll(' ','(') + ')';
+    today = today.replaceAll(':','-');
+    today = today.replaceAll('-','.');
+    Directory documentsDirectory = await getApplicationDocumentsDirectory();
+    File database = File(documentsDirectory.path+'/'+ConstDBData.databaseName);
+    database.copy(directory.path+'/'+today+'.db');
+
     // Init excel
     Excel excel = Excel.createExcel();
     excel.copy('Sheet1', ConstDBData.clientTableName);

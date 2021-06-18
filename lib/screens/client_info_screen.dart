@@ -764,8 +764,8 @@ class __BodyState extends State<_Body> {
     _image = File(pickedFile.path);
     String filename =
         pickedFile.path.substring(pickedFile.path.lastIndexOf('/') + 1);
-    await _image.copy('$appDocPath/$filename');
     String newPath = '$appDocPath/$filename';
+    await _image.copy(newPath);
     setState(() {});
     return newPath;
   }
