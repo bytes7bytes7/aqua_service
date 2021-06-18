@@ -231,9 +231,6 @@ class _CalendarContentState extends State<CalendarContent> {
                           _updateCurrentMonth(DateFormat.yMMM()
                               .format(_targetDateTimeNotifier.value));
                         },
-                        onDayLongPressed: (DateTime date) {
-                          print('long pressed date $date');
-                        },
                       );
                     },
                   ),

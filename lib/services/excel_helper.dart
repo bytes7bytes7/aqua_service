@@ -182,13 +182,6 @@ abstract class ExcelHelper {
       }
     }
 
-    // Print result
-    // for (var table in excel.tables.keys) {
-    //   for (var row in excel.tables[table].rows) {
-    //     print(row);
-    //   }
-    // }
-
     // Save excel
     excel.encode().then(
       (onValue) {
@@ -416,16 +409,7 @@ abstract class ExcelHelper {
           }
         }
       }
-      // for (var c in clients) {
-      //   print(c.toMap());
-      // }
-      // for (var f in fabrics) {
-      //   print(f.toMap());
-      // }
-      // for (var o in orders) {
-      //   print(o.toMap());
-      // }
-      // print(settings.toMap());
+
       Bloc.bloc.settingsBloc.importExcel(clients, fabrics, orders, settings);
       showInfoSnackBar(
         context: context,
