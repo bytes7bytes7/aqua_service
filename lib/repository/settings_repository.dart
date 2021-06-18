@@ -14,7 +14,7 @@ class SettingsRepository {
   }
 
   Future clearDatabase(List<String> dbName) async {
-    for (String name in dbName) await DatabaseHelper.db.dropBD(name);
+    for (String name in dbName) await DatabaseHelper.db.dropDB(name);
   }
 
   Future importExcel(List<Client> clients, List<Fabric> fabrics,

@@ -148,8 +148,8 @@ class __BodyState extends State<_Body> {
     _image = File(pickedFile.path);
     String filename =
         pickedFile.path.substring(pickedFile.path.lastIndexOf('/') + 1);
-    await _image.copy('$appDocPath/$filename');
-    String newPath = '$appDocPath/$filename';
+    await _image.copy('${appDocPath.value}/$filename');
+    String newPath = '${appDocPath.value}/$filename';
     return newPath;
   }
 
@@ -164,29 +164,66 @@ class __BodyState extends State<_Body> {
         padding: const EdgeInsets.fromLTRB(30.0, 20.0, 30.0, 0),
         child: Column(
           children: [
-            ConstrainedBox(
-              constraints: BoxConstraints.tightFor(width: 100, height: 100),
-              child: Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  onTap: () async {
-                    String path = await _getImage();
-                    if (path != null) {
-                      var hasLocalImage = File(path).existsSync();
-                      if (hasLocalImage) {
-                        bytes = File(path).readAsBytesSync();
-                        widget.settings.icon = path;
-                      }
-                      setState(() {});
-                    }
-                  },
-                  child: Container(
-                    child: (widget.settings.icon != null && bytes != null)
-                        ? Image.memory(bytes)
-                        : Image.asset('assets/png/logo.png'),
+            Stack(
+              children: [
+                ConstrainedBox(
+                  constraints: BoxConstraints.tightFor(width: 100, height: 100),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: () async {
+                        String path = await _getImage();
+                        if (path != null) {
+                          var hasLocalImage = File(path).existsSync();
+                          if (hasLocalImage) {
+                            bytes = File(path).readAsBytesSync();
+                            widget.settings.icon = path;
+                          }
+                          setState(() {});
+                        }
+                      },
+                      child: Container(
+                        child: (widget.settings.icon != null && bytes != null)
+                            ? Image.memory(bytes)
+                            : Image.asset('assets/png/logo.png'),
+                      ),
+                    ),
                   ),
                 ),
-              ),
+                if (widget.settings.icon != null)
+                  Positioned(
+                    top: 0,
+                    right: 0,
+                    child: CircleAvatar(
+                      radius: 18,
+                      backgroundColor:
+                          Theme.of(context).cardColor.withOpacity(0.6),
+                      child: IconButton(
+                        padding: const EdgeInsets.all(0),
+                        icon: Icon(
+                          Icons.delete,
+                          size: 18,
+                        ),
+                        color: Theme.of(context).focusColor,
+                        onPressed: () {
+                          showNoYesDialog(
+                            context: context,
+                            title: 'Удаление',
+                            subtitle: 'Удалить иконку?',
+                            noAnswer: () {
+                              Navigator.of(context).pop();
+                            },
+                            yesAnswer: () {
+                              widget.settings.icon = null;
+                              setState(() {});
+                              Navigator.of(context).pop();
+                            },
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+              ],
             ),
             SizedBox(height: 10),
             TextField(
@@ -248,42 +285,14 @@ class __BodyState extends State<_Body> {
             ),
             Spacer(),
             RectButton(
-              text: 'Сбросить базу данных',
+              text: 'Удалить данные',
               onPressed: () {
                 showNoYesDialog(
                   context: context,
                   title: 'Сброс базы данных',
                   subtitle: 'Удалить все данные?',
                   yesAnswer: () {
-                    Bloc.bloc.settingsBloc.clearDatabase([
-                      ConstDBData.clientTableName,
-                      ConstDBData.fabricTableName,
-                      ConstDBData.orderTableName,
-                    ]);
-                    Navigator.pop(context);
-                  },
-                  noAnswer: () {
-                    Navigator.pop(context);
-                  },
-                );
-              },
-            ),
-            SizedBox(height: 5),
-            RectButton(
-              text: 'Сбросить настройки',
-              onPressed: () {
-                showNoYesDialog(
-                  context: context,
-                  title: 'Иконка и название',
-                  subtitle: 'Поставить иконку и название по умолчанию?',
-                  yesAnswer: () {
-                    Bloc.bloc.settingsBloc
-                        .clearDatabase([ConstDBData.settingsTableName]);
-                    widget.settings.icon = null;
-                    widget.settings.appTitle = ConstData.appTitle;
-                    bytes = null;
-                    widget.titleController.text = ConstData.appTitle;
-                    setState(() {});
+                    Bloc.bloc.settingsBloc.clearDatabase(['']);
                     Navigator.pop(context);
                   },
                   noAnswer: () {

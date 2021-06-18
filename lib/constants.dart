@@ -56,6 +56,7 @@ abstract class ConstDBData {
   // static const String previousDate = 'previousDate';
   // static const String nextDate = 'nextDate';
   static const String images = 'images';
+  static const String comment = 'comment';
 
   // Special columns for fabrics
   static const String title = 'title';
@@ -69,7 +70,6 @@ abstract class ConstDBData {
   static const String expenses = 'expenses';
   static const String date = 'date';
   static const String done = 'done';
-  static const String comment = 'comment';
 
   // Special for settings
   static const String appTitle = 'appTitle';

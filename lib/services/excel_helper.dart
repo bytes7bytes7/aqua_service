@@ -108,6 +108,7 @@ abstract class ExcelHelper {
           ConstDBData.phone,
           ConstDBData.volume,
           ConstDBData.images,
+          ConstDBData.comment,
         ];
         thisTable.appendRow(headerRow);
         for (int i = 0; i < clients.length; i++) {
@@ -121,6 +122,9 @@ abstract class ExcelHelper {
             values[9] = '';
           } else {
             values[9] = values[9].join(';');
+          }
+          if(values.length>11){
+            values[10]='';
           }
           thisTable.appendRow(values);
         }

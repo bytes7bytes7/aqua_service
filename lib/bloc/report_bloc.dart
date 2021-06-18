@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import '../model/fabric.dart';
 import '../model/report.dart';
 import '../constants.dart';
 import '../repository/report_repository.dart';

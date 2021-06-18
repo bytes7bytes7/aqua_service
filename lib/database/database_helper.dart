@@ -42,7 +42,8 @@ class DatabaseHelper {
         ${ConstDBData.address} TEXT,
         ${ConstDBData.phone} TEXT,
         ${ConstDBData.volume} REAL,
-        ${ConstDBData.images} TEXT
+        ${ConstDBData.images} TEXT,
+        ${ConstDBData.comment} TEXT
       )
     ''');
     await db.execute('''
@@ -74,7 +75,7 @@ class DatabaseHelper {
     ''');
   }
 
-  Future dropBD(String dbName) async {
+  Future dropDB(String dbName) async {
     final db = await database;
     switch (dbName) {
       case ConstDBData.clientTableName:
@@ -90,11 +91,9 @@ class DatabaseHelper {
         await db.execute('DELETE FROM ${ConstDBData.settingsTableName};');
         break;
       default:
-        await db.execute('DELETE FROM ${ConstDBData.clientTableName};');
-        await db.execute('DELETE FROM ${ConstDBData.orderTableName};');
-        await db.execute('DELETE FROM ${ConstDBData.fabricTableName};');
-        await db.execute('DELETE FROM ${ConstDBData.settingsTableName};');
-        await _createDB(db, ConstDBData.databaseVersion);
+        await _database.close();
+        _database = null;
+        await _initDB();
     }
   }
 
@@ -109,7 +108,7 @@ class DatabaseHelper {
     final db = await database;
     client.id = await _getMaxId(db, ConstDBData.clientTableName);
     await db.rawInsert(
-      "INSERT INTO ${ConstDBData.clientTableName} (${ConstDBData.id}, ${ConstDBData.avatar}, ${ConstDBData.name}, ${ConstDBData.surname}, ${ConstDBData.middleName}, ${ConstDBData.city}, ${ConstDBData.address}, ${ConstDBData.phone}, ${ConstDBData.volume}, ${ConstDBData.images}) VALUES (?,?,?,?,?,?,?,?,?,?)",
+      "INSERT INTO ${ConstDBData.clientTableName} (${ConstDBData.id}, ${ConstDBData.avatar}, ${ConstDBData.name}, ${ConstDBData.surname}, ${ConstDBData.middleName}, ${ConstDBData.city}, ${ConstDBData.address}, ${ConstDBData.phone}, ${ConstDBData.volume}, ${ConstDBData.images}, ${ConstDBData.comment}) VALUES (?,?,?,?,?,?,?,?,?,?,?)",
       [
         client.id,
         client.avatar,
@@ -121,6 +120,7 @@ class DatabaseHelper {
         client.phone,
         client.volume,
         client.images?.join(';'),
+        client.comment,
       ],
     );
   }
@@ -131,7 +131,7 @@ class DatabaseHelper {
     for (Client client in clients) {
       client.id = id;
       await db.rawInsert(
-        "INSERT INTO ${ConstDBData.clientTableName} (${ConstDBData.id}, ${ConstDBData.avatar}, ${ConstDBData.name}, ${ConstDBData.surname}, ${ConstDBData.middleName}, ${ConstDBData.city}, ${ConstDBData.address}, ${ConstDBData.phone}, ${ConstDBData.volume}, ${ConstDBData.images}) VALUES (?,?,?,?,?,?,?,?,?,?)",
+        "INSERT INTO ${ConstDBData.clientTableName} (${ConstDBData.id}, ${ConstDBData.avatar}, ${ConstDBData.name}, ${ConstDBData.surname}, ${ConstDBData.middleName}, ${ConstDBData.city}, ${ConstDBData.address}, ${ConstDBData.phone}, ${ConstDBData.volume}, ${ConstDBData.images}, ${ConstDBData.comment}) VALUES (?,?,?,?,?,?,?,?,?,?,?)",
         [
           client.id,
           client.avatar,
@@ -143,6 +143,7 @@ class DatabaseHelper {
           client.phone,
           client.volume,
           client.images?.join(';'),
+          client.comment,
         ],
       );
       id++;
@@ -295,7 +296,7 @@ class DatabaseHelper {
     final db = await database;
     int id = await _getMaxId(db, ConstDBData.orderTableName);
     for (Order order in orders) {
-      order.id =id;
+      order.id = id;
       await db.rawInsert(
         "INSERT INTO ${ConstDBData.orderTableName} (${ConstDBData.id}, ${ConstDBData.client}, ${ConstDBData.price}, ${ConstDBData.fabrics}, ${ConstDBData.expenses}, ${ConstDBData.date}, ${ConstDBData.done}, ${ConstDBData.comment}) VALUES (?,?,?,?,?,?,?,?)",
         [

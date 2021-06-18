@@ -40,6 +40,7 @@ class _ClientInfoScreenState extends State<ClientInfoScreen> {
   TextEditingController addressController;
   TextEditingController phoneController;
   TextEditingController volumeController;
+  TextEditingController commentController;
   Map<String, dynamic> changes = {};
   String _title;
 
@@ -53,6 +54,7 @@ class _ClientInfoScreenState extends State<ClientInfoScreen> {
     addressController = TextEditingController();
     phoneController = TextEditingController();
     volumeController = TextEditingController();
+    commentController = TextEditingController();
 
     widget.client.name = widget.client.name ?? '';
     widget.client.surname = widget.client.surname ?? '';
@@ -62,6 +64,7 @@ class _ClientInfoScreenState extends State<ClientInfoScreen> {
     widget.client.phone = widget.client.phone ?? '';
     widget.client.volume = widget.client.volume ?? '';
     widget.client.images = widget.client.images ?? [];
+    widget.client.comment = widget.client.comment ?? '';
 
     changes['avatarPath'] = widget.client.avatar;
     changes['imagesPath'] =
@@ -73,7 +76,8 @@ class _ClientInfoScreenState extends State<ClientInfoScreen> {
     cityController.text = widget.client.city;
     addressController.text = widget.client.address;
     phoneController.text = widget.client.phone;
-    volumeController.text = widget.client.volume.toString();
+    volumeController.text = widget.client.volume;
+    commentController.text = widget.client.comment;
     super.initState();
   }
 
@@ -86,6 +90,7 @@ class _ClientInfoScreenState extends State<ClientInfoScreen> {
     addressController.dispose();
     phoneController.dispose();
     volumeController.dispose();
+    commentController.dispose();
     super.dispose();
   }
 
@@ -107,7 +112,8 @@ class _ClientInfoScreenState extends State<ClientInfoScreen> {
                 cityController.text != widget.client.city ||
                 addressController.text != widget.client.address ||
                 phoneController.text != widget.client.phone ||
-                volumeController.text != widget.client.volume.toString() ||
+                volumeController.text != widget.client.volume ||
+                commentController.text != widget.client.comment ||
                 changes['avatarPath'] != widget.client.avatar ||
                 !ListEquality()
                     .equals(changes['imagesPath'], widget.client.images)) {
@@ -171,7 +177,8 @@ class _ClientInfoScreenState extends State<ClientInfoScreen> {
                     ..address = addressController.text
                     ..phone = phoneController.text
                     ..volume = volumeController.text
-                    ..images = changes['imagesPath'];
+                    ..images = changes['imagesPath']
+                    ..comment = commentController.text;
                   if (widget.client.id == null) {
                     await Bloc.bloc.clientBloc.addClient(widget.client);
                     setState(() {
@@ -206,6 +213,7 @@ class _ClientInfoScreenState extends State<ClientInfoScreen> {
         addressController: addressController,
         phoneController: phoneController,
         volumeController: volumeController,
+        commentController: commentController,
       ),
     );
   }
@@ -224,6 +232,7 @@ class _Body extends StatefulWidget {
     @required this.addressController,
     @required this.phoneController,
     @required this.volumeController,
+    @required this.commentController,
   }) : super(key: key);
 
   final bool readMode;
@@ -236,6 +245,7 @@ class _Body extends StatefulWidget {
   final TextEditingController addressController;
   final TextEditingController phoneController;
   final TextEditingController volumeController;
+  final TextEditingController commentController;
 
   @override
   __BodyState createState() => __BodyState();
@@ -543,37 +553,70 @@ class __BodyState extends State<_Body> {
                           Spacer(),
                           (orders.value != null && orders.value[1].id != null)
                               ? IconButton(
-                                  icon: Icon(
-                                    Icons.calendar_today_outlined,
-                                    color: Theme.of(context).focusColor,
+                            icon: Icon(
+                              Icons.calendar_today_outlined,
+                              color: Theme.of(context).focusColor,
+                            ),
+                            onPressed: () {
+                              if (!widget.readMode) {
+                                Navigator.push(
+                                  context,
+                                  NextPageRoute(
+                                    nextPage: CalendarScreen(
+                                        updateDate: _updateDateTime),
                                   ),
-                                  onPressed: () {
-                                    if (!widget.readMode) {
-                                      Navigator.push(
-                                        context,
-                                        NextPageRoute(
-                                          nextPage: CalendarScreen(
-                                              updateDate: _updateDateTime),
-                                        ),
-                                      );
-                                    } else {
-                                      showInfoSnackBar(
-                                          context: context,
-                                          info: 'Режим чтения',
-                                          icon: Icons.warning_amber_outlined);
-                                    }
-                                  },
-                                )
+                                );
+                              } else {
+                                showInfoSnackBar(
+                                    context: context,
+                                    info: 'Режим чтения',
+                                    icon: Icons.warning_amber_outlined);
+                              }
+                            },
+                          )
                               : SizedBox.shrink(),
                         ],
                       ),
                     );
                   },
                 ),
-                SizedBox(height: 10.0),
+                SizedBox(height: 20.0),
+                Container(
+                  width: double.infinity,
+                  height: 0.4 * MediaQuery.of(context).size.height,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(5.0),
+                    border: Border.all(
+                        width: 2.0, color: Theme.of(context).focusColor),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: SingleChildScrollView(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          TextField(
+                            controller: widget.commentController,
+                            enabled: !widget.readMode,
+                            decoration: InputDecoration(
+                              hintText: "Ваш комментарий",
+                              hintStyle: Theme.of(context).textTheme.headline3,
+                              border: InputBorder.none,
+                            ),
+                            style: Theme.of(context).textTheme.bodyText1,
+                            scrollPadding: EdgeInsets.all(20.0),
+                            keyboardType: TextInputType.multiline,
+                            maxLines: 30,
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
+          SizedBox(height: 40.0),
           CarouselSlider(
             options: CarouselOptions(
               height: 200.0,
