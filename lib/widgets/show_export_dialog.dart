@@ -25,10 +25,12 @@ Future<void> showExportDialog(
         },
         child: AlertDialog(
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          title: Text(
+          title: Center(
+		child: Text(
             'Экспорт',
             style: Theme.of(context).textTheme.headline2,
-          ),
+        	  ),
+	),
           content: SingleChildScrollView(
             child: ListBody(
               children: <Widget>[

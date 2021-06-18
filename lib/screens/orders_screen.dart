@@ -241,7 +241,7 @@ class __OrderCardState extends State<_OrderCard> {
     init();
     double value = widget.order.price;
     if (widget.order.expenses != null) {
-      value-=widget.order.expenses;
+      value -= widget.order.expenses;
     }
     for (int i = 0; i < widget.order.fabrics.length; i++) {
       value += widget.order.fabrics[i].retailPrice -
@@ -276,7 +276,7 @@ class __OrderCardState extends State<_OrderCard> {
             width: double.infinity,
             child: Row(
               children: [
-                (widget.order.client.avatar != null)
+                (widget.order.client.avatar != null && bytes != null)
                     ? ConstrainedBox(
                         constraints:
                             BoxConstraints.tightFor(width: 50, height: 50),
@@ -290,14 +290,24 @@ class __OrderCardState extends State<_OrderCard> {
                           ),
                         ),
                       )
-                    : CircleAvatar(
-                        radius: 24.0,
-                        child: Icon(
-                          Icons.person,
-                          color: Theme.of(context).cardColor,
-                        ),
-                        backgroundColor: Theme.of(context).focusColor,
-                      ),
+                    : (widget.order.client.avatar != null)
+                        ? CircleAvatar(
+                            radius: 24.0,
+                            child: Icon(
+                              Icons.error_outline_outlined,
+                              color: Theme.of(context).errorColor,
+                            ),
+                            backgroundColor:
+                                Theme.of(context).errorColor.withOpacity(0.5),
+                          )
+                        : CircleAvatar(
+                            radius: 24.0,
+                            child: Icon(
+                              Icons.person,
+                              color: Theme.of(context).cardColor,
+                            ),
+                            backgroundColor: Theme.of(context).focusColor,
+                          ),
                 SizedBox(width: 14.0),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

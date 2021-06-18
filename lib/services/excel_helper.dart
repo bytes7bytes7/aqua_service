@@ -220,6 +220,7 @@ abstract class ExcelHelper {
           info: 'Ошибка',
           icon: Icons.warning_amber_outlined,
         );
+	return;
       }
       List<Client> clients = <Client>[];
       List<Order> orders = <Order>[];

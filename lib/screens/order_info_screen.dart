@@ -663,7 +663,8 @@ class __ClientCardState extends State<_ClientCard> {
                 ValueListenableBuilder(
                   valueListenable: _clientNotifier,
                   builder: (BuildContext context, Client client, Widget child) {
-                    if (widget.changes['client'].avatar != null) {
+                    if (widget.changes['client'].avatar != null &&
+                        bytes != null) {
                       return ConstrainedBox(
                         constraints:
                             BoxConstraints.tightFor(width: 50, height: 50),
@@ -676,6 +677,16 @@ class __ClientCardState extends State<_ClientCard> {
                             ),
                           ),
                         ),
+                      );
+                    } else if (widget.changes['client'].avatar != null) {
+                      return CircleAvatar(
+                        radius: 24.0,
+                        child: Icon(
+                          Icons.error_outline_outlined,
+                          color: Theme.of(context).errorColor,
+                        ),
+                        backgroundColor:
+                            Theme.of(context).errorColor.withOpacity(0.5),
                       );
                     } else {
                       return CircleAvatar(

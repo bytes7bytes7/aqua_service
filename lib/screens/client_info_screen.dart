@@ -295,66 +295,102 @@ class __BodyState extends State<_Body> {
             padding: const EdgeInsets.fromLTRB(30.0, 20.0, 30.0, 0),
             child: Column(
               children: [
-                ConstrainedBox(
-                  constraints: BoxConstraints.tightFor(width: 100, height: 100),
-                  child: ClipOval(
-                    child: Material(
-                      child: InkWell(
-                        onTap: () async {
-                          if (!widget.readMode) {
-                            String path = await _getImage();
-                            if (path != null) {
-                              var hasLocalImage = File(path).existsSync();
-                              if (hasLocalImage) {
-                                bytes = File(path).readAsBytesSync();
-                                widget.changes['avatarPath'] = path;
-                              }
-                              setState(() {});
-                            }
-                          } else
-                            showInfoSnackBar(
-                                context: context,
-                                info: 'Режим чтения',
-                                icon: Icons.warning_amber_outlined);
-                        },
-                        child: (widget.changes['avatarPath'] != null)
-                            ? Container(
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  // image: DecorationImage(
-                                  //   image: Image.memory(bytes),
-                                  //   fit: BoxFit.cover,
-                                  // ),
-                                ),
-                                child: (File(widget.changes['avatarPath'])
-                                        .existsSync())
-                                    ? Image.memory(
-                                        File(widget.changes['avatarPath'])
-                                            .readAsBytesSync(),
-                                        fit: BoxFit.cover,
-                                      )
-                                    : Container(
-                                        color: Theme.of(context)
-                                            .errorColor
-                                            .withOpacity(0.5),
-                                        child: Center(
-                                          child: Icon(
-                                            Icons.error_outline_outlined,
-                                            color: Theme.of(context).errorColor,
-                                            size: 30,
+                Stack(
+                  children: [
+                    ConstrainedBox(
+                      constraints:
+                          BoxConstraints.tightFor(width: 100, height: 100),
+                      child: ClipOval(
+                        child: Material(
+                          child: InkWell(
+                            onTap: () async {
+                              if (!widget.readMode) {
+                                String path = await _getImage();
+                                if (path != null) {
+                                  var hasLocalImage = File(path).existsSync();
+                                  if (hasLocalImage) {
+                                    bytes = File(path).readAsBytesSync();
+                                    widget.changes['avatarPath'] = path;
+                                  }
+                                  setState(() {});
+                                }
+                              } else
+                                showInfoSnackBar(
+                                    context: context,
+                                    info: 'Режим чтения',
+                                    icon: Icons.warning_amber_outlined);
+                            },
+                            child: (widget.changes['avatarPath'] != null)
+                                ? Container(
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: (File(widget.changes['avatarPath'])
+                                            .existsSync())
+                                        ? Image.memory(
+                                            File(widget.changes['avatarPath'])
+                                                .readAsBytesSync(),
+                                            fit: BoxFit.cover,
+                                          )
+                                        : Container(
+                                            color: Theme.of(context)
+                                                .errorColor
+                                                .withOpacity(0.5),
+                                            child: Center(
+                                              child: Icon(
+                                                Icons.error_outline_outlined,
+                                                color: Theme.of(context)
+                                                    .errorColor,
+                                                size: 30,
+                                              ),
+                                            ),
                                           ),
-                                        ),
-                                      ),
-                              )
-                            : Icon(
-                                Icons.image_search_outlined,
-                                size: 30,
-                                color:
-                                    Theme.of(context).scaffoldBackgroundColor,
-                              ),
+                                  )
+                                : Icon(
+                                    Icons.image_search_outlined,
+                                    size: 30,
+                                    color: Theme.of(context)
+                                        .scaffoldBackgroundColor,
+                                  ),
+                          ),
+                        ),
                       ),
                     ),
-                  ),
+                    if (!widget.readMode &&
+                        widget.changes['avatarPath'] != null)
+                      Positioned(
+                        top: 0,
+                        right: 0,
+                        child: CircleAvatar(
+                          radius: 18,
+                          backgroundColor:
+                              Theme.of(context).cardColor.withOpacity(0.6),
+                          child: IconButton(
+                            padding: const EdgeInsets.all(0),
+                            icon: Icon(
+                              Icons.delete,
+                              size: 18,
+                            ),
+                            color: Theme.of(context).focusColor,
+                            onPressed: () {
+                              showNoYesDialog(
+                                context: context,
+                                title: 'Удаление',
+                                subtitle: 'Удалить фото?',
+                                noAnswer: () {
+                                  Navigator.of(context).pop();
+                                },
+                                yesAnswer: () {
+                                  widget.changes['avatarPath'] = null;
+                                  setState(() {});
+                                  Navigator.of(context).pop();
+                                },
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
                 SizedBox(height: 20.0),
                 TextField(
@@ -596,6 +632,7 @@ class __BodyState extends State<_Body> {
                                     top: 5,
                                     right: 5,
                                     child: CircleAvatar(
+                                      radius: 18,
                                       backgroundColor: Theme.of(context)
                                           .cardColor
                                           .withOpacity(0.6),

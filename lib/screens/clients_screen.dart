@@ -207,11 +207,11 @@ class __ClientCardState extends State<_ClientCard> {
             width: double.infinity,
             child: Row(
               children: [
-                CircleAvatar(
-                  radius: 24.0,
-                  backgroundColor: Theme.of(context).focusColor,
-                  child: (bytes != null)
-                      ? Container(
+                (widget.client.avatar != null && bytes != null)
+                    ? ConstrainedBox(
+                        constraints:
+                            BoxConstraints.tightFor(width: 50, height: 50),
+                        child: Container(
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             image: DecorationImage(
@@ -219,12 +219,26 @@ class __ClientCardState extends State<_ClientCard> {
                               fit: BoxFit.cover,
                             ),
                           ),
-                        )
-                      : Icon(
-                          Icons.person,
-                          color: Theme.of(context).cardColor,
                         ),
-                ),
+                      )
+                    : (widget.client.avatar != null)
+                        ? CircleAvatar(
+                            radius: 24.0,
+                            child: Icon(
+                              Icons.error_outline_outlined,
+                              color: Theme.of(context).errorColor,
+                            ),
+                            backgroundColor:
+                                Theme.of(context).errorColor.withOpacity(0.5),
+                          )
+                        : CircleAvatar(
+                            radius: 24.0,
+                            child: Icon(
+                              Icons.person,
+                              color: Theme.of(context).cardColor,
+                            ),
+                            backgroundColor: Theme.of(context).focusColor,
+                          ),
                 SizedBox(width: 14.0),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
