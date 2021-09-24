@@ -75,23 +75,52 @@ class __BodyState extends State<_Body> {
         initialData: OrderInitState(),
         builder: (context, snapshot) {
           if (snapshot.data is OrderInitState) {
-            Bloc.bloc.orderBloc.loadAllOrders();
+            Bloc.bloc.orderBloc.loadAllOrdersGrouped();
             return SizedBox.shrink();
           } else if (snapshot.data is OrderLoadingState) {
             return LoadingCircle();
-          } else if (snapshot.data is OrderDataState) {
-            OrderDataState state = snapshot.data as OrderDataState;
+          } else if (snapshot.data is OrderDataGroupedState) {
+            OrderDataGroupedState state =
+                snapshot.data as OrderDataGroupedState;
             if (state.orderPack.length > 0) {
               return _OrderList(orderPack: state.orderPack);
             } else {
               return EmptyLabel();
             }
+          } else if (snapshot.data is OrderDataState) {
+            return Center(
+              child: Container(
+                margin: const EdgeInsets.symmetric(horizontal: 30),
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(15),
+                  border: Border.all(
+                    color: Theme.of(context).focusColor,
+                  ),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'Ошибка',
+                      style: Theme.of(context).textTheme.bodyText1,
+                    ),
+                    Text(
+                      'snapshot.data is OrderDataState',
+                      style: Theme.of(context).textTheme.bodyText1,
+                    ),
+                  ],
+                ),
+              ),
+            );
           } else {
+            print(snapshot.hasData);
+            print(snapshot.hasError);
             return ErrorLabel(
               error: snapshot.error as Error,
               stackTrace: snapshot.stackTrace as StackTrace,
               onPressed: () {
-                Bloc.bloc.orderBloc.loadAllOrders();
+                Bloc.bloc.orderBloc.loadAllOrdersGrouped();
               },
             );
           }
@@ -176,7 +205,6 @@ class __OrderCardState extends State<_OrderPackCard> {
     init();
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 28.0),
-
       child: ExpansionTile(
         key: tileKey,
         tilePadding: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 5.0),
@@ -261,8 +289,8 @@ class __OrderCardState extends State<_OrderPackCard> {
                                 children: [
                                   Icon(
                                     (orders[index].done!)
-                                        ? Icons.done_outlined
-                                        : Icons.block_rounded,
+                                        ? Icons.radio_button_checked
+                                        : Icons.radio_button_off,
                                     color: Theme.of(context).focusColor,
                                     size: 20,
                                   ),

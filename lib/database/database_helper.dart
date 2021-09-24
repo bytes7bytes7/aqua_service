@@ -212,7 +212,7 @@ class DatabaseHelper {
 
   Future deleteAllClients() async {
     final db = await database;
-    // TODO: this code does not delete a row
+    // this code does not delete a row
     db.rawDelete("DELETE FROM ${ConstDBData.clientTableName}");
   }
 

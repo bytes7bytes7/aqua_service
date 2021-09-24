@@ -8,6 +8,7 @@ class OrderBloc {
   OrderBloc(this._repository);
 
   final OrderRepository _repository;
+
   // ignore: close_sinks
   static StreamController? _orderStreamController;
 
@@ -18,7 +19,7 @@ class OrderBloc {
   }
 
   void dispose() {
-    if(_orderStreamController!= null && !_orderStreamController!.isClosed) {
+    if (_orderStreamController != null && !_orderStreamController!.isClosed) {
       _orderStreamController!.close();
     }
   }
@@ -26,16 +27,7 @@ class OrderBloc {
   void loadAllOrders() async {
     _orderStreamController!.sink.add(OrderState._orderLoading());
     _repository.getAllOrders().then((orderList) async {
-      // orderList.sort((a, b) => b.date!.compareTo(a.date!));
-
-      Map<Client, List<Order>> map = {};
-      orderList.forEach((order) {
-        if(map.containsKey(order.client)){
-          map[order.client]!.add(order);
-        }else{
-          map[order.client!] = <Order>[order];
-        }
-      });
+      orderList.sort((a, b) => b.date!.compareTo(a.date!));
 
       // reverse date to DD.MM.YYYY
       for (int i = 0; i < orderList.length; i++) {
@@ -43,19 +35,67 @@ class OrderBloc {
         String year = date[0], month = date[1], day = date[2];
         orderList[i].date = day + '.' + month + '.' + year;
       }
-
       if (!_orderStreamController!.isClosed)
-        _orderStreamController!.sink.add(OrderState._orderData(map));
+        _orderStreamController!.sink.add(OrderState._orderData(orderList));
     }).onError((dynamic error, stackTrace) {
       if (!_orderStreamController!.isClosed)
-        _orderStreamController!.sink.add(OrderState._orderError(error, stackTrace));
+        _orderStreamController!.sink
+            .add(OrderState._orderError(error, stackTrace));
+    });
+  }
+
+  void loadAllOrdersGrouped() async {
+    _orderStreamController!.sink.add(OrderState._orderLoading());
+    _repository.getAllOrders().then((orderList) async {
+      Map<Client, List<Order>> map = {};
+      orderList.forEach((order) {
+        if (map.containsKey(order.client)) {
+          map[order.client]!.add(order);
+        } else {
+          map[order.client!] = <Order>[order];
+        }
+      });
+
+      // sort by date & done
+      map.forEach((key, value) {
+        List<Order> done = [];
+        List<Order> undone = [];
+        for(Order order in value){
+          if(order.done!){
+            done.add(order);
+          }else{
+            undone.add(order);
+          }
+        }
+        done.sort((a,b) => b.date!.compareTo(a.date!));
+        undone.sort((a,b) => a.date!.compareTo(b.date!));
+        value.clear();
+        value.addAll(undone);
+        value.addAll(done);
+      });
+
+      // reverse date to DD.MM.YYYY
+      map.forEach((key, value) {
+        for (int i = 0; i < value.length; i++) {
+          List<String> date = value[i].date!.split('.');
+          String year = date[0], month = date[1], day = date[2];
+          value[i].date = day + '.' + month + '.' + year;
+        }
+      });
+
+      if (!_orderStreamController!.isClosed)
+        _orderStreamController!.sink.add(OrderState._orderDataGrouped(map));
+    }).onError((dynamic error, stackTrace) {
+      if (!_orderStreamController!.isClosed)
+        _orderStreamController!.sink
+            .add(OrderState._orderError(error, stackTrace));
     });
   }
 
   void deleteOrder(int id) async {
     _orderStreamController!.sink.add(OrderState._orderLoading());
     _repository.deleteOrder(id).then((value) {
-      loadAllOrders();
+      loadAllOrdersGrouped();
     });
   }
 
@@ -66,7 +106,7 @@ class OrderBloc {
     String day = date[0], month = date[1], year = date[2];
     newOrder.date = year + '.' + month + '.' + day;
     _repository.updateOrder(newOrder).then((value) {
-      loadAllOrders();
+      loadAllOrdersGrouped();
     });
   }
 
@@ -77,7 +117,7 @@ class OrderBloc {
     String day = date[0], month = date[1], year = date[2];
     newOrder.date = year + '.' + month + '.' + day;
     order.id = await _repository.addOrder(newOrder).then((value) {
-      loadAllOrders();
+      loadAllOrdersGrouped();
       return newOrder.id;
     });
   }
@@ -86,11 +126,15 @@ class OrderBloc {
 class OrderState {
   OrderState();
 
-  factory OrderState._orderData(Map<Client, List<Order>> orderPack) = OrderDataState;
+  factory OrderState._orderData(List<Order> orderList) = OrderDataState;
+
+  factory OrderState._orderDataGrouped(Map<Client, List<Order>> orderPack) =
+      OrderDataGroupedState;
 
   factory OrderState._orderLoading() = OrderLoadingState;
 
-  factory OrderState._orderError(Error error, StackTrace stackTrace) = OrderErrorState;
+  factory OrderState._orderError(Error error, StackTrace stackTrace) =
+      OrderErrorState;
 }
 
 class OrderInitState extends OrderState {}
@@ -105,7 +149,13 @@ class OrderErrorState extends OrderState {
 }
 
 class OrderDataState extends OrderState {
-  OrderDataState(this.orderPack);
+  OrderDataState(this.orderList);
+
+  final List<Order> orderList;
+}
+
+class OrderDataGroupedState extends OrderState {
+  OrderDataGroupedState(this.orderPack);
 
   final Map<Client, List<Order>> orderPack;
 }

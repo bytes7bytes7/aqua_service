@@ -114,7 +114,7 @@ class _OrderInfoScreenState extends State<OrderInfoScreen> {
       }
       priceController.text = widget.order.price?.toString() ?? '';
       expensesController.text = widget.order.expenses?.toString() ?? '';
-      Bloc.bloc.orderBloc.loadAllOrders();
+      Bloc.bloc.orderBloc.loadAllOrdersGrouped();
       fabricsNotifier.value = !fabricsNotifier.value;
     }
     if (validatePrice && validateFormat && validateClient && validateDate)
@@ -196,7 +196,7 @@ class _OrderInfoScreenState extends State<OrderInfoScreen> {
                     },
                     yesAnswer: () {
                       Bloc.bloc.orderBloc.deleteOrder(widget.order.id!);
-                      Bloc.bloc.orderBloc.loadAllOrders();
+                      Bloc.bloc.orderBloc.loadAllOrdersGrouped();
                       Navigator.of(context).pop();
                       Navigator.of(context).pop();
                     },

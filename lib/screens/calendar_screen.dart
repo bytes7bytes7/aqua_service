@@ -46,12 +46,36 @@ class _CalendarScreenState extends State<CalendarScreen> {
             return LoadingCircle();
           } else if (snapshot.data is OrderDataState) {
             OrderDataState state = snapshot.data as OrderDataState;
-            return SizedBox.shrink();
-            // TODO: remake it
-            // return CalendarContent(
-            //   orders: state.orderPack,
-            //   updateDate: widget.updateDate,
-            // );
+            return CalendarContent(
+              orders: state.orderList,
+              updateDate: widget.updateDate,
+            );
+          } else if (snapshot.data is OrderDataGroupedState) {
+            return Center(
+              child: Container(
+                margin: const EdgeInsets.symmetric(horizontal: 30),
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(15),
+                  border: Border.all(
+                    color: Theme.of(context).focusColor,
+                  ),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'Ошибка',
+                      style: Theme.of(context).textTheme.bodyText1,
+                    ),
+                    Text(
+                      'snapshot.data is OrderDataGroupedState',
+                      style: Theme.of(context).textTheme.bodyText1,
+                    ),
+                  ],
+                ),
+              ),
+            );
           } else {
             return ErrorLabel(
               error: snapshot.error as Error,
