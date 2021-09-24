@@ -1,6 +1,7 @@
 import 'dart:io';
-import 'package:aqua_service/services/excel_helper.dart';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:expansion_tile_card/expansion_tile_card.dart';
 
 import '../widgets/error_label.dart';
 import '../widgets/app_header.dart';
@@ -8,6 +9,7 @@ import '../widgets/empty_label.dart';
 import '../widgets/loading_circle.dart';
 import '../bloc/bloc.dart';
 import '../bloc/order_bloc.dart';
+import '../model/client.dart';
 import '../model/order.dart';
 import 'global/next_page_route.dart';
 import 'order_info_screen.dart';
@@ -78,16 +80,16 @@ class __BodyState extends State<_Body> {
           } else if (snapshot.data is OrderLoadingState) {
             return LoadingCircle();
           } else if (snapshot.data is OrderDataState) {
-            OrderDataState state = snapshot.data;
-            if (state.orders.length > 0) {
-              return _OrderList(orders: state.orders);
+            OrderDataState state = snapshot.data as OrderDataState;
+            if (state.orderPack.length > 0) {
+              return _OrderList(orderPack: state.orderPack);
             } else {
               return EmptyLabel();
             }
           } else {
             return ErrorLabel(
-              error: snapshot.data.error,
-              stackTrace: snapshot.data.stackTrace,
+              error: snapshot.error as Error,
+              stackTrace: snapshot.stackTrace as StackTrace,
               onPressed: () {
                 Bloc.bloc.orderBloc.loadAllOrders();
               },
@@ -100,253 +102,197 @@ class __BodyState extends State<_Body> {
 }
 
 class _OrderList extends StatelessWidget {
-  const _OrderList({Key key, this.orders}) : super(key: key);
+  const _OrderList({Key? key, required this.orderPack}) : super(key: key);
 
-  final List<Order> orders;
+  final Map<Client, List<Order>> orderPack;
 
   @override
   Widget build(BuildContext context) {
-    List<Order> lstDone = [];
-    List<Order> lstNotDone = [];
-    orders.forEach((element) {
-      if (element.done)
-        lstDone.add(element);
-      else
-        lstNotDone.add(element);
-    });
-    return Column(
-      children: [
-        SizedBox(height: 20),
-        Expanded(
-          child: ListView.builder(
-            itemCount: orders.length + 2,
-            itemBuilder: (context, i) {
-              if (i == 0) {
-                if (lstNotDone.length > 0) {
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 30),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Divider(
-                            thickness: 1,
-                            color: Theme.of(context).focusColor,
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 4),
-                          child: Text(
-                            'Не выполнено',
-                            style: Theme.of(context).textTheme.bodyText1,
-                          ),
-                        ),
-                        Expanded(
-                          child: Divider(
-                            thickness: 1,
-                            color: Theme.of(context).focusColor,
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                } else {
-                  return SizedBox.shrink();
-                }
-              } else if (i < lstNotDone.length + 1) {
-                return _OrderCard(
-                  order: lstNotDone[i - 1],
-                );
-              } else if (i == lstNotDone.length + 1) {
-                if (lstDone.length > 0) {
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 30),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Divider(
-                            thickness: 1,
-                            color: Theme.of(context).focusColor,
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 4),
-                          child: Text(
-                            'Выполнено',
-                            style: Theme.of(context).textTheme.bodyText1,
-                          ),
-                        ),
-                        Expanded(
-                          child: Divider(
-                            thickness: 1,
-                            color: Theme.of(context).focusColor,
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                } else {
-                  return SizedBox.shrink();
-                }
-              } else {
-                int index = i - lstNotDone.length - 2;
-                return _OrderCard(
-                  order: lstDone[index],
-                );
-              }
-            },
-          ),
-        ),
-      ],
+    List<Client> keys = orderPack.keys.toList();
+    keys.sort((a, b) => a.name!.compareTo(b.name!));
+    return ListView.builder(
+      itemCount: keys.length,
+      itemBuilder: (context, i) {
+        return _OrderPackCard(
+          orderPack: {keys[i]: orderPack[keys[i]]!},
+        );
+      },
     );
   }
 }
 
-class _OrderCard extends StatefulWidget {
-  const _OrderCard({
-    Key key,
-    @required this.order,
+class _OrderPackCard extends StatefulWidget {
+  const _OrderPackCard({
+    Key? key,
+    required this.orderPack,
   }) : super(key: key);
 
-  final Order order;
+  final Map<Client, List<Order>> orderPack;
 
   @override
   __OrderCardState createState() => __OrderCardState();
 }
 
-class __OrderCardState extends State<_OrderCard> {
-  String appDocPath;
-  Iterable<int> bytes;
+class __OrderCardState extends State<_OrderPackCard> {
+  final GlobalKey<ExpansionTileCardState> tileKey = GlobalKey();
 
-  Future<void> getApplicationDirectoryPath() async {
-    Directory appDir = await ExcelHelper.getPhotosDirectory(context);
-    appDocPath = appDir.path;
-  }
+  Iterable<int>? bytes;
+  late Client client;
+  late List<Order> orders;
 
   void init() {
-    if (widget.order.client.avatar != null) {
-      if (appDocPath == null) getApplicationDirectoryPath();
-      if (widget.order.client.avatar != null) {
-        var hasLocalImage = File(widget.order.client.avatar).existsSync();
-        if (hasLocalImage) {
-          bytes = File(widget.order.client.avatar).readAsBytesSync();
-        }
+    widget.orderPack.forEach((key, value) {
+      client = key;
+      orders = value;
+    });
+    if (client.avatar != null) {
+      var hasLocalImage = File(client.avatar!).existsSync();
+      if (hasLocalImage) {
+        bytes = File(client.avatar!).readAsBytesSync();
       }
     }
+  }
+
+  String getProfit(Order order) {
+    double value = order.price!;
+    if (order.expenses != null) {
+      value -= order.expenses!;
+    }
+    for (int i = 0; i < order.fabrics!.length; i++) {
+      value +=
+          order.fabrics![i].retailPrice! - order.fabrics![i].purchasePrice!;
+    }
+    String profit = value.toString().replaceAll(RegExp(r"([.]*0)(?!.*\d)"), "");
+    if (order.expenses == null) {
+      profit = '+' + profit;
+    } else if (order.price! > order.expenses!) {
+      profit = '+' + profit;
+    }
+    return profit;
   }
 
   @override
   Widget build(BuildContext context) {
     init();
-    double value = widget.order.price;
-    if (widget.order.expenses != null) {
-      value -= widget.order.expenses;
-    }
-    for (int i = 0; i < widget.order.fabrics.length; i++) {
-      value += widget.order.fabrics[i].retailPrice -
-          widget.order.fabrics[i].purchasePrice;
-    }
-    String profit = value.toString().replaceAll(RegExp(r"([.]*0)(?!.*\d)"), "");
-    if (widget.order.expenses == null) {
-      profit = '+' + profit;
-    } else if (widget.order.price > widget.order.expenses) {
-      profit = '+' + profit;
-    }
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 28.0),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(8),
-          onTap: () {
-            Navigator.push(
-              context,
-              NextPageRoute(
-                nextPage: OrderInfoScreen(
-                  title: 'Заказ',
-                  order: widget.order,
+      margin: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 28.0),
+
+      child: ExpansionTile(
+        key: tileKey,
+        tilePadding: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 5.0),
+        iconColor: Theme.of(context).focusColor,
+        collapsedIconColor: Theme.of(context).focusColor,
+        backgroundColor: Theme.of(context).primaryColor.withOpacity(0.3),
+        title: Row(
+          children: [
+            (client.avatar != null && bytes != null)
+                ? Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      image: DecorationImage(
+                        image: MemoryImage(bytes as Uint8List),
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  )
+                : (client.avatar != null)
+                    ? CircleAvatar(
+                        radius: 24.0,
+                        child: Icon(
+                          Icons.error_outline_outlined,
+                          color: Theme.of(context).errorColor,
+                        ),
+                        backgroundColor:
+                            Theme.of(context).errorColor.withOpacity(0.5),
+                      )
+                    : CircleAvatar(
+                        radius: 24.0,
+                        child: Icon(
+                          Icons.person,
+                          color: Theme.of(context).cardColor,
+                        ),
+                        backgroundColor: Theme.of(context).focusColor,
+                      ),
+            const SizedBox(width: 14.0),
+            Text(
+              '${(client.name != '') ? (client.name! + ' ') : ''}' +
+                  '${client.surname ?? ''}'.replaceAll(RegExp(r"\s+"), ""),
+              style: Theme.of(context).textTheme.bodyText1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ),
+        children: List.generate(
+          orders.length,
+          (index) {
+            return Column(
+              children: [
+                Divider(
+                  thickness: 1.0,
+                  height: 1.0,
+                  color: Theme.of(context).primaryColor,
                 ),
-              ),
-            );
-          },
-          child: Container(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
-            width: double.infinity,
-            child: LayoutBuilder(
-              builder: (BuildContext context, BoxConstraints constraints) {
-                return Row(
-                  children: [
-                    (widget.order.client.avatar != null && bytes != null)
-                        ? ConstrainedBox(
-                            constraints:
-                                BoxConstraints.tightFor(width: 50, height: 50),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                image: DecorationImage(
-                                  image: MemoryImage(bytes),
-                                  fit: BoxFit.cover,
-                                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 10.0, vertical: 5.0),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(8),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          NextPageRoute(
+                            nextPage: OrderInfoScreen(
+                              title: 'Заказ',
+                              order: orders[index],
+                            ),
+                          ),
+                        );
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10.0, vertical: 15.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Flexible(
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    (orders[index].done!)
+                                        ? Icons.done_outlined
+                                        : Icons.block_rounded,
+                                    color: Theme.of(context).focusColor,
+                                    size: 20,
+                                  ),
+                                  SizedBox(width: 8.0),
+                                  Text(
+                                    orders[index].date!,
+                                    style:
+                                        Theme.of(context).textTheme.subtitle2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
                               ),
                             ),
-                          )
-                        : (widget.order.client.avatar != null)
-                            ? CircleAvatar(
-                                radius: 24.0,
-                                child: Icon(
-                                  Icons.error_outline_outlined,
-                                  color: Theme.of(context).errorColor,
-                                ),
-                                backgroundColor: Theme.of(context)
-                                    .errorColor
-                                    .withOpacity(0.5),
-                              )
-                            : CircleAvatar(
-                                radius: 24.0,
-                                child: Icon(
-                                  Icons.person,
-                                  color: Theme.of(context).cardColor,
-                                ),
-                                backgroundColor: Theme.of(context).focusColor,
+                            Expanded(
+                              child: Text(
+                                getProfit(orders[index]),
+                                textAlign: TextAlign.end,
+                                style: Theme.of(context).textTheme.bodyText1,
+                                overflow: TextOverflow.ellipsis,
                               ),
-                    SizedBox(width: 14.0),
-                    Container(
-                      width: constraints.maxWidth * 0.5,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            '${(widget.order.client.name != '') ? (widget.order.client.name + ' ') : ''}' +
-                                '${widget.order.client.surname ?? ''}'
-                                    .replaceAll(RegExp(r"\s+"), ""),
-                            style: Theme.of(context).textTheme.bodyText1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          Text(
-                            widget.order.date,
-                            style: Theme.of(context).textTheme.subtitle2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                    Spacer(),
-                    Container(
-                      width: constraints.maxWidth * 0.25,
-                      child: Text(
-                        profit,
-                        textAlign: TextAlign.end,
-                        style: Theme.of(context).textTheme.bodyText1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
-                );
-              },
-            ),
-          ),
+                  ),
+                ),
+              ],
+            );
+          },
         ),
       ),
     );

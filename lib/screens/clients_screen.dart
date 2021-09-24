@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'package:aqua_service/services/excel_helper.dart';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 
 import '../widgets/empty_label.dart';
@@ -14,11 +14,11 @@ import 'client_info_screen.dart';
 
 class ClientsScreen extends StatefulWidget {
   ClientsScreen({
-    Key key,
+    Key? key,
     this.updateClient,
   }) : super(key: key);
 
-  final Function updateClient;
+  final Function? updateClient;
 
   @override
   _ClientsScreenState createState() => _ClientsScreenState();
@@ -59,11 +59,11 @@ class _ClientsScreenState extends State<ClientsScreen> {
 
 class _Body extends StatefulWidget {
   const _Body({
-    Key key,
+    Key? key,
     this.updateClient,
   }) : super(key: key);
 
-  final Function updateClient;
+  final Function? updateClient;
 
   @override
   __BodyState createState() => __BodyState();
@@ -93,7 +93,7 @@ class __BodyState extends State<_Body> {
           } else if (snapshot.data is ClientLoadingState) {
             return LoadingCircle();
           } else if (snapshot.data is ClientDataState) {
-            ClientDataState state = snapshot.data;
+            ClientDataState state = snapshot.data as ClientDataState;
             if (state.clients.length > 0) {
               return _ContentList(
                 clients: state.clients,
@@ -104,8 +104,8 @@ class __BodyState extends State<_Body> {
             }
           } else {
             return ErrorLabel(
-              error: snapshot.data.error,
-              stackTrace: snapshot.data.stackTrace,
+              error: snapshot.error as Error,
+              stackTrace: snapshot.stackTrace as StackTrace,
               onPressed: () {
                 Bloc.bloc.clientBloc.loadAllClients();
               },
@@ -119,13 +119,13 @@ class __BodyState extends State<_Body> {
 
 class _ContentList extends StatelessWidget {
   const _ContentList({
-    Key key,
-    @required this.clients,
-    @required this.updateClient,
+    Key? key,
+    required this.clients,
+    required this.updateClient,
   }) : super(key: key);
 
   final List<Client> clients;
-  final Function updateClient;
+  final Function? updateClient;
 
   @override
   Widget build(BuildContext context) {
@@ -143,34 +143,27 @@ class _ContentList extends StatelessWidget {
 
 class _ClientCard extends StatefulWidget {
   const _ClientCard({
-    Key key,
-    @required this.client,
+    Key? key,
+    required this.client,
     this.updateClient,
   }) : super(key: key);
 
   final Client client;
-  final Function updateClient;
+  final Function? updateClient;
 
   @override
   __ClientCardState createState() => __ClientCardState();
 }
 
 class __ClientCardState extends State<_ClientCard> {
-  String appDocPath;
-  Iterable<int> bytes;
-
-  Future<void> getApplicationDirectoryPath() async {
-    Directory appDir = await ExcelHelper.getPhotosDirectory(context);
-    appDocPath = appDir.path;
-  }
+  Iterable<int>? bytes;
 
   void init() {
     if (widget.client.avatar != null) {
-      if (appDocPath == null) getApplicationDirectoryPath();
       if (widget.client.avatar != null) {
-        var hasLocalImage = File(widget.client.avatar).existsSync();
+        var hasLocalImage = File(widget.client.avatar!).existsSync();
         if (hasLocalImage) {
-          bytes = File(widget.client.avatar).readAsBytesSync();
+          bytes = File(widget.client.avatar!).readAsBytesSync();
         }
       }
     }
@@ -188,7 +181,7 @@ class __ClientCardState extends State<_ClientCard> {
           borderRadius: BorderRadius.circular(8),
           onTap: (widget.updateClient != null)
               ? () {
-                  widget.updateClient(widget.client);
+                  widget.updateClient!(widget.client);
                   Navigator.pop(context);
                 }
               : () {
@@ -216,7 +209,7 @@ class __ClientCardState extends State<_ClientCard> {
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             image: DecorationImage(
-                              image: MemoryImage(bytes),
+                              image: MemoryImage(bytes as Uint8List),
                               fit: BoxFit.cover,
                             ),
                           ),
@@ -247,14 +240,14 @@ class __ClientCardState extends State<_ClientCard> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '${(widget.client.name != '') ? (widget.client.name + ' ') : ''}' +
+                        '${(widget.client.name != '') ? (widget.client.name! + ' ') : ''}' +
                             '${widget.client.surname ?? ''}'
                                 .replaceAll(RegExp(r"\s+"), ""),
                         style: Theme.of(context).textTheme.bodyText1,
-                        overflow: TextOverflow.ellipsis,
+                        overflow: TextOverflow.visible,
                       ),
                       Text(
-                        widget.client.city,
+                        widget.client.city!,
                         style: Theme.of(context).textTheme.subtitle2,
                         overflow: TextOverflow.ellipsis,
                       ),

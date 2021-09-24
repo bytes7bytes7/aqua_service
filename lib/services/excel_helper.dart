@@ -22,23 +22,26 @@ abstract class ExcelHelper {
     return false;
   }
 
-  static Future<Directory> getPhotosDirectory(BuildContext context) async {
-    Directory directory = await _getApplicationDirectory(context);
-    String photosPath = directory.path + '/Photos';
-    directory = Directory(photosPath);
-    if (!await directory.exists()) {
-      await directory.create(recursive: true);
+  static Future<Directory?> getPhotosDirectory(BuildContext context) async {
+    Directory? directory = await _getApplicationDirectory(context);
+    if(directory != null){
+      String photosPath = directory.path + '/Photos';
+      directory = Directory(photosPath);
+      if (!await directory.exists()) {
+        await directory.create(recursive: true);
+      }
     }
     return directory;
   }
 
-  static Future<Directory> _getApplicationDirectory(BuildContext context) async {
-    Directory directory;
+  static Future<Directory?> _getApplicationDirectory(
+      BuildContext context) async {
+    Directory? directory;
     try {
       if (await _requestPermission(Permission.storage)) {
         directory = await getExternalStorageDirectory();
         String newPath = '';
-        for (String p in directory.path.split('/')) {
+        for (String p in directory!.path.split('/')) {
           if (p == 'Android')
             break;
           else if (p.isNotEmpty) newPath += '/' + p;
@@ -63,18 +66,28 @@ abstract class ExcelHelper {
   }
 
   static exportToExcel(BuildContext context, String filename) async {
-    Directory directory = await _getApplicationDirectory(context);
+    Directory? directory = await _getApplicationDirectory(context);
+    if(directory == null){
+      showInfoSnackBar(
+        context: context,
+        info: 'Ошибка пути',
+        icon: Icons.warning_amber_outlined,
+      );
+      Navigator.pop(context);
+      return;
+    }
     String filePath = '${directory.path}/$filename.xlsx';
 
     // Create backup of DB
     String today = DateTime.now().toLocal().toString();
-    today = today.substring(0,today.indexOf('.'));
-    today = today.replaceAll(' ','(') + ')';
-    today = today.replaceAll(':','-');
-    today = today.replaceAll('-','.');
+    today = today.substring(0, today.indexOf('.'));
+    today = today.replaceAll(' ', '(') + ')';
+    today = today.replaceAll(':', '-');
+    today = today.replaceAll('-', '.');
     Directory documentsDirectory = await getApplicationDocumentsDirectory();
-    File database = File(documentsDirectory.path+'/'+ConstDBData.databaseName);
-    database.copy(directory.path+'/'+today+'.db');
+    File database =
+        File(documentsDirectory.path + '/' + ConstDBData.databaseName);
+    database.copy(directory.path + '/' + today + '.db');
 
     // Init excel
     Excel excel = Excel.createExcel();
@@ -90,7 +103,7 @@ abstract class ExcelHelper {
     List<Fabric> fabrics = await DatabaseHelper.db.getAllFabrics();
     Settings settings = await DatabaseHelper.db.getSettings();
 
-    List<String> headerRow;
+    late List<String> headerRow;
 
     // Fill table with data
     for (var table in excel.tables.keys) {
@@ -110,7 +123,7 @@ abstract class ExcelHelper {
           ConstDBData.images,
           ConstDBData.comment,
         ];
-        thisTable.appendRow(headerRow);
+        thisTable!.appendRow(headerRow);
         for (int i = 0; i < clients.length; i++) {
           values = clients[i].toMap().values.toList();
           // avatar
@@ -123,8 +136,8 @@ abstract class ExcelHelper {
           } else {
             values[9] = values[9].join(';');
           }
-          if(values.length>11){
-            values[10]='';
+          if (values.length > 11) {
+            values[10] = '';
           }
           thisTable.appendRow(values);
         }
@@ -139,7 +152,7 @@ abstract class ExcelHelper {
           ConstDBData.done,
           ConstDBData.comment,
         ];
-        thisTable.appendRow(headerRow);
+        thisTable!.appendRow(headerRow);
         for (int i = 0; i < orders.length; i++) {
           values = orders[i].toMap().values.toList();
           // Client id
@@ -148,8 +161,8 @@ abstract class ExcelHelper {
           if (values[3] != null) {
             values[3] = values[3].map((e) => e.id).join(';');
           } // done
-          if(values[4]==null){
-            values[4]='';
+          if (values[4] == null) {
+            values[4] = '';
           }
           if (values[6] == false) {
             values[6] = 'false';
@@ -165,7 +178,7 @@ abstract class ExcelHelper {
           ConstDBData.retailPrice,
           ConstDBData.purchasePrice,
         ];
-        thisTable.appendRow(headerRow);
+        thisTable!.appendRow(headerRow);
         for (int i = 0; i < fabrics.length; i++) {
           thisTable.appendRow(fabrics[i].toMap().values.toList());
         }
@@ -179,7 +192,7 @@ abstract class ExcelHelper {
         if (values[2] == null) {
           values[2] = '';
         }
-        thisTable.appendRow(headerRow);
+        thisTable!.appendRow(headerRow);
         thisTable.appendRow(values);
       }
 
@@ -188,7 +201,7 @@ abstract class ExcelHelper {
           table == ConstDBData.orderTableName ||
           table == ConstDBData.fabrics ||
           table == ConstDBData.settingsTableName) {
-        for (int i = 0; i < thisTable.rows.length; i++) {
+        for (int i = 0; i < thisTable!.rows.length; i++) {
           while (thisTable.rows[i].length > headerRow.length) {
             thisTable.removeColumn(thisTable.rows[i].length - 1);
           }
@@ -197,13 +210,12 @@ abstract class ExcelHelper {
     }
 
     // Save excel
-    excel.encode().then(
-      (onValue) {
-        File(filePath)
-          ..createSync(recursive: true)
-          ..writeAsBytesSync(onValue);
-      },
-    );
+    List<int> bytes = excel.encode()!;
+
+    File(filePath)
+      ..createSync(recursive: true)
+      ..writeAsBytesSync(bytes);
+
     showInfoSnackBar(
       context: context,
       info: 'Экспорт завершен',
@@ -213,37 +225,37 @@ abstract class ExcelHelper {
   }
 
   static importFromExcel(BuildContext context) async {
-    FilePickerResult result = await FilePicker.platform.pickFiles();
+    FilePickerResult? result = await FilePicker.platform.pickFiles();
 
     if (result != null) {
       Excel excel;
       try {
-        String file = result.files.single.path;
+        String file = result.files.single.path!;
         Iterable<int> bytes = File(file).readAsBytesSync();
-        excel = Excel.decodeBytes(bytes);
+        excel = Excel.decodeBytes(bytes as List<int>);
       } catch (error) {
         showInfoSnackBar(
           context: context,
           info: 'Ошибка',
           icon: Icons.warning_amber_outlined,
         );
-	return;
+        return;
       }
       List<Client> clients = <Client>[];
       List<Order> orders = <Order>[];
       List<Fabric> fabrics = <Fabric>[];
       Settings settings = Settings();
 
-      List<String> headerRow;
+      late List<String> headerRow;
 
       for (var table in excel.tables.keys) {
         var thisTable = excel.tables[table];
         List<dynamic> values;
         if (table == ConstDBData.clientTableName) {
-          if (thisTable.rows.length > 0) {
+          if (thisTable!.rows.length > 0) {
             headerRow =
                 thisTable.rows[0].map<String>((e) => e.toString()).toList();
-            if(headerRow.length<11){
+            if (headerRow.length < 11) {
               headerRow.add(ConstDBData.comment);
             }
           }
@@ -273,7 +285,7 @@ abstract class ExcelHelper {
             } else {
               values[9] = values[9].split(';');
             }
-            if(values.length<11){
+            if (values.length < 11) {
               values.add('');
             }
             Map<String, dynamic> map =
@@ -281,7 +293,7 @@ abstract class ExcelHelper {
             clients.add(Client.fromMap(map));
           }
         } else if (table == ConstDBData.fabricTableName) {
-          if (thisTable.rows.length > 0) {
+          if (thisTable!.rows.length > 0) {
             headerRow =
                 thisTable.rows[0].map<String>((e) => e.toString()).toList();
           }
@@ -323,7 +335,7 @@ abstract class ExcelHelper {
             fabrics.add(Fabric.fromMap(map));
           }
         } else if (table == ConstDBData.orderTableName) {
-          if (thisTable.rows.length > 0) {
+          if (thisTable!.rows.length > 0) {
             headerRow =
                 thisTable.rows[0].map<String>((e) => e.toString()).toList();
           }
@@ -390,9 +402,9 @@ abstract class ExcelHelper {
             if (values[6].isEmpty) {
               continue;
             } else if (values[6] == 'true') {
-              values[6] = true;
+              values[6] = 1;
             } else if (values[6] == 'false') {
-              values[6] = false;
+              values[6] = 0;
             } else {
               continue;
             }
@@ -401,7 +413,7 @@ abstract class ExcelHelper {
             orders.add(Order.fromMap(map));
           }
         } else if (table == ConstDBData.settingsTableName) {
-          if (thisTable.rows.length > 0) {
+          if (thisTable!.rows.length > 0) {
             headerRow =
                 thisTable.rows[0].map<String>((e) => e.toString()).toList();
           }

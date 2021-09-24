@@ -5,9 +5,9 @@ class Settings {
     this.icon,
   });
 
-  int id;
-  String appTitle;
-  String icon;
+  int? id;
+  String? appTitle;
+  String? icon;
 
   Settings.fromMap(Map<String, dynamic> map) {
     id = map['id'];

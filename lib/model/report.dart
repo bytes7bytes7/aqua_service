@@ -6,8 +6,8 @@ class Report {
     this.expenses,
   });
 
-  int id;
-  String timePeriod;
-  double profit;
-  double expenses;
+  int? id;
+  String? timePeriod;
+  double? profit;
+  double? expenses;
 }

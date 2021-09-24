@@ -18,39 +18,39 @@ class Bloc {
     _settingsBloc = null;
   }
 
-  static ClientBloc _clientBloc;
-  static FabricBloc _fabricBloc;
-  static OrderBloc _orderBloc;
-  static ReportBloc _reportBloc;
-  static SettingsBloc _settingsBloc;
+  static ClientBloc? _clientBloc;
+  static FabricBloc? _fabricBloc;
+  static OrderBloc? _orderBloc;
+  static ReportBloc? _reportBloc;
+  static SettingsBloc? _settingsBloc;
 
   ClientBloc get clientBloc {
-    if (_clientBloc != null) return _clientBloc;
+    if (_clientBloc != null) return _clientBloc!;
     _clientBloc = ClientBloc(Repository.clientRepository);
-    return _clientBloc;
+    return _clientBloc!;
   }
 
   FabricBloc get fabricBloc {
-    if (_fabricBloc != null) return _fabricBloc;
+    if (_fabricBloc != null) return _fabricBloc!;
     _fabricBloc = FabricBloc(Repository.fabricRepository);
-    return _fabricBloc;
+    return _fabricBloc!;
   }
 
   OrderBloc get orderBloc {
-    if (_orderBloc != null) return _orderBloc;
+    if (_orderBloc != null) return _orderBloc!;
     _orderBloc = OrderBloc(Repository.orderRepository);
-    return _orderBloc;
+    return _orderBloc!;
   }
 
   ReportBloc get reportBloc {
-    if (_reportBloc != null) return _reportBloc;
+    if (_reportBloc != null) return _reportBloc!;
     _reportBloc = ReportBloc(Repository.reportRepository);
-    return _reportBloc;
+    return _reportBloc!;
   }
 
   SettingsBloc get settingsBloc {
-    if (_settingsBloc != null) return _settingsBloc;
+    if (_settingsBloc != null) return _settingsBloc!;
     _settingsBloc = SettingsBloc(Repository.settingsRepository);
-    return _settingsBloc;
+    return _settingsBloc!;
   }
 }

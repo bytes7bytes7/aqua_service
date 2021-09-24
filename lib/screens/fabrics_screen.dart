@@ -12,11 +12,11 @@ import 'fabric_info_screen.dart';
 
 class FabricsScreen extends StatefulWidget {
   FabricsScreen({
-    Key key,
+    Key? key,
     this.addFabric,
   }) : super(key: key);
 
-  final Function addFabric;
+  final Function? addFabric;
 
   @override
   _FabricsScreenState createState() => _FabricsScreenState();
@@ -57,11 +57,11 @@ class _FabricsScreenState extends State<FabricsScreen> {
 
 class _Body extends StatefulWidget {
   const _Body({
-    Key key,
-    @required this.addFabric,
+    Key? key,
+    required this.addFabric,
   }) : super(key: key);
 
-  final Function addFabric;
+  final Function? addFabric;
 
   @override
   __BodyState createState() => __BodyState();
@@ -91,7 +91,7 @@ class __BodyState extends State<_Body> {
           } else if (snapshot.data is FabricLoadingState) {
             return LoadingCircle();
           } else if (snapshot.data is FabricDataState) {
-            FabricDataState state = snapshot.data;
+            FabricDataState state = snapshot.data as FabricDataState;
             if (state.fabrics.length > 0) {
               return _ContentList(
                 fabrics: state.fabrics,
@@ -102,8 +102,8 @@ class __BodyState extends State<_Body> {
             }
           } else {
             return ErrorLabel(
-              error: snapshot.data.error,
-              stackTrace: snapshot.data.stackTrace,
+              error: snapshot.error as Error,
+              stackTrace: snapshot.stackTrace as StackTrace,
               onPressed: () {
                 Bloc.bloc.fabricBloc.loadAllFabrics();
               },
@@ -117,13 +117,13 @@ class __BodyState extends State<_Body> {
 
 class _ContentList extends StatelessWidget {
   const _ContentList({
-    Key key,
-    @required this.fabrics,
-    @required this.addFabric,
+    Key? key,
+    required this.fabrics,
+    required this.addFabric,
   }) : super(key: key);
 
   final List<Fabric> fabrics;
-  final Function addFabric;
+  final Function? addFabric;
 
   @override
   Widget build(BuildContext context) {
@@ -141,13 +141,13 @@ class _ContentList extends StatelessWidget {
 
 class _FabricCard extends StatelessWidget {
   const _FabricCard({
-    Key key,
-    @required this.fabric,
-    @required this.addFabric,
+    Key? key,
+    required this.fabric,
+    required this.addFabric,
   }) : super(key: key);
 
   final Fabric fabric;
-  final Function addFabric;
+  final Function? addFabric;
 
   @override
   Widget build(BuildContext context) {
@@ -159,7 +159,7 @@ class _FabricCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(8),
           onTap: (addFabric != null)
               ? () {
-                  addFabric(fabric);
+                  addFabric!(fabric);
                   Navigator.pop(context);
                 }
               : () {
@@ -177,9 +177,9 @@ class _FabricCard extends StatelessWidget {
             padding:
                 const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
             child: Text(
-              '${fabric.title}',
+              fabric.title!,
               style: Theme.of(context).textTheme.bodyText1,
-              overflow: TextOverflow.ellipsis,
+              overflow: TextOverflow.visible,
             ),
           ),
         ),

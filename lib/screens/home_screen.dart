@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 
 import '../widgets/empty_label.dart';
@@ -36,11 +38,11 @@ class _HomeScreenState extends State<HomeScreen> {
               } else if (snapshot.data is SettingsLoadingState) {
                 return LoadingCircle();
               } else if (snapshot.data is SettingsDataState) {
-                SettingsDataState state = snapshot.data;
-                Settings settings = state.settings;
+                SettingsDataState state = snapshot.data as SettingsDataState;
+                Settings? settings = state.settings;
                 if (state.settings != null) {
                   return _ContentList(
-                    settings: settings,
+                    settings: settings!,
                     bytes: state.bytes,
                   );
                 } else {
@@ -48,8 +50,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 }
               } else {
                 return ErrorLabel(
-                  error: snapshot.data.error,
-                  stackTrace: snapshot.data.stackTrace,
+                  error: snapshot.error as Error,
+                  stackTrace: snapshot.stackTrace as StackTrace,
                   onPressed: () {
                     Bloc.bloc.settingsBloc.loadAllSettings();
                   },
@@ -65,13 +67,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
 class _ContentList extends StatelessWidget {
   const _ContentList({
-    Key key,
-    @required this.settings,
-    @required this.bytes,
+    Key? key,
+    required this.settings,
+    required this.bytes,
   }) : super(key: key);
 
   final Settings settings;
-  final Iterable<int> bytes;
+  final Iterable<int>? bytes;
 
   @override
   Widget build(BuildContext context) {
@@ -93,7 +95,7 @@ class _ContentList extends StatelessWidget {
               },
               child: Container(
                 child: (settings.icon != null && bytes != null)
-                    ? Image.memory(bytes)
+                    ? Image.memory(bytes as Uint8List)
                     : Image.asset('assets/png/logo.png'),
               ),
             ),
@@ -102,7 +104,7 @@ class _ContentList extends StatelessWidget {
         SizedBox(height: 10),
         Text(
           settings.appTitle ?? ConstData.appTitle,
-          style: Theme.of(context).textTheme.headline1.copyWith(fontSize: 35),
+          style: Theme.of(context).textTheme.headline1!.copyWith(fontSize: 35),
         ),
         SizedBox(height: 50),
         Expanded(
@@ -157,9 +159,9 @@ class _ContentList extends StatelessWidget {
 
 class _CardButton extends StatelessWidget {
   const _CardButton({
-    Key key,
-    @required this.title,
-    @required this.route,
+    Key? key,
+    required this.title,
+    required this.route,
   }) : super(key: key);
 
   final String title;

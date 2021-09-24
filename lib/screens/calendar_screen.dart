@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:aqua_service/services/excel_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_calendar_carousel/flutter_calendar_carousel.dart'
@@ -18,10 +19,10 @@ import 'order_info_screen.dart';
 
 class CalendarScreen extends StatefulWidget {
   CalendarScreen({
-    Key key,
+    Key? key,
     this.updateDate,
   }) : super(key: key);
-  final Function updateDate;
+  final Function? updateDate;
 
   @override
   _CalendarScreenState createState() => _CalendarScreenState();
@@ -44,15 +45,17 @@ class _CalendarScreenState extends State<CalendarScreen> {
           } else if (snapshot.data is OrderLoadingState) {
             return LoadingCircle();
           } else if (snapshot.data is OrderDataState) {
-            OrderDataState state = snapshot.data;
-            return CalendarContent(
-              orders: state.orders,
-              updateDate: widget.updateDate,
-            );
+            OrderDataState state = snapshot.data as OrderDataState;
+            return SizedBox.shrink();
+            // TODO: remake it
+            // return CalendarContent(
+            //   orders: state.orderPack,
+            //   updateDate: widget.updateDate,
+            // );
           } else {
             return ErrorLabel(
-              error: snapshot.data.error,
-              stackTrace: snapshot.data.stackTrace,
+              error: snapshot.error as Error,
+              stackTrace: snapshot.stackTrace as StackTrace,
               onPressed: () {
                 Bloc.bloc.orderBloc.loadAllOrders();
               },
@@ -66,12 +69,12 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
 class CalendarContent extends StatefulWidget {
   CalendarContent({
-    @required this.orders,
+    required this.orders,
     this.updateDate,
   });
 
   final List<Order> orders;
-  final Function updateDate;
+  final Function? updateDate;
 
   @override
   _CalendarContentState createState() => _CalendarContentState();
@@ -80,7 +83,7 @@ class CalendarContent extends StatefulWidget {
 class _CalendarContentState extends State<CalendarContent> {
   final DateTime _currentDate = DateTime.now();
   final ValueNotifier<bool> _calendarNotifier = ValueNotifier(false);
-  final ValueNotifier<DateTime> _currentDate2Notifier = ValueNotifier(null);
+  final ValueNotifier<DateTime?> _currentDate2Notifier = ValueNotifier(null);
   final ValueNotifier<String> _currentMonthNotifier =
       ValueNotifier(DateFormat.yMMM().format(DateTime.now()));
   final ValueNotifier<DateTime> _targetDateTimeNotifier =
@@ -97,7 +100,7 @@ class _CalendarContentState extends State<CalendarContent> {
   void _updateCurrentDate2(DateTime dateTime) {
     _currentDate2Notifier.value = dateTime;
     _updateCalendar();
-    if (widget.updateDate != null) widget.updateDate(dateTime);
+    if (widget.updateDate != null) widget.updateDate!(dateTime);
   }
 
   void _updateCurrentMonth(String month) {
@@ -110,11 +113,6 @@ class _CalendarContentState extends State<CalendarContent> {
     _updateCalendar();
   }
 
-  Future<String> getApplicationDirectoryPath() async {
-    Directory appDir = await ExcelHelper.getPhotosDirectory(context);
-    return appDir.path;
-  }
-
   @override
   void didUpdateWidget(covariant CalendarContent oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -123,18 +121,20 @@ class _CalendarContentState extends State<CalendarContent> {
   @override
   Widget build(BuildContext context) {
     for (int i = widget.orders.length - 1; i >= 0; i--) {
-      if (widget.orders[i].done) widget.orders.removeAt(i);
+      if (widget.orders[i].done!) widget.orders.removeAt(i);
     }
     EventList<Event> _markedDateMap = EventList<Event>(
       events: Map<DateTime, List<Event>>.fromIterables(
-        widget.orders.map((e) => DateFormat("dd.MM.yyyy").parse(e.date)),
+        widget.orders.map((e) => DateFormat("dd.MM.yyyy").parse(e.date!)),
         widget.orders.map(
           (e) => [
             Event(
               id: e.id,
-              date: DateFormat("dd.MM.yyyy").parse(e.date),
-              title: '${(e.client.name != '') ? (e.client.name + ' ') : ''}' +
-                  '${e.client.surname ?? ''}'.replaceAll(RegExp(r"\s+"), ""),
+              date: DateFormat("dd.MM.yyyy").parse(e.date!),
+              title:
+                  '${(e.client!.name != '') ? (e.client!.name! + ' ') : ''}' +
+                      '${e.client!.surname ?? ''}'
+                          .replaceAll(RegExp(r"\s+"), ""),
             ),
           ],
         ),
@@ -156,7 +156,7 @@ class _CalendarContentState extends State<CalendarContent> {
                   margin: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: ValueListenableBuilder(
                     valueListenable: _calendarNotifier,
-                    builder: (BuildContext context, bool b, Widget child) {
+                    builder: (BuildContext context, bool b, Widget? child) {
                       return CalendarCarousel<Event>(
                         customGridViewPhysics: NeverScrollableScrollPhysics(),
                         locale: "RU",
@@ -173,7 +173,7 @@ class _CalendarContentState extends State<CalendarContent> {
                         showOnlyCurrentMonthDate: true,
                         showHeader: true,
                         weekFormat: false,
-                        pageSnapping: false,
+                        isScrollable: false,
                         iconColor: Theme.of(context).focusColor,
                         headerTextStyle: Theme.of(context).textTheme.headline2,
                         thisMonthDayBorderColor: Colors.transparent,
@@ -184,35 +184,35 @@ class _CalendarContentState extends State<CalendarContent> {
                         daysTextStyle: Theme.of(context).textTheme.bodyText1,
                         weekdayTextStyle: Theme.of(context)
                             .textTheme
-                            .bodyText1
+                            .bodyText1!
                             .copyWith(color: Theme.of(context).focusColor),
                         todayTextStyle: Theme.of(context)
                             .textTheme
-                            .bodyText1
+                            .bodyText1!
                             .copyWith(color: Theme.of(context).cardColor),
                         markedDateCustomTextStyle: Theme.of(context)
                             .textTheme
-                            .bodyText1
-                            .copyWith(color: Theme.of(context).accentColor),
+                            .bodyText1!
+                            .copyWith(color: Theme.of(context).highlightColor),
                         selectedDayTextStyle: Theme.of(context)
                             .textTheme
-                            .bodyText1
+                            .bodyText1!
                             .copyWith(color: Theme.of(context).focusColor),
                         inactiveDaysTextStyle: Theme.of(context)
                             .textTheme
-                            .bodyText1
+                            .bodyText1!
                             .copyWith(color: Theme.of(context).disabledColor),
                         weekendTextStyle: Theme.of(context)
                             .textTheme
-                            .bodyText1
+                            .bodyText1!
                             .copyWith(color: Theme.of(context).cardColor),
                         prevDaysTextStyle: Theme.of(context)
                             .textTheme
-                            .bodyText1
+                            .bodyText1!
                             .copyWith(color: Theme.of(context).disabledColor),
                         nextDaysTextStyle: Theme.of(context)
                             .textTheme
-                            .bodyText1
+                            .bodyText1!
                             .copyWith(color: Theme.of(context).disabledColor),
                         onDayPressed: (date, events) {
                           _updateCurrentDate2(date);
@@ -222,7 +222,7 @@ class _CalendarContentState extends State<CalendarContent> {
                                   .orders
                                   .where((item) =>
                                       DateFormat("dd.MM.yyyy")
-                                          .parse(item.date) ==
+                                          .parse(item.date!) ==
                                       ev.date)
                                   .toList()));
                         },
@@ -253,10 +253,10 @@ class _CalendarContentState extends State<CalendarContent> {
 
 class OrderBottomSheet extends StatelessWidget {
   const OrderBottomSheet({
-    Key key,
-    @required this.calendarNotifier,
-    @required this.selectedOrders,
-    @required this.orders,
+    Key? key,
+    required this.calendarNotifier,
+    required this.selectedOrders,
+    required this.orders,
   });
 
   final ValueNotifier<bool> calendarNotifier;
@@ -285,27 +285,26 @@ class OrderBottomSheet extends StatelessWidget {
           ),
           child: ValueListenableBuilder(
             valueListenable: calendarNotifier,
-            builder: (BuildContext context, _, Widget child) {
+            builder: (BuildContext context, dynamic _, Widget? child) {
               return ListView.builder(
                 controller: scrollController,
                 itemCount: selectedOrders.value.length + 1,
                 itemBuilder: (BuildContext context, int index) {
-                  String appDocPath;
+                  String? appDocPath;
                   Future<void> getApplicationDirectoryPath() async {
-                    Directory appDir =
+                    Directory? appDir =
                         await ExcelHelper.getPhotosDirectory(context);
-                    appDocPath = appDir.path;
+                    appDocPath = appDir?.path;
                   }
 
-                  Future<Iterable<int>> _getImage() async {
-                    Iterable<int> bytes;
+                  Future<Iterable<int>?> _getImage() async {
+                    Iterable<int>? bytes;
                     if (appDocPath == null) await getApplicationDirectoryPath();
-                    if (orders[index - 1] != null &&
-                        orders[index - 1].client.avatar != null) {
+                    if (orders[index - 1].client!.avatar != null) {
                       var hasLocalImage =
-                          File(orders[index - 1].client.avatar).existsSync();
+                          File(orders[index - 1].client!.avatar!).existsSync();
                       if (hasLocalImage) {
-                        bytes = File(orders[index - 1].client.avatar)
+                        bytes = File(orders[index - 1].client!.avatar!)
                             .readAsBytesSync();
                       }
                     }
@@ -334,7 +333,7 @@ class OrderBottomSheet extends StatelessWidget {
                       ),
                     );
                   } else {
-                    Iterable<int> bytes;
+                    Iterable<int>? bytes;
                     return Container(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 20.0, vertical: 10.0),
@@ -367,10 +366,10 @@ class OrderBottomSheet extends StatelessWidget {
                                     radius: 24.0,
                                     backgroundColor:
                                         Theme.of(context).focusColor,
-                                    child: FutureBuilder<Iterable<int>>(
+                                    child: FutureBuilder<Iterable<int>?>(
                                       future: _getImage(),
                                       builder: (BuildContext context,
-                                          AsyncSnapshot<Iterable<int>>
+                                          AsyncSnapshot<Iterable<int>?>
                                               snapshot) {
                                         if (snapshot.hasData) {
                                           bytes = snapshot.data;
@@ -379,7 +378,8 @@ class OrderBottomSheet extends StatelessWidget {
                                               decoration: BoxDecoration(
                                                 shape: BoxShape.circle,
                                                 image: DecorationImage(
-                                                  image: MemoryImage(bytes),
+                                                  image: MemoryImage(
+                                                      bytes as Uint8List),
                                                   fit: BoxFit.cover,
                                                 ),
                                               ),
@@ -408,18 +408,18 @@ class OrderBottomSheet extends StatelessWidget {
                                           CrossAxisAlignment.start,
                                       children: [
                                         Text(
-                                          '${(selectedOrders.value[index - 1].client.name != '') ? (selectedOrders.value[index - 1].client.name + ' ') : ''}' +
-                                              '${selectedOrders.value[index - 1].client.surname ?? ''}'
+                                          '${(selectedOrders.value[index - 1].client!.name != '') ? (selectedOrders.value[index - 1].client!.name! + ' ') : ''}' +
+                                              '${selectedOrders.value[index - 1].client!.surname ?? ''}'
                                                   .replaceAll(
                                                       RegExp(r"\s+"), ""),
                                           style: Theme.of(context)
                                               .textTheme
                                               .bodyText1,
-                                          overflow: TextOverflow.ellipsis,
+                                          overflow: TextOverflow.visible,
                                         ),
                                         Text(
                                           selectedOrders
-                                              .value[index - 1].client.city,
+                                              .value[index - 1].client!.city!,
                                           style: Theme.of(context)
                                               .textTheme
                                               .subtitle2,
@@ -438,10 +438,10 @@ class OrderBottomSheet extends StatelessWidget {
                                                       .expenses !=
                                                   null)
                                           ? (selectedOrders
-                                                      .value[index - 1].price -
+                                                      .value[index - 1].price! -
                                                   selectedOrders
                                                       .value[index - 1]
-                                                      .expenses)
+                                                      .expenses!)
                                               .toString()
                                           : (selectedOrders
                                                       .value[index - 1].price !=

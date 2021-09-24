@@ -7,48 +7,49 @@ class FabricBloc{
   FabricBloc(this._repository);
 
   final FabricRepository _repository;
-  static StreamController _fabricStreamController;
+  // ignore: close_sinks
+  static StreamController? _fabricStreamController;
 
   Stream<FabricState> get fabric {
-    if (_fabricStreamController == null || _fabricStreamController.isClosed)
+    if (_fabricStreamController == null || _fabricStreamController!.isClosed)
       _fabricStreamController = StreamController<FabricState>();
-    return _fabricStreamController.stream;
+    return _fabricStreamController!.stream as Stream<FabricState>;
   }
 
   void dispose(){
-    if(_fabricStreamController != null && !_fabricStreamController.isClosed) {
-      _fabricStreamController.close();
+    if(_fabricStreamController != null && !_fabricStreamController!.isClosed) {
+      _fabricStreamController!.close();
     }
   }
 
   void loadAllFabrics() async{
-    _fabricStreamController.sink.add(FabricState._fabricLoading());
+    _fabricStreamController!.sink.add(FabricState._fabricLoading());
     _repository.getAllFabrics().then((fabricList) {
-      fabricList.sort((a,b) => a.title.toLowerCase().compareTo(b.title.toLowerCase()));
-      if(!_fabricStreamController.isClosed)
-      _fabricStreamController.sink.add(FabricState._fabricData(fabricList));
-    }).onError((error, stackTrace) {
-      if (!_fabricStreamController.isClosed)
-        _fabricStreamController.sink.add(FabricState._fabricError(error,stackTrace));
+      fabricList.sort((a,b) => a.title!.toLowerCase().compareTo(b.title!.toLowerCase()));
+      if(!_fabricStreamController!.isClosed)
+      _fabricStreamController!.sink.add(FabricState._fabricData(fabricList));
+    }).onError((dynamic error, stackTrace) {
+      if (!_fabricStreamController!.isClosed)
+        _fabricStreamController!.sink.add(FabricState._fabricError(error,stackTrace));
     });
   }
 
   void deleteFabric(int id)async {
-    _fabricStreamController.sink.add(FabricState._fabricLoading());
+    _fabricStreamController!.sink.add(FabricState._fabricLoading());
     _repository.deleteFabric(id).then((value) {
       loadAllFabrics();
     });
   }
 
   void updateFabric(Fabric fabric)async{
-    _fabricStreamController.sink.add(FabricState._fabricLoading());
+    _fabricStreamController!.sink.add(FabricState._fabricLoading());
     _repository.updateFabric(fabric).then((value) {
       loadAllFabrics();
     });
   }
 
   Future addFabric(Fabric fabric)async{
-    _fabricStreamController.sink.add(FabricState._fabricLoading());
+    _fabricStreamController!.sink.add(FabricState._fabricLoading());
     await _repository.addFabric(fabric).then((value) {
       loadAllFabrics();
     });

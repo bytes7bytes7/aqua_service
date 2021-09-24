@@ -7,8 +7,8 @@ bool priceValidation(String price) {
   return true;
 }
 
-String filenameValidation(String filename) {
-  String error;
+String? filenameValidation(String filename) {
+  String? error;
   if (filename.isEmpty) {
     error = 'пустая строка';
   } else if (filename

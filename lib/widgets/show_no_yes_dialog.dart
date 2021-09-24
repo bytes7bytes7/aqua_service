@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-Future<void> showNoYesDialog({BuildContext context, String title, String subtitle, Function noAnswer, Function yesAnswer}) async {
+Future<void> showNoYesDialog({required BuildContext context, required String title, required String subtitle, required Function noAnswer, required Function yesAnswer}) async {
   return showDialog<void>(
     context: context,
     barrierDismissible: true, // true - user can dismiss dialog
@@ -27,20 +27,20 @@ Future<void> showNoYesDialog({BuildContext context, String title, String subtitl
               'Нет',
               style: Theme.of(context)
                   .textTheme
-                  .bodyText1
+                  .bodyText1!
                   .copyWith(color: Theme.of(context).cardColor),
             ),
-            onPressed: noAnswer,
+            onPressed: noAnswer as void Function()?,
           ),
           TextButton(
             child: Text(
               'Да',
               style: Theme.of(context)
                   .textTheme
-                  .bodyText1
+                  .bodyText1!
                   .copyWith(color: Theme.of(context).cardColor),
             ),
-            onPressed: yesAnswer,
+            onPressed: yesAnswer as void Function()?,
           ),
         ],
       );

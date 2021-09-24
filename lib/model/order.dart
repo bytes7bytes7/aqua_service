@@ -4,7 +4,7 @@ import 'fabric.dart';
 class Order {
   Order({
     this.id,
-    Client client,
+    Client? client,
     this.price,
     this.fabrics,
     this.expenses,
@@ -13,20 +13,30 @@ class Order {
     this.comment,
   });
 
-  int id;
-  Client client;
-  double price;
-  List<Fabric> fabrics;
-  double expenses;
-  String date; // yyyy-MM-dd - to store in db
-  bool done;
-  String comment;
+  int? id;
+  Client? client;
+  double? price;
+  List<Fabric>? fabrics;
+  double? expenses;
+  String? date; // yyyy-MM-dd - to store in db
+  bool? done;
+  String? comment;
+
+  @override
+  String toString(){
+    String result = '';
+    toMap().forEach((key, value) {
+      result += '$key : $value, ';
+    });
+    result = result.substring(0, result.length-2);
+    return 'Order {$result}';
+  }
 
   Order.from(Order other){
     id = other.id;
-    client = Client.from(other.client);
+    client = Client.from(other.client!);
     price = other.price;
-    fabrics = List<Fabric>.from(other.fabrics);
+    fabrics = List<Fabric>.from(other.fabrics!);
     expenses = other.expenses;
     date = other.date;
     done = other.done;

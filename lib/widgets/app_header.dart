@@ -5,15 +5,15 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
   Size get preferredSize => Size.fromHeight(60.0);
 
   const AppHeader({
-    Key key,
-    @required this.title,
+    Key? key,
+    required this.title,
     this.action,
     this.leading,
   }) : super(key: key);
 
   final String title;
-  final List<Widget> action;
-  final Widget leading;
+  final List<Widget>? action;
+  final Widget? leading;
 
   @override
   Widget build(BuildContext context) {

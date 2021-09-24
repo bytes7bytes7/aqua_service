@@ -6,10 +6,10 @@ import 'rect_button.dart';
 
 class ErrorLabel extends StatelessWidget {
   const ErrorLabel({
-    Key key,
-    @required this.error,
-    @required this.stackTrace,
-    @required this.onPressed,
+    Key? key,
+    required this.error,
+    required this.stackTrace,
+    required this.onPressed,
   }) : super(key: key);
 
   final Error error;

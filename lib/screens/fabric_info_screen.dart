@@ -8,9 +8,9 @@ import '../bloc/bloc.dart';
 
 class FabricInfoScreen extends StatefulWidget {
   const FabricInfoScreen({
-    Key key,
-    @required this.title,
-    @required this.fabric,
+    Key? key,
+    required this.title,
+    required this.fabric,
   }) : super(key: key);
 
   final String title;
@@ -21,10 +21,10 @@ class FabricInfoScreen extends StatefulWidget {
 }
 
 class _FabricInfoScreenState extends State<FabricInfoScreen> {
-  TextEditingController titleController;
-  TextEditingController retailPriceController;
-  TextEditingController purchasePriceController;
-  String _title;
+  late TextEditingController titleController;
+  late TextEditingController retailPriceController;
+  late TextEditingController purchasePriceController;
+  late String _title;
 
   @override
   void initState() {
@@ -37,9 +37,10 @@ class _FabricInfoScreenState extends State<FabricInfoScreen> {
     // widget.fabric.retailPrice = widget.fabric.retailPrice;
     // widget.fabric.purchasePrice = widget.fabric.purchasePrice;
 
-    titleController.text = widget.fabric.title;
-    retailPriceController.text = widget.fabric.retailPrice?.toString();
-    purchasePriceController.text = widget.fabric.purchasePrice?.toString();
+    titleController.text = widget.fabric.title!;
+    retailPriceController.text = widget.fabric.retailPrice?.toString() ?? '';
+    purchasePriceController.text =
+        widget.fabric.purchasePrice?.toString() ?? '';
     super.initState();
   }
 
@@ -108,7 +109,7 @@ class _FabricInfoScreenState extends State<FabricInfoScreen> {
                     Navigator.of(context).pop();
                   },
                   yesAnswer: () {
-                    Bloc.bloc.fabricBloc.deleteFabric(widget.fabric.id);
+                    Bloc.bloc.fabricBloc.deleteFabric(widget.fabric.id!);
                     Bloc.bloc.fabricBloc.loadAllFabrics();
                     Navigator.of(context).pop();
                     Navigator.of(context).pop();
@@ -156,8 +157,10 @@ class _FabricInfoScreenState extends State<FabricInfoScreen> {
                 (widget.fabric.id == null)
                     ? await Bloc.bloc.fabricBloc.addFabric(widget.fabric)
                     : Bloc.bloc.fabricBloc.updateFabric(widget.fabric);
-                retailPriceController.text = widget.fabric.retailPrice.toString();
-                purchasePriceController.text = widget.fabric.purchasePrice.toString();
+                retailPriceController.text =
+                    widget.fabric.retailPrice.toString();
+                purchasePriceController.text =
+                    widget.fabric.purchasePrice.toString();
                 Bloc.bloc.fabricBloc.loadAllFabrics();
                 setState(() {
                   _title = 'Материал';
@@ -199,11 +202,11 @@ class _FabricInfoScreenState extends State<FabricInfoScreen> {
 
 class _Body extends StatefulWidget {
   const _Body({
-    Key key,
-    @required this.fabric,
-    @required this.titleController,
-    @required this.retailPriceController,
-    @required this.purchasePriceController,
+    Key? key,
+    required this.fabric,
+    required this.titleController,
+    required this.retailPriceController,
+    required this.purchasePriceController,
   }) : super(key: key);
 
   final Fabric fabric;
@@ -277,11 +280,10 @@ class __BodyState extends State<_Body> {
                         style: Theme.of(context).textTheme.bodyText1,
                       ),
                       Text(
-                        ((widget.fabric != null &&
-                                widget.fabric.retailPrice != null &&
+                        ((widget.fabric.retailPrice != null &&
                                 widget.fabric.purchasePrice != null)
-                            ? (widget.fabric.retailPrice -
-                                    widget.fabric.purchasePrice)
+                            ? (widget.fabric.retailPrice! -
+                                    widget.fabric.purchasePrice!)
                                 .toStringAsFixed(2)
                                 .toString()
                             : ''),

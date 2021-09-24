@@ -4,14 +4,14 @@ import '../services/value_validation.dart';
 import '../services/excel_helper.dart';
 
 Future<void> showExportDialog(
-    {BuildContext context, Function onDone}) async {
+    {required BuildContext context, Function? onDone}) async {
   DateTime today = DateTime.now();
   String day = today.day.toString(), month = today.month.toString();
   if (day.length < 2) day = '0' + day;
   if (month.length < 2) month = '0' + month;
   String name = '${today.year}-$month-$day';
   final TextEditingController controller = TextEditingController(text: name);
-  final ValueNotifier<String> errorNotifier = ValueNotifier(null);
+  final ValueNotifier<String?> errorNotifier = ValueNotifier(null);
   final _formKey = GlobalKey<FormState>();
 
   return showDialog<void>(
@@ -61,7 +61,7 @@ Future<void> showExportDialog(
                 'Отмена',
                 style: Theme.of(context)
                     .textTheme
-                    .bodyText1
+                    .bodyText1!
                     .copyWith(color: Theme.of(context).cardColor),
               ),
               onPressed: () {
@@ -73,13 +73,13 @@ Future<void> showExportDialog(
                 'Готово',
                 style: Theme.of(context)
                     .textTheme
-                    .bodyText1
+                    .bodyText1!
                     .copyWith(color: Theme.of(context).cardColor),
               ),
               onPressed: () {
                 errorNotifier.value = filenameValidation(controller.text);
                 if (errorNotifier.value != null) {
-                  _formKey.currentState.validate();
+                  _formKey.currentState!.validate();
                 } else {
                   errorNotifier.value = null;
                   ExcelHelper.exportToExcel(context, controller.text);

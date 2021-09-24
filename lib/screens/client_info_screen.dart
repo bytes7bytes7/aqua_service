@@ -19,8 +19,8 @@ import 'calendar_screen.dart';
 
 class ClientInfoScreen extends StatefulWidget {
   ClientInfoScreen({
-    @required this.title,
-    @required this.client,
+    required this.title,
+    required this.client,
     this.readMode = false,
   });
 
@@ -33,16 +33,16 @@ class ClientInfoScreen extends StatefulWidget {
 }
 
 class _ClientInfoScreenState extends State<ClientInfoScreen> {
-  TextEditingController nameController;
-  TextEditingController surnameController;
-  TextEditingController middleNameController;
-  TextEditingController cityController;
-  TextEditingController addressController;
-  TextEditingController phoneController;
-  TextEditingController volumeController;
-  TextEditingController commentController;
+  late TextEditingController nameController;
+  late TextEditingController surnameController;
+  late TextEditingController middleNameController;
+  late TextEditingController cityController;
+  late TextEditingController addressController;
+  late TextEditingController phoneController;
+  late TextEditingController volumeController;
+  late TextEditingController commentController;
   Map<String, dynamic> changes = {};
-  String _title;
+  late String _title;
 
   @override
   void initState() {
@@ -68,16 +68,16 @@ class _ClientInfoScreenState extends State<ClientInfoScreen> {
 
     changes['avatarPath'] = widget.client.avatar;
     changes['imagesPath'] =
-        List<String>.from(widget.client.images) ?? List<String>.from(null);
+        List<String>.from(widget.client.images!);
 
-    nameController.text = widget.client.name;
-    surnameController.text = widget.client.surname;
-    middleNameController.text = widget.client.middleName;
-    cityController.text = widget.client.city;
-    addressController.text = widget.client.address;
-    phoneController.text = widget.client.phone;
-    volumeController.text = widget.client.volume;
-    commentController.text = widget.client.comment;
+    nameController.text = widget.client.name!;
+    surnameController.text = widget.client.surname!;
+    middleNameController.text = widget.client.middleName!;
+    cityController.text = widget.client.city!;
+    addressController.text = widget.client.address!;
+    phoneController.text = widget.client.phone!;
+    volumeController.text = widget.client.volume!;
+    commentController.text = widget.client.comment!;
     super.initState();
   }
 
@@ -150,7 +150,7 @@ class _ClientInfoScreenState extends State<ClientInfoScreen> {
                     Navigator.of(context).pop();
                   },
                   yesAnswer: () {
-                    Bloc.bloc.clientBloc.deleteClient(widget.client.id);
+                    Bloc.bloc.clientBloc.deleteClient(widget.client.id!);
                     Navigator.of(context).pop();
                     Navigator.of(context).pop();
                   },
@@ -221,18 +221,18 @@ class _ClientInfoScreenState extends State<ClientInfoScreen> {
 
 class _Body extends StatefulWidget {
   const _Body({
-    Key key,
-    @required this.readMode,
-    @required this.changes,
-    @required this.client,
-    @required this.nameController,
-    @required this.surnameController,
-    @required this.middleNameController,
-    @required this.cityController,
-    @required this.addressController,
-    @required this.phoneController,
-    @required this.volumeController,
-    @required this.commentController,
+    Key? key,
+    required this.readMode,
+    required this.changes,
+    required this.client,
+    required this.nameController,
+    required this.surnameController,
+    required this.middleNameController,
+    required this.cityController,
+    required this.addressController,
+    required this.phoneController,
+    required this.volumeController,
+    required this.commentController,
   }) : super(key: key);
 
   final bool readMode;
@@ -253,13 +253,15 @@ class _Body extends StatefulWidget {
 
 class __BodyState extends State<_Body> {
   final DateFormat dateTimeFormat = DateFormat("dd.MM.yyyy");
-  String appDocPath;
-  Iterable<int> bytes;
-  ValueNotifier<List<Order>> orders = ValueNotifier(null);
+  String? appDocPath;
+  Iterable<int>? bytes;
+  ValueNotifier<List<Order>?> orders = ValueNotifier(null);
 
   Future<void> getApplicationDirectoryPath() async {
-    Directory appDir = await ExcelHelper.getPhotosDirectory(context);
-    appDocPath = appDir.path;
+    Directory? appDir = await ExcelHelper.getPhotosDirectory(context);
+    if(appDir != null) {
+      appDocPath = appDir.path;
+    }
   }
 
   @override
@@ -278,18 +280,18 @@ class __BodyState extends State<_Body> {
   Future<ValueNotifier> getDates() async {
     if (widget.client.id == null) return ValueNotifier(null);
     if (orders.value == null)
-      orders.value = await widget.client.getDates(widget.client.id);
+      orders.value = await widget.client.getDates(widget.client.id!);
     return orders;
   }
 
   _updateDateTime(DateTime dateTime) async {
-    Order last = orders.value[0];
-    Order next = orders.value[1];
+    Order last = orders.value![0];
+    Order next = orders.value![1];
     next.date = dateTimeFormat.format(dateTime);
     orders.value = [];
     orders.value = [last, next];
     Navigator.pop(context);
-    Bloc.bloc.orderBloc.updateOrder(orders.value[1]);
+    Bloc.bloc.orderBloc.updateOrder(orders.value![1]);
   }
 
   @override
@@ -315,7 +317,7 @@ class __BodyState extends State<_Body> {
                           child: InkWell(
                             onTap: () async {
                               if (!widget.readMode) {
-                                String path = await _getImage();
+                                String? path = await _getImage();
                                 if (path != null) {
                                   var hasLocalImage = File(path).existsSync();
                                   if (hasLocalImage) {
@@ -521,9 +523,9 @@ class __BodyState extends State<_Body> {
                 SizedBox(height: 30.0),
                 ValueListenableBuilder(
                   valueListenable: orders,
-                  builder: (context, snapshot, child) {
+                  builder: (context, dynamic snapshot, child) {
                     if (orders.value != null) {
-                      widget.client.previousDate = orders.value[0].date;
+                      widget.client.previousDate = orders.value![0].date;
                     }
                     return Container(
                       padding: const EdgeInsets.symmetric(vertical: 10.0),
@@ -537,9 +539,9 @@ class __BodyState extends State<_Body> {
                 ),
                 ValueListenableBuilder(
                   valueListenable: orders,
-                  builder: (context, snapshot, child) {
+                  builder: (context, dynamic snapshot, child) {
                     if (orders.value != null) {
-                      widget.client.nextDate = orders.value[1].date;
+                      widget.client.nextDate = orders.value![1].date;
                     }
                     return Container(
                       padding: const EdgeInsets.symmetric(vertical: 10.0),
@@ -551,7 +553,7 @@ class __BodyState extends State<_Body> {
                             style: Theme.of(context).textTheme.bodyText1,
                           ),
                           Spacer(),
-                          (orders.value != null && orders.value[1].id != null)
+                          (orders.value != null && orders.value![1].id != null)
                               ? IconButton(
                             icon: Icon(
                               Icons.calendar_today_outlined,
@@ -799,7 +801,7 @@ class __BodyState extends State<_Body> {
     );
   }
 
-  Future<String> _getImage() async {
+  Future<String?> _getImage() async {
     File _image;
     final picker = ImagePicker();
     final pickedFile = await picker.getImage(source: ImageSource.gallery);
@@ -807,10 +809,13 @@ class __BodyState extends State<_Body> {
     _image = File(pickedFile.path);
     String filename =
         pickedFile.path.substring(pickedFile.path.lastIndexOf('/') + 1);
-    String newPath = '$appDocPath/$filename';
-    await _image.copy(newPath);
-    setState(() {});
-    return newPath;
+    if (appDocPath != null) {
+      String newPath = '$appDocPath/$filename';
+      await _image.copy(newPath);
+      setState(() {});
+      return newPath;
+    }
+    return null;
   }
 
   Widget buildAddImage() {

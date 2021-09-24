@@ -6,17 +6,18 @@ class Fabric {
     this.purchasePrice,
   });
 
-  int id;
-  String title;
-  double retailPrice;
-  double purchasePrice;
+  int? id;
+  String? title;
+  double? retailPrice;
+  double? purchasePrice;
 
   @override
   int get hashCode => super.hashCode;
 
   @override
   bool operator ==(other) {
-    return (other.id == id &&
+    return (other is Fabric &&
+        other.id == id &&
         other.title == title &&
         other.retailPrice == retailPrice &&
         other.purchasePrice == purchasePrice);

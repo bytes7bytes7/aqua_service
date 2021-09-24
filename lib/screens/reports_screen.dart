@@ -52,7 +52,7 @@ class __BodyState extends State<_Body> {
           } else if (snapshot.data is ReportLoadingState) {
             return LoadingCircle();
           } else if (snapshot.data is ReportDataState) {
-            ReportDataState state = snapshot.data;
+            ReportDataState state = snapshot.data as ReportDataState;
             if (state.reports.length > 0) {
               return _ReportList(reports: state.reports);
             } else {
@@ -60,8 +60,8 @@ class __BodyState extends State<_Body> {
             }
           } else {
             return ErrorLabel(
-              error: snapshot.data.error,
-              stackTrace: snapshot.data.stackTrace,
+              error: snapshot.error as Error,
+              stackTrace: snapshot.stackTrace as StackTrace,
               onPressed: () {
                 Bloc.bloc.reportBloc.loadAllReports();
               },
@@ -75,8 +75,8 @@ class __BodyState extends State<_Body> {
 
 class _ReportList extends StatelessWidget {
   const _ReportList({
-    Key key,
-    @required this.reports,
+    Key? key,
+    required this.reports,
   }) : super(key: key);
 
   final List<Report> reports;
@@ -96,8 +96,8 @@ class _ReportList extends StatelessWidget {
 
 class _ReportCard extends StatelessWidget {
   const _ReportCard({
-    Key key,
-    @required this.report,
+    Key? key,
+    required this.report,
   }) : super(key: key);
 
   final Report report;
@@ -121,7 +121,7 @@ class _ReportCard extends StatelessWidget {
                 Container(
                   width: size.width*0.4,
                   child: Text(
-                    report.timePeriod,
+                    report.timePeriod!,
                     style: Theme.of(context).textTheme.bodyText1,
                     overflow: TextOverflow.ellipsis,
                   ),

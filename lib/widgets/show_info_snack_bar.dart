@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
 void showInfoSnackBar({
-  @required BuildContext context,
-  @required String info,
-  @required IconData icon,
+  required BuildContext context,
+  required String info,
+  required IconData icon,
 }) {
   ScaffoldMessenger.of(context).showSnackBar(
     SnackBar(

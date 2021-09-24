@@ -14,12 +14,12 @@ class DatabaseHelper {
 
   static final DatabaseHelper db = DatabaseHelper._privateConstructor();
 
-  static Database _database;
+  static Database? _database;
 
   Future<Database> get database async {
-    if (_database != null) return _database;
+    if (_database != null) return _database!;
     _database = await _initDB();
-    return _database;
+    return _database!;
   }
 
   Future<Database> _initDB() async {
@@ -83,8 +83,7 @@ class DatabaseHelper {
             .execute('DROP TABLE IF EXISTS ${ConstDBData.clientTableName};');
         break;
       case ConstDBData.orderTableName:
-        await db
-            .execute('DROP TABLE IF EXISTS ${ConstDBData.orderTableName};');
+        await db.execute('DROP TABLE IF EXISTS ${ConstDBData.orderTableName};');
         break;
       case ConstDBData.fabricTableName:
         await db
@@ -95,8 +94,7 @@ class DatabaseHelper {
       default:
         await db
             .execute('DROP TABLE IF EXISTS ${ConstDBData.clientTableName};');
-        await db
-            .execute('DROP TABLE IF EXISTS ${ConstDBData.orderTableName};');
+        await db.execute('DROP TABLE IF EXISTS ${ConstDBData.orderTableName};');
         await db
             .execute('DROP TABLE IF EXISTS ${ConstDBData.fabricTableName};');
         await _createDB(db, ConstDBData.databaseVersion);
@@ -106,7 +104,13 @@ class DatabaseHelper {
   Future<int> _getMaxId(Database db, String tableName) async {
     var table = await db.rawQuery(
         "SELECT MAX(${ConstDBData.id})+1 AS ${ConstDBData.id} FROM $tableName");
-    return table.first["${ConstDBData.id}"] ?? 1;
+    dynamic result = table.first["${ConstDBData.id}"];
+    if (result != null){
+      result = result as int;
+    }else{
+      result = 1;
+    }
+    return result;
   }
 
   // Client methods
@@ -287,9 +291,9 @@ class DatabaseHelper {
       "INSERT INTO ${ConstDBData.orderTableName} (${ConstDBData.id}, ${ConstDBData.client}, ${ConstDBData.price}, ${ConstDBData.fabrics}, ${ConstDBData.expenses}, ${ConstDBData.date}, ${ConstDBData.done}, ${ConstDBData.comment}) VALUES (?,?,?,?,?,?,?,?)",
       [
         order.id,
-        order.client.id,
+        order.client!.id,
         order.price,
-        order.fabrics.map((e) => e.id).join(';'),
+        order.fabrics!.map((e) => e.id).join(';'),
         order.expenses,
         order.date,
         order.done,
@@ -307,9 +311,9 @@ class DatabaseHelper {
         "INSERT INTO ${ConstDBData.orderTableName} (${ConstDBData.id}, ${ConstDBData.client}, ${ConstDBData.price}, ${ConstDBData.fabrics}, ${ConstDBData.expenses}, ${ConstDBData.date}, ${ConstDBData.done}, ${ConstDBData.comment}) VALUES (?,?,?,?,?,?,?,?)",
         [
           order.id,
-          order.client.id,
+          order.client!.id,
           order.price,
-          order.fabrics.map((e) => e.id).join(';'),
+          order.fabrics!.map((e) => e.id).join(';'),
           order.expenses,
           order.date,
           order.done,
@@ -330,7 +334,7 @@ class DatabaseHelper {
         where: "${ConstDBData.id} = ?", whereArgs: [order.id]);
   }
 
-  Future<Order> getOrder(int id) async {
+  Future<Order?> getOrder(int id) async {
     final db = await database;
     List<Map<String, dynamic>> res = await db.query(
         "${ConstDBData.orderTableName}",

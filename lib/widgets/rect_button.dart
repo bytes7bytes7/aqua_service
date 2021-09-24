@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 
 class RectButton extends StatelessWidget {
   const RectButton({
-    Key key,
-    @required this.text,
-    @required this.onPressed,
+    Key? key,
+    required this.text,
+    required this.onPressed,
   }) : super(key: key);
 
   final String text;
@@ -25,7 +25,7 @@ class RectButton extends StatelessWidget {
         text,
         style: Theme.of(context).textTheme.headline2,
       ),
-      onPressed: onPressed,
+      onPressed: onPressed as void Function()?,
     );
   }
 }

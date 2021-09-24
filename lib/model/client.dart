@@ -16,7 +16,7 @@ class Client {
     this.volume,
     this.previousDate,
     this.nextDate,
-    List<String> images,
+    List<String>? images,
     this.comment,
   }) : images = images ?? [];
 
@@ -25,26 +25,27 @@ class Client {
   // Uint8List bytes = Uint8List.fromList(list);
   // String string = String.fromCharCodes(bytes);
 
-  int id;
-  String avatar;
-  String name;
-  String surname;
-  String middleName;
-  String city;
-  String address;
-  String phone;
-  String volume;
-  String previousDate;
-  String nextDate;
-  List<String> images;
-  String comment;
+  int? id;
+  String? avatar;
+  String? name;
+  String? surname;
+  String? middleName;
+  String? city;
+  String? address;
+  String? phone;
+  String? volume;
+  String? previousDate;
+  String? nextDate;
+  List<String>? images;
+  String? comment;
 
   @override
-  int get hashCode => super.hashCode;
+  int get hashCode => toString().hashCode;
 
   @override
   bool operator ==(other) {
-    return (other.id == id &&
+    return (other is Client &&
+        other.id == id &&
         other.avatar == avatar &&
         other.name == name &&
         other.surname == surname &&
@@ -59,6 +60,16 @@ class Client {
         other.comment == comment);
   }
 
+  @override
+  String toString(){
+    String result = '';
+    toMap().forEach((key, value) {
+      result += '$key : $value, ';
+    });
+    result = result.substring(0, result.length-2);
+    return 'Client {$result}';
+  }
+
   Client.from(Client other) {
     id = other.id;
     avatar = other.avatar;
@@ -71,7 +82,7 @@ class Client {
     volume = other.volume;
     previousDate = other.previousDate;
     nextDate = other.nextDate;
-    images = List<String>.from(other.images);
+    images = List<String>.from(other.images!);
     comment = other.comment;
   }
 
@@ -112,27 +123,27 @@ class Client {
     int thisDay =
         int.parse(today.substring(0, today.indexOf(' ')).replaceAll('-', ''));
     orders.forEach((element) {
-      if (element.client.id == id) {
-        int eDate = int.parse(element.date.replaceAll('.', ''));
-        if (element.done) {
+      if (element.client!.id == id) {
+        int eDate = int.parse(element.date!.replaceAll('.', ''));
+        if (element.done!) {
           if (last.id == null) {
             if (eDate.compareTo(thisDay) <= 0) {
               last = Order.from(element);
             }
           } else {
-            int lastDate = int.parse(last.date.replaceAll('.', ''));
+            int lastDate = int.parse(last.date!.replaceAll('.', ''));
             if (eDate.compareTo(thisDay) <= 0 &&
                 lastDate.compareTo(eDate) <= 0) {
               last = Order.from(element);
             }
           }
-        } else if (!element.done) {
-          if (last.id == null) {
+        } else if (!element.done!) {
+          if (next.id == null) {
             if (eDate.compareTo(thisDay) >= 0) {
               next = Order.from(element);
             }
           } else {
-            int nextDate = int.parse(next.date.replaceAll('.', ''));
+            int nextDate = int.parse(next.date!.replaceAll('.', ''));
             if (eDate.compareTo(thisDay) >= 0 &&
                 nextDate.compareTo(eDate) >= 0) {
               next = Order.from(element);
@@ -142,11 +153,11 @@ class Client {
       }
     });
     if (last.id != null) {
-      List<String> tmp = last.date.split('.');
+      List<String> tmp = last.date!.split('.');
       last.date = '${tmp[2]}.${tmp[1]}.${tmp[0]}';
     }
     if (next.id != null) {
-      List<String> tmp = next.date.split('.');
+      List<String> tmp = next.date!.split('.');
       next.date = '${tmp[2]}.${tmp[1]}.${tmp[0]}';
     }
     return [last, next];

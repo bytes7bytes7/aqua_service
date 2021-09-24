@@ -11,56 +11,57 @@ class SettingsBloc {
   SettingsBloc(this._repository);
 
   final SettingsRepository _repository;
-  static StreamController _settingsStreamController;
+  // ignore: close_sinks
+  static StreamController? _settingsStreamController;
 
   Stream<SettingsState> get settings {
-    if (_settingsStreamController == null || _settingsStreamController.isClosed)
+    if (_settingsStreamController == null || _settingsStreamController!.isClosed)
       _settingsStreamController = StreamController<SettingsState>.broadcast();
-    return _settingsStreamController.stream;
+    return _settingsStreamController!.stream as Stream<SettingsState>;
   }
 
   void dispose() {
-    if(_settingsStreamController != null && !_settingsStreamController.isClosed) {
-      _settingsStreamController.close();
+    if(_settingsStreamController != null && !_settingsStreamController!.isClosed) {
+      _settingsStreamController!.close();
     }
   }
 
   void loadAllSettings() async {
-    _settingsStreamController.sink.add(SettingsState._settingsLoading());
+    _settingsStreamController!.sink.add(SettingsState._settingsLoading());
     _repository.getSettings().then((settings) {
-      Iterable<int> bytes;
+      Iterable<int>? bytes;
       if (settings.icon != null) {
-        var hasLocalImage = File(settings.icon).existsSync();
+        var hasLocalImage = File(settings.icon!).existsSync();
         if (hasLocalImage) {
-          bytes = File(settings.icon).readAsBytesSync();
+          bytes = File(settings.icon!).readAsBytesSync();
         }
       }
-      if (!_settingsStreamController.isClosed)
-        _settingsStreamController.sink
+      if (!_settingsStreamController!.isClosed)
+        _settingsStreamController!.sink
             .add(SettingsState._settingsData(settings, bytes));
-    }).onError((error, stackTrace) {
-      if (!_settingsStreamController.isClosed)
-        _settingsStreamController.sink.add(SettingsState._settingsError(error,stackTrace));
+    }).onError((dynamic error, stackTrace) {
+      if (!_settingsStreamController!.isClosed)
+        _settingsStreamController!.sink.add(SettingsState._settingsError(error,stackTrace));
     });
   }
 
   void importExcel(List<Client> clients,
       List<Fabric> fabrics, List<Order> orders, Settings settings) async {
-    _settingsStreamController.sink.add(SettingsState._settingsLoading());
+    _settingsStreamController!.sink.add(SettingsState._settingsLoading());
     await _repository.importExcel(clients,fabrics,orders, settings).then((value) {
       loadAllSettings();
     });
   }
 
   Future updateSettings(Settings settings) async {
-    _settingsStreamController.sink.add(SettingsState._settingsLoading());
+    _settingsStreamController!.sink.add(SettingsState._settingsLoading());
     await _repository.updateSettings(settings).then((value) {
       loadAllSettings();
     });
   }
 
   void clearDatabase(List<String> dbName) async {
-    _settingsStreamController.sink.add(SettingsState._settingsLoading());
+    _settingsStreamController!.sink.add(SettingsState._settingsLoading());
     _repository.clearDatabase(dbName).then((value) {
       loadAllSettings();
     });
@@ -70,7 +71,7 @@ class SettingsBloc {
 class SettingsState {
   SettingsState();
 
-  factory SettingsState._settingsData(Settings settings, Iterable<int> bytes) =
+  factory SettingsState._settingsData(Settings settings, Iterable<int>? bytes) =
       SettingsDataState;
 
   factory SettingsState._settingsLoading() = SettingsLoadingState;
@@ -92,6 +93,6 @@ class SettingsErrorState extends SettingsState {
 class SettingsDataState extends SettingsState {
   SettingsDataState(this.settings, this.bytes);
 
-  final Settings settings;
-  final Iterable<int> bytes;
+  final Settings? settings;
+  final Iterable<int>? bytes;
 }

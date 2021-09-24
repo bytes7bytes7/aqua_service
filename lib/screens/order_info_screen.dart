@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'package:aqua_service/services/excel_helper.dart';
+import 'dart:typed_data';
 import 'package:intl/intl.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
@@ -22,9 +22,9 @@ import 'clients_screen.dart';
 
 class OrderInfoScreen extends StatefulWidget {
   const OrderInfoScreen({
-    Key key,
-    @required this.title,
-    @required this.order,
+    Key? key,
+    required this.title,
+    required this.order,
     this.readMode = false,
   }) : super(key: key);
 
@@ -37,12 +37,12 @@ class OrderInfoScreen extends StatefulWidget {
 }
 
 class _OrderInfoScreenState extends State<OrderInfoScreen> {
-  TextEditingController priceController;
-  TextEditingController expensesController;
-  TextEditingController commentController;
+  late TextEditingController priceController;
+  late TextEditingController expensesController;
+  late TextEditingController commentController;
   ValueNotifier<bool> fabricsNotifier = ValueNotifier(true);
   Map<String, dynamic> changes = {};
-  String _title;
+  late String _title;
   bool validateClient = false,
       validateDate = false,
       validatePrice = false,
@@ -64,15 +64,15 @@ class _OrderInfoScreenState extends State<OrderInfoScreen> {
     widget.order.done = widget.order.done ?? false;
     widget.order.comment = widget.order.comment ?? '';
 
-    changes['client'] = Client.from(widget.order.client);
+    changes['client'] = Client.from(widget.order.client!);
     changes['fabrics'] =
-        widget.order.fabrics.map<Fabric>((e) => Fabric.from(e)).toList();
+        widget.order.fabrics!.map<Fabric>((e) => Fabric.from(e)).toList();
     changes['date'] = widget.order.date;
     changes['done'] = widget.order.done;
 
-    priceController.text = widget.order.price?.toString();
-    expensesController.text = widget.order.expenses?.toString();
-    commentController.text = widget.order.comment;
+    priceController.text = widget.order.price?.toString() ?? '';
+    expensesController.text = widget.order.expenses?.toString() ?? '';
+    commentController.text = widget.order.comment ?? '';
     super.initState();
   }
 
@@ -112,8 +112,8 @@ class _OrderInfoScreenState extends State<OrderInfoScreen> {
       } else {
         Bloc.bloc.orderBloc.updateOrder(widget.order);
       }
-      priceController.text = widget.order.price?.toString();
-      expensesController.text = widget.order.expenses?.toString();
+      priceController.text = widget.order.price?.toString() ?? '';
+      expensesController.text = widget.order.expenses?.toString() ?? '';
       Bloc.bloc.orderBloc.loadAllOrders();
       fabricsNotifier.value = !fabricsNotifier.value;
     }
@@ -195,7 +195,7 @@ class _OrderInfoScreenState extends State<OrderInfoScreen> {
                       Navigator.of(context).pop();
                     },
                     yesAnswer: () {
-                      Bloc.bloc.orderBloc.deleteOrder(widget.order.id);
+                      Bloc.bloc.orderBloc.deleteOrder(widget.order.id!);
                       Bloc.bloc.orderBloc.loadAllOrders();
                       Navigator.of(context).pop();
                       Navigator.of(context).pop();
@@ -229,14 +229,14 @@ class _OrderInfoScreenState extends State<OrderInfoScreen> {
 
 class _Body extends StatefulWidget {
   const _Body({
-    Key key,
-    @required this.save,
-    @required this.readMode,
-    @required this.changes,
-    @required this.fabricsNotifier,
-    @required this.priceController,
-    @required this.expensesController,
-    @required this.commentController,
+    Key? key,
+    required this.save,
+    required this.readMode,
+    required this.changes,
+    required this.fabricsNotifier,
+    required this.priceController,
+    required this.expensesController,
+    required this.commentController,
   }) : super(key: key);
 
   final Function save;
@@ -253,10 +253,9 @@ class _Body extends StatefulWidget {
 
 class __BodyState extends State<_Body> {
   final DateFormat dateTimeFormat = DateFormat("dd.MM.yyyy");
-  ValueNotifier<DateTime> _dateTimeNotifier;
-  ValueNotifier<bool> _doneNotifier;
-  String appDocPath;
-  Iterable<int> bytes;
+  late ValueNotifier<DateTime> _dateTimeNotifier;
+  late ValueNotifier<bool?> _doneNotifier;
+  Iterable<int>? bytes;
 
   _addFabric(Fabric fabric) {
     if (fabric.id != null) {
@@ -274,11 +273,6 @@ class __BodyState extends State<_Body> {
     widget.fabricsNotifier.value = !widget.fabricsNotifier.value;
   }
 
-  Future<void> getApplicationDirectoryPath() async {
-    Directory appDir = await ExcelHelper.getPhotosDirectory(context);
-    appDocPath = appDir.path;
-  }
-
   _updateDateTime(DateTime dateTime) {
     _dateTimeNotifier.value = dateTime;
     widget.changes['date'] = dateTimeFormat.format(_dateTimeNotifier.value);
@@ -290,7 +284,6 @@ class __BodyState extends State<_Body> {
     _dateTimeNotifier =
         ValueNotifier(dateTimeFormat.parse(widget.changes['date']));
     _doneNotifier = ValueNotifier(widget.changes['done']);
-    if (appDocPath == null) getApplicationDirectoryPath();
     if (widget.changes['client'] != null &&
         widget.changes['client'].avatar != null) {
       var hasLocalImage = File(widget.changes['client'].avatar).existsSync();
@@ -357,7 +350,7 @@ class __BodyState extends State<_Body> {
                       ),
                       ValueListenableBuilder(
                         valueListenable: widget.fabricsNotifier,
-                        builder: (context, _, __) {
+                        builder: (context, dynamic _, __) {
                           double value = (widget
                                       .priceController.text.isNotEmpty &&
                                   widget.expensesController.text.isNotEmpty)
@@ -393,18 +386,16 @@ class __BodyState extends State<_Body> {
                       ValueListenableBuilder(
                         valueListenable: _dateTimeNotifier,
                         builder: (BuildContext context, DateTime dateTime,
-                            Widget child) {
+                            Widget? child) {
                           String date = '-- -- --';
-                          if (dateTime != null) {
-                            String day, month, year;
-                            day = dateTime.day.toString();
-                            month = dateTime.month.toString();
-                            year = dateTime.year.toString();
-                            while (day.length < 2) day = '0' + day;
-                            while (month.length < 2) month = '0' + month;
-                            while (year.length < 4) year = '0' + year;
-                            date = '$day.$month.$year';
-                          }
+                          String day, month, year;
+                          day = dateTime.day.toString();
+                          month = dateTime.month.toString();
+                          year = dateTime.year.toString();
+                          while (day.length < 2) day = '0' + day;
+                          while (month.length < 2) month = '0' + month;
+                          while (year.length < 4) year = '0' + year;
+                          date = '$day.$month.$year';
                           return Text(
                             date,
                             style: Theme.of(context).textTheme.bodyText1,
@@ -489,7 +480,7 @@ class __BodyState extends State<_Body> {
                     child: ValueListenableBuilder(
                       valueListenable: widget.fabricsNotifier,
                       builder:
-                          (BuildContext context, bool updated, Widget child) {
+                          (BuildContext context, bool updated, Widget? child) {
                         if (widget.changes['fabrics'].length == 0) {
                           return Center(
                             child: Text(
@@ -564,7 +555,7 @@ class __BodyState extends State<_Body> {
                 SizedBox(height: 20.0),
                 ValueListenableBuilder(
                   valueListenable: _doneNotifier,
-                  builder: (BuildContext context, bool done, Widget child) {
+                  builder: (BuildContext context, bool? done, Widget? child) {
                     return RectButton(
                       text: (widget.changes['done']) ? 'Заново' : 'Завершить',
                       onPressed: (widget.readMode)
@@ -575,7 +566,7 @@ class __BodyState extends State<_Body> {
                                   icon: Icons.warning_amber_outlined);
                             }
                           : () {
-                              _doneNotifier.value = !_doneNotifier.value;
+                              _doneNotifier.value = !_doneNotifier.value!;
                               widget.changes['done'] = _doneNotifier.value;
                               widget.save();
                             },
@@ -594,9 +585,9 @@ class __BodyState extends State<_Body> {
 
 class _ClientCard extends StatefulWidget {
   const _ClientCard({
-    Key key,
-    @required this.readMode,
-    @required this.changes,
+    Key? key,
+    required this.readMode,
+    required this.changes,
   }) : super(key: key);
 
   final bool readMode;
@@ -608,8 +599,8 @@ class _ClientCard extends StatefulWidget {
 
 class __ClientCardState extends State<_ClientCard> {
   final ValueNotifier<Client> _clientNotifier = ValueNotifier(Client());
-  String appDocPath;
-  Iterable<int> bytes;
+  String? appDocPath;
+  Iterable<int>? bytes;
 
   _updateClient(Client client) {
     if (client.id != null) {
@@ -620,13 +611,7 @@ class __ClientCardState extends State<_ClientCard> {
     }
   }
 
-  Future<void> getApplicationDirectoryPath() async {
-    Directory appDir = await ExcelHelper.getPhotosDirectory(context);
-    appDocPath = appDir.path;
-  }
-
   void init() {
-    if (appDocPath == null) getApplicationDirectoryPath();
     if (widget.changes['client'].avatar != null) {
       var hasLocalImage = File(widget.changes['client'].avatar).existsSync();
       if (hasLocalImage)
@@ -663,7 +648,8 @@ class __ClientCardState extends State<_ClientCard> {
               children: [
                 ValueListenableBuilder(
                   valueListenable: _clientNotifier,
-                  builder: (BuildContext context, Client client, Widget child) {
+                  builder:
+                      (BuildContext context, Client client, Widget? child) {
                     if (widget.changes['client'].avatar != null &&
                         bytes != null) {
                       return ConstrainedBox(
@@ -673,7 +659,7 @@ class __ClientCardState extends State<_ClientCard> {
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             image: DecorationImage(
-                              image: MemoryImage(bytes),
+                              image: MemoryImage(bytes as Uint8List),
                               fit: BoxFit.cover,
                             ),
                           ),
@@ -704,16 +690,17 @@ class __ClientCardState extends State<_ClientCard> {
                 SizedBox(width: 14.0),
                 ValueListenableBuilder(
                   valueListenable: _clientNotifier,
-                  builder: (BuildContext context, Client client, Widget child) {
+                  builder:
+                      (BuildContext context, Client client, Widget? child) {
                     if (widget.changes['client'].id != null) {
                       return Container(
-                        width: size.width*0.5,
+                        width: size.width * 0.5,
                         child: Text(
                           '${(widget.changes['client'].name != '') ? (widget.changes['client'].name + ' ') : ''}' +
                               '${widget.changes['client'].surname ?? ''}'
                                   .replaceAll(RegExp(r"\s+"), ""),
                           style: Theme.of(context).textTheme.bodyText1,
-                          overflow: TextOverflow.ellipsis,
+                          overflow: TextOverflow.visible,
                         ),
                       );
                     } else {
@@ -721,7 +708,7 @@ class __ClientCardState extends State<_ClientCard> {
                         'Не выбран',
                         style: Theme.of(context)
                             .textTheme
-                            .bodyText1
+                            .bodyText1!
                             .copyWith(color: Theme.of(context).disabledColor),
                       );
                     }
@@ -763,12 +750,12 @@ class __ClientCardState extends State<_ClientCard> {
 
 class _FabricCard extends StatelessWidget {
   const _FabricCard({
-    Key key,
-    @required this.changes,
-    @required this.readMode,
-    @required this.fabric,
-    @required this.removeFabric,
-    @required this.addFabric,
+    Key? key,
+    required this.changes,
+    required this.readMode,
+    required this.fabric,
+    required this.removeFabric,
+    required this.addFabric,
   }) : super(key: key);
 
   final Map<String, dynamic> changes;
@@ -786,9 +773,9 @@ class _FabricCard extends StatelessWidget {
         children: [
           Flexible(
             child: Text(
-              fabric.title,
+              fabric.title!,
               style: Theme.of(context).textTheme.bodyText1,
-              overflow: TextOverflow.ellipsis,
+              overflow: TextOverflow.visible,
             ),
           ),
           IconButton(
@@ -834,7 +821,7 @@ class _FabricCard extends StatelessWidget {
           ),
           SizedBox(width: 8),
           Text(
-            ((fabric.retailPrice - fabric.purchasePrice) *
+            ((fabric.retailPrice! - fabric.purchasePrice!) *
                     changes['fabrics'].where((e) => e.id == fabric.id).length)
                 .toString(),
             style: Theme.of(context).textTheme.bodyText1,
