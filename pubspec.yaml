@@ -39,6 +39,7 @@ dependencies:
   excel: ^2.0.0-null-safety-3
   permission_handler: ^8.0.1
   expansion_tile_card: ^2.0.0
+  snapping_sheet: ^3.1.0
 
 dev_dependencies:
   flutter_test:

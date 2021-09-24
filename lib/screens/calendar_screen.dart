@@ -6,6 +6,7 @@ import 'package:flutter_calendar_carousel/flutter_calendar_carousel.dart'
     show CalendarCarousel;
 import 'package:flutter_calendar_carousel/classes/event.dart';
 import 'package:flutter_calendar_carousel/classes/event_list.dart';
+import 'package:snapping_sheet/snapping_sheet.dart';
 import 'package:intl/intl.dart' show DateFormat;
 
 import '../widgets/error_label.dart';
@@ -213,7 +214,7 @@ class _CalendarContentState extends State<CalendarContent> {
                         todayTextStyle: Theme.of(context)
                             .textTheme
                             .bodyText1!
-                            .copyWith(color: Theme.of(context).cardColor),
+                            .copyWith(color: Theme.of(context).focusColor),
                         markedDateCustomTextStyle: Theme.of(context)
                             .textTheme
                             .bodyText1!
@@ -276,7 +277,7 @@ class _CalendarContentState extends State<CalendarContent> {
 }
 
 class OrderBottomSheet extends StatelessWidget {
-  const OrderBottomSheet({
+  OrderBottomSheet({
     Key? key,
     required this.calendarNotifier,
     required this.selectedOrders,
@@ -286,17 +287,31 @@ class OrderBottomSheet extends StatelessWidget {
   final ValueNotifier<bool> calendarNotifier;
   final ValueNotifier<List<Order>> selectedOrders;
   final List<Order> orders;
+  final ScrollController listViewController = ScrollController();
 
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
-    return DraggableScrollableSheet(
-      expand: true,
-      initialChildSize: 0.2,
-      minChildSize: 0.2,
-      maxChildSize: 0.95,
-      builder: (BuildContext context, ScrollController scrollController) {
-        return Container(
+    return SnappingSheet(
+      lockOverflowDrag: true,
+      snappingPositions: [
+        SnappingPosition.factor(
+          positionFactor: 0.2,
+          snappingCurve: Curves.easeInOut,
+          snappingDuration: Duration(milliseconds: 300),
+          grabbingContentOffset: GrabbingContentOffset.top,
+        ),
+        SnappingPosition.factor(
+          positionFactor: 0.95,
+          snappingCurve: Curves.easeInOut,
+          snappingDuration: Duration(milliseconds: 300),
+          grabbingContentOffset: GrabbingContentOffset.bottom,
+        ),
+      ],
+      sheetBelow: SnappingSheetContent(
+        childScrollController: listViewController,
+        draggable: true,
+        child: Container(
           decoration: BoxDecoration(
             color: Theme.of(context).scaffoldBackgroundColor,
             borderRadius: BorderRadius.only(
@@ -310,190 +325,189 @@ class OrderBottomSheet extends StatelessWidget {
           child: ValueListenableBuilder(
             valueListenable: calendarNotifier,
             builder: (BuildContext context, dynamic _, Widget? child) {
-              return ListView.builder(
-                controller: scrollController,
-                itemCount: selectedOrders.value.length + 1,
-                itemBuilder: (BuildContext context, int index) {
-                  String? appDocPath;
-                  Future<void> getApplicationDirectoryPath() async {
-                    Directory? appDir =
-                        await ExcelHelper.getPhotosDirectory(context);
-                    appDocPath = appDir?.path;
-                  }
-
-                  Future<Iterable<int>?> _getImage() async {
-                    Iterable<int>? bytes;
-                    if (appDocPath == null) await getApplicationDirectoryPath();
-                    if (orders[index - 1].client!.avatar != null) {
-                      var hasLocalImage =
-                          File(orders[index - 1].client!.avatar!).existsSync();
-                      if (hasLocalImage) {
-                        bytes = File(orders[index - 1].client!.avatar!)
-                            .readAsBytesSync();
-                      }
-                    }
-                    return bytes;
-                  }
-
-                  if (index == 0) {
-                    return Center(
-                      child: Column(
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 15),
-                            child: Text(
-                              'Заказы',
-                              style: Theme.of(context).textTheme.headline2,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          Divider(
-                            color: Theme.of(context).focusColor,
-                            thickness: 1,
-                            height: 0,
-                          ),
-                          SizedBox(height: 10),
-                        ],
-                      ),
-                    );
-                  } else {
-                    Iterable<int>? bytes;
-                    return Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 20.0, vertical: 10.0),
-                      width: double.infinity,
-                      child: Material(
-                        color: Colors.transparent,
-                        child: InkWell(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              NextPageRoute(
-                                nextPage: OrderInfoScreen(
-                                  title: 'Заказ',
-                                  order: selectedOrders.value[index - 1],
-                                  readMode: true,
-                                ),
-                              ),
-                            );
-                          },
-                          borderRadius: BorderRadius.circular(8),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 5.0, vertical: 5.0),
-                            width: double.infinity,
-                            child: Material(
-                              color: Colors.transparent,
-                              child: Row(
-                                children: [
-                                  CircleAvatar(
-                                    radius: 24.0,
-                                    backgroundColor:
-                                        Theme.of(context).focusColor,
-                                    child: FutureBuilder<Iterable<int>?>(
-                                      future: _getImage(),
-                                      builder: (BuildContext context,
-                                          AsyncSnapshot<Iterable<int>?>
-                                              snapshot) {
-                                        if (snapshot.hasData) {
-                                          bytes = snapshot.data;
-                                          if (bytes != null) {
-                                            return Container(
-                                              decoration: BoxDecoration(
-                                                shape: BoxShape.circle,
-                                                image: DecorationImage(
-                                                  image: MemoryImage(
-                                                      bytes as Uint8List),
-                                                  fit: BoxFit.cover,
-                                                ),
-                                              ),
-                                            );
-                                          } else {
-                                            return Icon(
-                                              Icons.person,
-                                              color:
-                                                  Theme.of(context).cardColor,
-                                            );
-                                          }
-                                        } else {
-                                          return Icon(
-                                            Icons.person,
-                                            color: Theme.of(context).cardColor,
-                                          );
-                                        }
-                                      },
-                                    ),
-                                  ),
-                                  SizedBox(width: 14.0),
-                                  Container(
-                                    width: size.width * 0.5,
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          '${(selectedOrders.value[index - 1].client!.name != '') ? (selectedOrders.value[index - 1].client!.name! + ' ') : ''}' +
-                                              '${selectedOrders.value[index - 1].client!.surname ?? ''}'
-                                                  .replaceAll(
-                                                      RegExp(r"\s+"), ""),
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .bodyText1,
-                                          overflow: TextOverflow.visible,
-                                        ),
-                                        Text(
-                                          selectedOrders
-                                              .value[index - 1].client!.city!,
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .subtitle2,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Spacer(),
-                                  Container(
-                                    width: size.width * 0.2,
-                                    child: Text(
-                                      (selectedOrders.value[index - 1].price !=
-                                                  null &&
-                                              selectedOrders.value[index - 1]
-                                                      .expenses !=
-                                                  null)
-                                          ? (selectedOrders
-                                                      .value[index - 1].price! -
-                                                  selectedOrders
-                                                      .value[index - 1]
-                                                      .expenses!)
-                                              .toString()
-                                          : (selectedOrders
-                                                      .value[index - 1].price !=
-                                                  null)
-                                              ? selectedOrders
-                                                  .value[index - 1].price
-                                                  .toString()
-                                              : '0.0',
-                                      style:
-                                          Theme.of(context).textTheme.bodyText1,
-                                      textAlign: TextAlign.end,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
+              return Column(
+                children: [
+                  Center(
+                    child: Column(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 15),
+                          child: Text(
+                            'Заказы',
+                            style: Theme.of(context).textTheme.headline2,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                      ),
-                    );
-                  }
-                },
+                        Divider(
+                          color: Theme.of(context).focusColor,
+                          thickness: 1,
+                          height: 0,
+                        ),
+                        SizedBox(height: 10),
+                      ],
+                    ),
+                  ),
+                  Expanded(
+                    child: ListView.builder(
+                      controller: listViewController,
+                      itemCount: selectedOrders.value.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        String? appDocPath;
+                        Future<void> getApplicationDirectoryPath() async {
+                          Directory? appDir =
+                              await ExcelHelper.getPhotosDirectory(context);
+                          appDocPath = appDir?.path;
+                        }
+
+                        Future<Iterable<int>?> _getImage() async {
+                          Iterable<int>? bytes;
+                          if (appDocPath == null) await getApplicationDirectoryPath();
+                          if (orders[index].client!.avatar != null) {
+                            var hasLocalImage =
+                                File(orders[index].client!.avatar!).existsSync();
+                            if (hasLocalImage) {
+                              bytes = File(orders[index].client!.avatar!)
+                                  .readAsBytesSync();
+                            }
+                          }
+                          return bytes;
+                        }
+
+                        Iterable<int>? bytes;
+                        return Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 20.0, vertical: 10.0),
+                          width: double.infinity,
+                          child: Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  NextPageRoute(
+                                    nextPage: OrderInfoScreen(
+                                      title: 'Заказ',
+                                      order: selectedOrders.value[index],
+                                      readMode: true,
+                                    ),
+                                  ),
+                                );
+                              },
+                              borderRadius: BorderRadius.circular(8),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 5.0, vertical: 5.0),
+                                width: double.infinity,
+                                child: Material(
+                                  color: Colors.transparent,
+                                  child: Row(
+                                    children: [
+                                      CircleAvatar(
+                                        radius: 24.0,
+                                        backgroundColor: Theme.of(context).focusColor,
+                                        child: FutureBuilder<Iterable<int>?>(
+                                          future: _getImage(),
+                                          builder: (BuildContext context,
+                                              AsyncSnapshot<Iterable<int>?>
+                                                  snapshot) {
+                                            if (snapshot.hasData) {
+                                              bytes = snapshot.data;
+                                              if (bytes != null) {
+                                                return Container(
+                                                  decoration: BoxDecoration(
+                                                    shape: BoxShape.circle,
+                                                    image: DecorationImage(
+                                                      image: MemoryImage(
+                                                          bytes as Uint8List),
+                                                      fit: BoxFit.cover,
+                                                    ),
+                                                  ),
+                                                );
+                                              } else {
+                                                return Icon(
+                                                  Icons.person,
+                                                  color: Theme.of(context).cardColor,
+                                                );
+                                              }
+                                            } else {
+                                              return Icon(
+                                                Icons.person,
+                                                color: Theme.of(context).cardColor,
+                                              );
+                                            }
+                                          },
+                                        ),
+                                      ),
+                                      SizedBox(width: 14.0),
+                                      Container(
+                                        width: size.width * 0.5,
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              '${(selectedOrders.value[index].client!.name != '') ? (selectedOrders.value[index].client!.name! + ' ') : ''}' +
+                                                  '${selectedOrders.value[index].client!.surname ?? ''}'
+                                                      .replaceAll(RegExp(r"\s+"), ""),
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .bodyText1,
+                                              overflow: TextOverflow.visible,
+                                            ),
+                                            Text(
+                                              selectedOrders
+                                                  .value[index].client!.city!,
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .subtitle2,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      Spacer(),
+                                      Container(
+                                        width: size.width * 0.2,
+                                        child: Text(
+                                          (selectedOrders.value[index].price !=
+                                                      null &&
+                                                  selectedOrders.value[index]
+                                                          .expenses !=
+                                                      null)
+                                              ? (selectedOrders
+                                                          .value[index ].price! -
+                                                      selectedOrders
+                                                          .value[index].expenses!)
+                                                  .toString()
+                                              : (selectedOrders
+                                                          .value[index].price !=
+                                                      null)
+                                                  ? selectedOrders
+                                                      .value[index].price
+                                                      .toString()
+                                                  : '0.0',
+                                          style:
+                                              Theme.of(context).textTheme.bodyText1,
+                                          textAlign: TextAlign.end,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
               );
             },
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 }

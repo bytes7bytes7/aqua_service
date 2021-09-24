@@ -215,6 +215,8 @@ class __OrderCardState extends State<_OrderPackCard> {
           children: [
             (client.avatar != null && bytes != null)
                 ? Container(
+                    height: 48.0,
+                    width: 48.0,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       image: DecorationImage(
